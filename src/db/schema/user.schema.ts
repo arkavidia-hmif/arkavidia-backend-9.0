@@ -2,9 +2,11 @@ import { type InferSelectModel, relations, sql } from 'drizzle-orm';
 import {
 	type AnyPgColumn,
 	boolean,
+	date,
 	index,
 	integer,
 	json,
+	pgEnum,
 	pgTable,
 	primaryKey,
 	text,
@@ -12,16 +14,21 @@ import {
 	unique,
 } from 'drizzle-orm/pg-core';
 import { createId, getNow } from '../../utils/drizzle-schema-util';
-import { todo } from './todo.schema';
+import { userIdentity } from './auth.schema';
 
 export const user = pgTable('user', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	name: text('name').notNull(),
-	age: integer('age').notNull().default(0),
-	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').$onUpdate(getNow),
+	id: text('id')
+		.primaryKey()
+		.references(() => userIdentity.id),
+	email: text('email').notNull(),
+	birthDate: date('birth_date'),
+	instance: text('instance'),
+	phoneNumber: text('phone_number'),
 });
 
-export const userRelation = relations(user, ({ one, many }) => ({
-	todo: many(todo),
+export const userRelations = relations(user, ({ one }) => ({
+	userIdentity: one(userIdentity, {
+		fields: [user.id],
+		references: [userIdentity.id],
+	}),
 }));
