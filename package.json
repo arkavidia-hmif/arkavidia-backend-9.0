@@ -1,0 +1,33 @@
+{
+	"name": "backend",
+	"scripts": {
+		"dev": "bun run --hot src/index.ts",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio",
+		"check": "bunx biome check src && bunx check:type",
+		"check:write": "bunx biome check --write",
+		"check:lint": "biome lint src",
+		"check:format": "biome format src",
+		"check:type": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@hono/zod-openapi": "^0.18.3",
+		"@paralleldrive/cuid2": "^2.2.2",
+		"@scalar/hono-api-reference": "^0.5.162",
+		"dotenv": "^16.4.5",
+		"drizzle-orm": "^0.36.0",
+		"drizzle-zod": "^0.5.1",
+		"hono": "^4.6.12",
+		"postgres": "^3.4.5",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/bun": "latest",
+		"@types/pg": "^8.11.10",
+		"drizzle-kit": "^0.27.1",
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.2"
+	}
+}
