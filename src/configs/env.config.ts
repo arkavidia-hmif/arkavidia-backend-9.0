@@ -10,6 +10,11 @@ const EnvSchema = z.object({
 		.pipe(z.array(z.string().url())),
 	JWT_SECRET: z.string(),
 	TOKEN_EXPIRATION: z.string(),
+	SMTP_HOST: z.string(),
+	SMTP_USER: z.string(),
+	SMTP_PASSWORD: z.string(),
+	SMTP_PORT: z.coerce.number().default(465),
+	SMTP_SECURE: z.coerce.boolean().default(true),
 });
 
 const result = EnvSchema.safeParse(process.env);

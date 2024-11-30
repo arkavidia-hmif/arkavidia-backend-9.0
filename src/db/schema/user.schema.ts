@@ -20,7 +20,8 @@ export const user = pgTable('user', {
 	id: text('id')
 		.primaryKey()
 		.references(() => userIdentity.id),
-	email: text('email').notNull(),
+	name: text('name'),
+	email: text('email').unique().notNull(),
 	birthDate: date('birth_date'),
 	instance: text('instance'),
 	phoneNumber: text('phone_number'),

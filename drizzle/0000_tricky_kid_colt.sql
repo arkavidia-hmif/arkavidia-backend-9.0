@@ -10,15 +10,18 @@ CREATE TABLE IF NOT EXISTS "user_identity" (
 	"password_recovery_token" text,
 	"password_recovery_token_expiration" timestamp,
 	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp
+	"updated_at" timestamp,
+	CONSTRAINT "user_identity_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" text PRIMARY KEY NOT NULL,
+	"name" text,
 	"email" text NOT NULL,
 	"birth_date" date,
 	"instance" text,
-	"phone_number" text
+	"phone_number" text,
+	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DO $$ BEGIN
