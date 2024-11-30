@@ -16,12 +16,13 @@ const transporter = nodemailer.createTransport({
 export const sendVerificationEmail = async (
 	targetEmail: string,
 	verificationToken: string,
+	userId: string
 ) => {
 	const info = await transporter.sendMail({
 		from: MAIL_FROM,
 		to: targetEmail,
 		subject: 'Verify your account!',
-		text: verificationToken, // TODO: Change this to beautiful HTML
+		text: `http://api.arkavidia.com/api/verify?user=${userId}&token=${verificationToken}`, // TODO: Change this to beautiful HTML
 	});
 
 	console.log('Message sent: %s', info.messageId);
