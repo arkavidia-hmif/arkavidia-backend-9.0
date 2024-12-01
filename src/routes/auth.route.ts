@@ -4,6 +4,7 @@ import {
 	BasicLoginBodySchema,
 	BasicRegisterBodySchema,
 	BasicVerifyAccountQuerySchema,
+	UserSchema,
 } from '~/types/auth.type';
 import { createErrorResponse } from '../utils/error-response-factory';
 
@@ -99,6 +100,11 @@ export const selfRoute = createRoute({
 	responses: {
 		200: {
 			description: 'Get self',
+			content: {
+				'application/json': {
+					schema: UserSchema
+				}
+			}
 		},
 		401: createErrorResponse('GENERIC', 'Unauthorized'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),

@@ -1,14 +1,12 @@
 import * as argon2 from 'argon2';
-import { deleteCookie, setCookie } from 'hono/cookie';
 import * as jwt from 'hono/jwt';
-import { PostgresError } from 'postgres';
+import { deleteCookie, setCookie } from 'hono/cookie';
 import { env } from '~/configs/env.config';
 import { db } from '~/db/drizzle';
 import type { User } from '~/db/schema/user.schema';
 import { sendVerificationEmail } from '~/lib/nodemailer';
 import {
 	createUserIdentity,
-	findUserByEmail,
 	findUserIdentityByEmail,
 	getUserIdentity,
 	updateUserIdentity,
@@ -23,6 +21,8 @@ import {
 } from '~/routes/auth.route';
 import { createAuthRouter, createRouter } from '../utils/router-factory';
 import type { UserIdentity } from '~/db/schema/auth.schema';
+import { UserSchema } from '~/types/auth.type';
+import { findUserByEmail } from '~/repositories/user.repository';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 3600; // TTL 1 hour
 
@@ -148,5 +148,6 @@ authProtectedRouter.openapi(logoutRoute, async (c) => {
 });
 
 authProtectedRouter.openapi(selfRoute, async (c) => {
-	return c.json(c.var.user, 200);
+	const user = await UserSchema.parseAsync(c.var.user);
+	return c.json(user, 200);
 });
