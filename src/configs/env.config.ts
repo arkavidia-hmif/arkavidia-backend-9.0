@@ -8,8 +8,10 @@ const EnvSchema = z.object({
 		.default('["http://localhost:5173"]')
 		.transform((value) => JSON.parse(value))
 		.pipe(z.array(z.string().url())),
-	JWT_SECRET: z.string(),
-	TOKEN_EXPIRATION: z.string(),
+	ACCESS_TOKEN_SECRET: z.string(),
+	ACCESS_TOKEN_EXPIRATION: z.coerce.number(),
+	REFRESH_TOKEN_SECRET: z.string(),
+	REFRESH_TOKEN_EXPIRATION: z.coerce.number(),
 	SMTP_HOST: z.string(),
 	SMTP_USER: z.string(),
 	SMTP_PASSWORD: z.string(),

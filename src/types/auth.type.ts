@@ -1,8 +1,18 @@
 import { z } from '@hono/zod-openapi';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { userIdentity } from '~/db/schema/auth.schema';
+import { user } from '~/db/schema/user.schema';
 
-export const UserIdentitySchema = createInsertSchema(userIdentity).partial();
+export const UserIdentitySchema = createSelectSchema(userIdentity);
+
+export const UserIdentityInsertSchema =
+	createInsertSchema(userIdentity).partial();
+
+export const UserSchema = createSelectSchema(user).openapi('User');
+
+export const JWTPayloadSchema = UserSchema.merge(
+	UserIdentitySchema.pick({ provider: true }),
+).openapi('JWTPayload');
 
 export const BasicLoginBodySchema = z.object({
 	email: z.string().email(),
@@ -34,3 +44,14 @@ export const BasicVerifyAccountQuerySchema = z.object({
 		},
 	}),
 });
+
+export const AccessRefreshTokenSchema = z
+	.object({
+		accessToken: z.string(),
+		refreshToken: z.string(),
+	})
+	.openapi('AccessRefreshToken');
+
+export const AccessTokenSchema = AccessRefreshTokenSchema.pick({
+	accessToken: true,
+}).openapi('AccessToken');

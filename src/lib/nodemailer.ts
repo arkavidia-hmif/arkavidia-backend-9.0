@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 export const sendVerificationEmail = async (
 	targetEmail: string,
 	verificationToken: string,
-	userId: string
+	userId: string,
 ) => {
 	const info = await transporter.sendMail({
 		from: MAIL_FROM,

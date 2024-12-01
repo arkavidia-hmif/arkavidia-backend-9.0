@@ -8,6 +8,13 @@
 			"when": 1732980296696,
 			"tag": "0000_tricky_kid_colt",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1733025644816,
+			"tag": "0001_boring_oracle",
+			"breakpoints": true
 		}
 	]
 }

@@ -42,6 +42,8 @@ export const userIdentity = pgTable('user_identity', {
 		'password_recovery_token_expiration',
 	),
 
+	refreshToken: text('refresh_token'),
+
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').$onUpdate(getNow),
 });

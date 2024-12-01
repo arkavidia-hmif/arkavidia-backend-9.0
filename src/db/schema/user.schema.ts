@@ -33,3 +33,5 @@ export const userRelations = relations(user, ({ one }) => ({
 		references: [userIdentity.id],
 	}),
 }));
+
+export type User = InferSelectModel<typeof user>;
