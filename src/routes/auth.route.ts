@@ -91,4 +91,18 @@ export const logoutRoute = createRoute({
 	},
 });
 
+export const selfRoute = createRoute({
+	operationId: 'self',
+	tags: ['auth'],
+	method: 'get',
+	path: '/auth/self',
+	responses: {
+		200: {
+			description: 'Get self',
+		},
+		401: createErrorResponse('GENERIC', 'Unauthorized'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
+
 // refreshTokenRoute

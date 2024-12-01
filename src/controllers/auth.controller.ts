@@ -19,17 +19,20 @@ import {
 	basicRegisterRoute,
 	basicVerifyAccountRoute,
 	logoutRoute,
+	selfRoute,
 } from '~/routes/auth.route';
-import { createRouter } from '../utils/router-factory';
+import { createAuthRouter, createRouter } from '../utils/router-factory';
+import type { UserIdentity } from '~/db/schema/auth.schema';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 3600; // TTL 1 hour
 
 export const authRouter = createRouter();
-// export const authProtectedRouter = createAuthRouter();
+export const authProtectedRouter = createAuthRouter();
 
-const generateAccessToken = async (user: User) => {
+const generateAccessToken = async (user: User, userIdentity: UserIdentity) => {
 	const payload = {
 		...user,
+		provider: userIdentity.provider,
 		exp: Math.floor(Date.now() / 1000) + env.ACCESS_TOKEN_EXPIRATION,
 	};
 	const token = await jwt.sign(payload, env.ACCESS_TOKEN_SECRET);
@@ -112,7 +115,7 @@ authRouter.openapi(basicLoginRoute, async (c) => {
 	if (!userIdentity.isVerified)
 		return c.json({ message: "User isn't verified" }, 400);
 
-	const accessToken = await generateAccessToken(user);
+	const accessToken = await generateAccessToken(user, userIdentity);
 	const refreshToken = await generateRefreshToken(user);
 
 	await updateUserIdentity(db, user.id, {
@@ -136,7 +139,14 @@ authRouter.openapi(basicLoginRoute, async (c) => {
 	);
 });
 
-// authRouter.openapi(logoutRoute, async (c) => {
-// 	deleteCookie(c, 'khongguan');
-// 	await
-// })
+authProtectedRouter.openapi(logoutRoute, async (c) => {
+	deleteCookie(c, 'khongguan');
+	await updateUserIdentity(db, c.var.user.id, {
+		refreshToken: null,
+	});
+	return c.json({}, 204);
+});
+
+authProtectedRouter.openapi(selfRoute, async (c) => {
+	return c.json(c.var.user, 200);
+});
