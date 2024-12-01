@@ -5,10 +5,12 @@ import { user } from '~/db/schema/user.schema';
 
 export const UserIdentitySchema = createSelectSchema(userIdentity);
 
-export const UserIdentityInsertSchema =
+export const UserIdentityUpdateSchema =
 	createInsertSchema(userIdentity).partial();
 
 export const UserSchema = createSelectSchema(user).openapi('User');
+
+export const UserUpdateSchema = createInsertSchema(user).partial();
 
 export const JWTPayloadSchema = UserSchema.merge(
 	UserIdentitySchema.pick({ provider: true }),
@@ -45,6 +47,15 @@ export const BasicVerifyAccountQuerySchema = z.object({
 	}),
 });
 
+export const GoogleCallbackQuerySchema = z.object({
+	code: z.string().openapi({
+		param: {
+			in: 'query',
+			example: '4/0AY0e-g7Qj6y2v7zR7iJ2b9b4V6K7zrZ9X0q4Q',
+		},
+	}),
+});
+
 export const AccessRefreshTokenSchema = z
 	.object({
 		accessToken: z.string(),
@@ -55,3 +66,24 @@ export const AccessRefreshTokenSchema = z
 export const AccessTokenSchema = AccessRefreshTokenSchema.pick({
 	accessToken: true,
 }).openapi('AccessToken');
+
+export const GoogleTokenDataSchema = z.object({
+	access_token: z.string(),
+	expires_in: z.number(),
+	refresh_token: z.string(),
+	scope: z.string(),
+	token_type: z.string(),
+	id_token: z.string(),
+});
+
+export const GoogleUserSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	given_name: z.string().optional(),
+	family_name: z.string().optional(),
+	picture: z.string().optional(),
+	email: z.string(),
+	email_verified: z.string().optional(),
+	locale: z.string().optional(),
+	hd: z.string().optional(),
+});

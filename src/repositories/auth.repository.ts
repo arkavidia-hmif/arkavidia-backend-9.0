@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
 import { type UserIdentityInsert, userIdentity } from '~/db/schema/auth.schema';
-import type { UserIdentityInsertSchema } from '~/types/auth.type';
+import type { UserIdentityUpdateSchema } from '~/types/auth.type';
 
 export const createUserIdentity = async (
 	db: Database,
@@ -24,7 +24,7 @@ export const getUserIdentity = async (db: Database, userId: string) => {
 export const updateUserIdentity = async (
 	db: Database,
 	userId: string,
-	user: z.infer<typeof UserIdentityInsertSchema>,
+	user: z.infer<typeof UserIdentityUpdateSchema>,
 ) => {
 	return await db
 		.update(userIdentity)

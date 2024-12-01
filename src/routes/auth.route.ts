@@ -4,10 +4,12 @@ import {
 	BasicLoginBodySchema,
 	BasicRegisterBodySchema,
 	BasicVerifyAccountQuerySchema,
+	GoogleCallbackQuerySchema,
 	UserSchema,
 } from '~/types/auth.type';
 import { createErrorResponse } from '../utils/error-response-factory';
 
+/** BASIC AUTHENTICATION ROUTES (Email & Password) */
 export const basicRegisterRoute = createRoute({
 	operationId: 'basicRegister',
 	tags: ['auth'],
@@ -41,8 +43,13 @@ export const basicVerifyAccountRoute = createRoute({
 		query: BasicVerifyAccountQuerySchema,
 	},
 	responses: {
-		204: {
-			description: 'Verification succesful',
+		200: {
+			description: 'Verification sucessful, automatic login',
+			content: {
+				'application/json': {
+					schema: AccessRefreshTokenSchema,
+				},
+			},
 		},
 		400: createErrorResponse('UNION', 'Bad request error'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),
@@ -78,6 +85,50 @@ export const basicLoginRoute = createRoute({
 	},
 });
 
+/** GOOGLE AUTHENTICATION ROUTES */
+export const googleAuthRoute = createRoute({
+	operationId: 'googleAuth',
+	tags: ['auth'],
+	method: 'get',
+	path: '/auth/google',
+	responses: {
+		302: {
+			description: 'Redirect to Google login',
+			headers: {
+				location: {
+					description: 'URL to Google consent screen',
+					schema: {
+						type: 'string',
+					},
+				},
+			},
+		},
+	},
+});
+
+export const googleAuthCallbackRoute = createRoute({
+	operationId: 'googleAuthCallback',
+	tags: ['auth'],
+	method: 'get',
+	path: '/auth/google/callback',
+	request: {
+		query: GoogleCallbackQuerySchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: AccessRefreshTokenSchema,
+				},
+			},
+			description: 'Login succesful',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
+
+/** BOTH AUTH */
 export const logoutRoute = createRoute({
 	operationId: 'logout',
 	tags: ['auth'],
@@ -88,6 +139,7 @@ export const logoutRoute = createRoute({
 			description: 'Logout sucessful',
 		},
 		400: createErrorResponse('UNION', 'Bad request error'),
+		401: createErrorResponse('UNION', 'Unauthorized'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),
 	},
 });
@@ -102,9 +154,9 @@ export const selfRoute = createRoute({
 			description: 'Get self',
 			content: {
 				'application/json': {
-					schema: UserSchema
-				}
-			}
+					schema: UserSchema,
+				},
+			},
 		},
 		401: createErrorResponse('GENERIC', 'Unauthorized'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),
