@@ -40,3 +40,5 @@ export const userRelations = relations(user, ({ one, many }) => ({
   events: many(event),
 	teams: many(team),
 }));
+
+export type User = InferSelectModel<typeof user>;

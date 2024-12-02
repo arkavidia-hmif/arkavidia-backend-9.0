@@ -1,4 +1,9 @@
-import { type InferSelectModel, relations, sql } from 'drizzle-orm';
+import {
+	type InferInsertModel,
+	type InferSelectModel,
+	relations,
+	sql,
+} from 'drizzle-orm';
 import {
 	type AnyPgColumn,
 	boolean,
@@ -22,7 +27,7 @@ export const userIdentityProviderEnum = pgEnum('user_identity_provider_enum', [
 
 export const userIdentity = pgTable('user_identity', {
 	id: text('id').primaryKey().$defaultFn(createId),
-	email: text('email').notNull(),
+	email: text('email').unique().notNull(),
 	provider: userIdentityProviderEnum('provider').notNull(),
 	hash: text('hash').notNull(),
 
@@ -37,6 +42,8 @@ export const userIdentity = pgTable('user_identity', {
 		'password_recovery_token_expiration',
 	),
 
+	refreshToken: text('refresh_token'),
+
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').$onUpdate(getNow),
 });
@@ -44,3 +51,6 @@ export const userIdentity = pgTable('user_identity', {
 export const userIdentityRelations = relations(userIdentity, ({ one }) => ({
 	user: one(user),
 }));
+
+export type UserIdentity = InferSelectModel<typeof userIdentity>;
+export type UserIdentityInsert = InferInsertModel<typeof userIdentity>;
