@@ -2,21 +2,8 @@ import {
 	type InferInsertModel,
 	type InferSelectModel,
 	relations,
-	sql,
 } from 'drizzle-orm';
-import {
-	type AnyPgColumn,
-	boolean,
-	index,
-	integer,
-	json,
-	pgEnum,
-	pgTable,
-	primaryKey,
-	text,
-	timestamp,
-	unique,
-} from 'drizzle-orm/pg-core';
+import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { createId, getNow } from '../../utils/drizzle-schema-util';
 import { user } from './user.schema';
 

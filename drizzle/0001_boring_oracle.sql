@@ -1,1 +1,0 @@
-ALTER TABLE "user_identity" ADD COLUMN "refresh_token" text;

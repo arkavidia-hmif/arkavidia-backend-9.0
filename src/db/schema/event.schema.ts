@@ -1,20 +1,13 @@
-import { type InferSelectModel, relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
-  type AnyPgColumn,
-  boolean,
   date,
-  index,
   integer,
-  json,
-  pgEnum,
   pgTable,
-  primaryKey,
   text,
   timestamp,
-  unique,
 } from "drizzle-orm/pg-core";
 import { createId, getNow } from "../../utils/drizzle-schema-util";
-import { user } from "./user.schema";
+import { eventParticipant } from "./event-participant.schema";
 
 export const event = pgTable("event", {
   id: text("id").primaryKey().$defaultFn(createId),
@@ -31,5 +24,5 @@ export const event = pgTable("event", {
 });
 
 export const eventRelations = relations(event, ({ many }) => ({
-  users: many(user),
+	eventParticipant: many(eventParticipant),
 }));

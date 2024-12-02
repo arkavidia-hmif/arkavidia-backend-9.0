@@ -246,7 +246,7 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
 			verificationTokenExpiration: new Date(),
 		});
 
-		await updateUser(db, newUser.id, { name: userInfo.name });
+		await updateUser(db, newUser.id, { fullName: userInfo.name });
 	}
 
 	const existingUserIdentity = (await findUserIdentityByEmail(
