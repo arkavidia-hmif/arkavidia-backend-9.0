@@ -1,8 +1,9 @@
 import * as argon2 from 'argon2';
-import * as jwt from 'hono/jwt';
 import { deleteCookie, setCookie } from 'hono/cookie';
+import * as jwt from 'hono/jwt';
 import { env } from '~/configs/env.config';
 import { db } from '~/db/drizzle';
+import type { UserIdentity } from '~/db/schema/auth.schema';
 import type { User } from '~/db/schema/user.schema';
 import { sendVerificationEmail } from '~/lib/nodemailer';
 import {
@@ -12,6 +13,7 @@ import {
 	updateUserIdentity,
 	updateUserVerification,
 } from '~/repositories/auth.repository';
+import { findUserByEmail, updateUser } from '~/repositories/user.repository';
 import {
 	basicLoginRoute,
 	basicRegisterRoute,
@@ -21,14 +23,12 @@ import {
 	logoutRoute,
 	selfRoute,
 } from '~/routes/auth.route';
-import { createAuthRouter, createRouter } from '../utils/router-factory';
-import type { UserIdentity } from '~/db/schema/auth.schema';
 import {
 	GoogleTokenDataSchema,
 	GoogleUserSchema,
 	UserSchema,
 } from '~/types/auth.type';
-import { findUserByEmail, updateUser } from '~/repositories/user.repository';
+import { createAuthRouter, createRouter } from '../utils/router-factory';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 3600; // TTL 1 hour
 
