@@ -8,6 +8,13 @@
       "when": 1732966296471,
       "tag": "0000_cuddly_kabuki",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1733119621093,
+      "tag": "0001_dry_magma",
+      "breakpoints": true
     }
   ]
 }
