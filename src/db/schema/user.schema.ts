@@ -1,27 +1,47 @@
-import { type InferSelectModel, relations, sql } from 'drizzle-orm';
+import { type InferSelectModel, relations } from 'drizzle-orm';
 import {
-	type AnyPgColumn,
 	boolean,
-	index,
-	integer,
-	json,
+	date,
+	pgEnum,
 	pgTable,
-	primaryKey,
 	text,
 	timestamp,
-	unique,
 } from 'drizzle-orm/pg-core';
-import { createId, getNow } from '../../utils/drizzle-schema-util';
-import { todo } from './todo.schema';
+import { getNow } from '../../utils/drizzle-schema-util';
+import { userIdentity } from './auth.schema';
+import { teamMember } from './team-member.schema';
+
+export const userEducationEnum = pgEnum('user_education_enum', [
+	's1',
+	's2',
+	'sma',
+]);
 
 export const user = pgTable('user', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	name: text('name').notNull(),
-	age: integer('age').notNull().default(0),
+	id: text('id')
+		.primaryKey()
+		.references(() => userIdentity.id),
+	email: text('email').notNull().unique(), // Add unique constraint
+	fullName: text('full_name'),
+	birthDate: date('birth_date'),
+	education: userEducationEnum('education'),
+	entrySource: text('entry_source'), // Ini semacam 'Where did you hear from us?',
+	instance: text('instance'),
+	phoneNumber: text('phone_number'),
+	idLine: text('id_line'),
+	idDiscord: text('id_discord'),
+	idInstagram: text('id_instagram'),
+	consent: boolean('consent').notNull().default(false),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').$onUpdate(getNow),
 });
 
-export const userRelation = relations(user, ({ one, many }) => ({
-	todo: many(todo),
+export const userRelations = relations(user, ({ one, many }) => ({
+	userIdentity: one(userIdentity, {
+		fields: [user.id],
+		references: [userIdentity.id],
+	}),
+	teamMember: many(teamMember),
 }));
+
+export type User = InferSelectModel<typeof user>;
