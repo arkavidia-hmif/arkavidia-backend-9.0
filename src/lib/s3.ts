@@ -1,5 +1,5 @@
-import { env } from '~/configs/env.config';
 import * as Minio from 'minio';
+import { env } from '~/configs/env.config';
 
 const client = new Minio.Client({
 	endPoint: env.S3_ENDPOINT,

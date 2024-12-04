@@ -4,7 +4,6 @@ import { media, mediaBucketEnum } from '~/db/schema/media.schema';
 
 export const MediaSchema = createSelectSchema(media).openapi('Media');
 
-
 export const GetPresignedLinkQuerySchema = z.object({
 	filename: z.string().openapi({
 		description: 'name of file with extension',

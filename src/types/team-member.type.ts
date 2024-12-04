@@ -1,7 +1,7 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 import { teamMember } from '~/db/schema/team-member.schema';
 import { MediaSchema } from './media.type';
-import { z } from 'zod';
 
 export const TeamAndUserIdParam = z.object({
 	teamId: z.string().openapi({

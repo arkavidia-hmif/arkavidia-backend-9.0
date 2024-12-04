@@ -1,10 +1,10 @@
 import { relations } from 'drizzle-orm';
 import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { createId, getNow } from '../../utils/drizzle-schema-util';
-import { user } from './user.schema';
 import { competition } from './competition.schema';
-import { team } from './team.schema';
 import { media } from './media.schema';
+import { team } from './team.schema';
+import { user } from './user.schema';
 
 export const teamMemberRoleEnum = pgEnum('team_member_role_renum', [
 	'leader',

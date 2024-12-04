@@ -21,4 +21,4 @@ export const insertMediaFromUrl = async (
 	return await db.insert(media).values(values).returning();
 };
 
-export const deleteMedia = async (db: Database, id: string) => {}
+export const deleteMedia = async (db: Database, id: string) => {};

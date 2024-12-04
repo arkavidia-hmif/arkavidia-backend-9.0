@@ -1,12 +1,7 @@
-import { type InferSelectModel, relations, sql } from "drizzle-orm";
-import {
-  date,
-  integer,
-  pgTable,
-  text,
-} from "drizzle-orm/pg-core";
-import { createId, getNow } from "../../utils/drizzle-schema-util";
-import { team } from "./team.schema";
+import { type InferSelectModel, relations, sql } from 'drizzle-orm';
+import { date, integer, pgTable, text } from 'drizzle-orm/pg-core';
+import { createId, getNow } from '../../utils/drizzle-schema-util';
+import { team } from './team.schema';
 
 export const competition = pgTable('competition', {
 	id: text('id').primaryKey().$defaultFn(createId),
