@@ -16,6 +16,10 @@ import {
 import { createId, getNow } from '../../utils/drizzle-schema-util';
 import { user } from './user.schema';
 
+export const mediaBucketEnum = pgEnum('media_bucket_enum', [
+	'competition-registration',
+]);
+
 export const media = pgTable('media', {
 	id: text('id').primaryKey().$defaultFn(createId),
 	creatorId: text('creator_id')
