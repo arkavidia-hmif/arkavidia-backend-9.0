@@ -10,7 +10,7 @@ export const team = pgTable('team', {
 	competitionId: text('competition_id').notNull().references(() => competition.id), // Add reference to competition
 	name: text('team_name').notNull(),
 	joinCode: text('team_code').notNull().$defaultFn(createId).unique(), // Add unique constraint
-	paymentProofId: text('payment_proof_id').references(() => media.id), // Picture of payment proof
+	paymentProofMediaId: text('payment_proof_media_id').references(() => media.id), // Picture of payment proof
 
 	isVerified: boolean('is_verified').default(false).notNull(),
 	verificationError: text('verification_error'),
@@ -26,7 +26,7 @@ export const teamRelations = relations(team, ({ one, many }) => ({
 		references: [competition.id],
 	}),
 	paymentProof: one(media, {
-		fields: [team.paymentProofId],
+		fields: [team.paymentProofMediaId],
 		references: [media.id],
 	}),
 }));
