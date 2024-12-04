@@ -35,6 +35,7 @@ app.doc('/openapi.json', {
 	tags: [
 		{ name: 'hello', description: 'Hello API' },
 		{ name: 'auth', description: 'Authentication API' },
+		{ name: 'media', description: 'Media API'}
 	],
 });
 

@@ -12,6 +12,8 @@
 		"check:type": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.705.0",
+		"@aws-sdk/s3-request-presigner": "^3.705.0",
 		"@hono/zod-openapi": "^0.18.3",
 		"@paralleldrive/cuid2": "^2.2.2",
 		"@scalar/hono-api-reference": "^0.5.162",
