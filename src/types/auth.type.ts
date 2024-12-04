@@ -8,7 +8,10 @@ export const UserIdentitySchema = createSelectSchema(userIdentity);
 export const UserIdentityUpdateSchema =
 	createInsertSchema(userIdentity).partial();
 
-export const UserSchema = createSelectSchema(user).openapi('User');
+export const UserSchema = createSelectSchema(user, {
+	createdAt: z.union([z.string(), z.date()]),
+	updatedAt: z.union([z.string(), z.date()]),
+}).openapi('User');
 
 export const UserUpdateSchema = createInsertSchema(user).partial();
 
