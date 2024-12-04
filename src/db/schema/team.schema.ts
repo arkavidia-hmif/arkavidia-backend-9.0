@@ -7,10 +7,15 @@ import { media } from './media.schema';
 
 export const team = pgTable('team', {
 	id: text('id').primaryKey().$defaultFn(createId),
-	competitionId: text('competition_id').notNull().references(() => competition.id), // Add reference to competition
+	competitionId: text('competition_id')
+		.notNull()
+		.references(() => competition.id, { onDelete: 'cascade' }), // Add reference to competition
 	name: text('team_name').notNull(),
 	joinCode: text('team_code').notNull().$defaultFn(createId).unique(), // Add unique constraint
-	paymentProofMediaId: text('payment_proof_media_id').references(() => media.id), // Picture of payment proof
+	paymentProofMediaId: text('payment_proof_media_id').references(
+		() => media.id,
+		{ onDelete: 'cascade' },
+	), // Picture of payment proof
 
 	isVerified: boolean('is_verified').default(false).notNull(),
 	verificationError: text('verification_error'),

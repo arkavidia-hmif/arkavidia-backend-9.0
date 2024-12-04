@@ -1,18 +1,12 @@
-import {
-	S3Client,
-	GetObjectCommand,
-	PutObjectCommand,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '~/configs/env.config';
+import * as Minio from 'minio';
 
-const S3 = new S3Client({
-	region: 'auto',
-	endpoint: env.S3_ENDPOINT,
-	credentials: {
-		accessKeyId: env.S3_ACCESS_KEY_ID,
-		secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-	},
+const client = new Minio.Client({
+	endPoint: env.S3_ENDPOINT,
+	// port: 9000,
+	useSSL: true,
+	accessKey: env.S3_ACCESS_KEY_ID,
+	secretKey: env.S3_SECRET_ACCESS_KEY,
 });
 
 export const createPutObjectPresignedUrl = async (
@@ -20,19 +14,5 @@ export const createPutObjectPresignedUrl = async (
 	bucketName: string,
 	expiresIn: number,
 ) => {
-	return await getSignedUrl(
-		S3,
-		new PutObjectCommand({ Bucket: bucketName, Key: key }),
-		{ expiresIn },
-	);
-};
-
-export const createGetObjectPresignedUrl = async (
-	key: string,
-	bucketName: string,
-) => {
-	return await getSignedUrl(
-		S3,
-		new GetObjectCommand({ Bucket: bucketName, Key: key }),
-	);
+	return await client.presignedPutObject(bucketName, key, expiresIn);
 };

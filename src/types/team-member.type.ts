@@ -3,6 +3,21 @@ import { teamMember } from '~/db/schema/team-member.schema';
 import { MediaSchema } from './media.type';
 import { z } from 'zod';
 
+export const TeamAndUserIdParam = z.object({
+	teamId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
+	userId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
+});
+
 export const TeamMemberSchema = createSelectSchema(teamMember)
 	.merge(
 		z.object({
