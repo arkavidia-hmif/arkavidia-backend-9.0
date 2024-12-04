@@ -1,10 +1,12 @@
+import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { apiReference } from '@scalar/hono-api-reference';
 import { serve } from 'bun';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { env } from './configs/env.config';
 import { apiRouter } from './controllers/api.controller';
+import { apiReference } from '@scalar/hono-api-reference'
+
 
 const app = new OpenAPIHono({
 	defaultHook: (result, c) => {
@@ -30,24 +32,23 @@ app.doc('/openapi.json', {
 	openapi: '3.1.0',
 	info: {
 		version: '1.0',
-		title: 'Arkavidia API',
+		title: 'Competition Site API',
 	},
 	tags: [
 		{ name: 'hello', description: 'Hello API' },
-		{ name: 'auth', description: 'Authentication API' },
-		{ name: 'media', description: 'Media API'}
+		{ name: 'todo', description: 'Todo API' },
 	],
 });
 
 app.get(
-	'/docs',
-	apiReference({
-		theme: 'purple',
-		spec: {
-			url: '/openapi.json',
-		},
-	}),
-);
+  '/docs',
+  apiReference({
+    theme: 'purple',
+    spec: {
+      url: '/openapi.json',
+    },
+  }),
+)
 
 console.log(`Server is running on port ${env.PORT}`);
 
