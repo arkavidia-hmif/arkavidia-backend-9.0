@@ -23,6 +23,11 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
     return c.json({ error: "Your team already verified!" }, 400);
   }
 
+  // Check if paymentProofId exist
+  const { paymentProofMediaId } = c.req.valid("json");
+  if (!paymentProofMediaId)
+    return c.json({ error: "paymentProofMediaId id is required!" }, 400);
+
   const updatedTeam = await updateTeamDocument(
     db,
     teamId,
