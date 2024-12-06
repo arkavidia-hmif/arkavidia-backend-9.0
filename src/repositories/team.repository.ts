@@ -1,7 +1,12 @@
 import { eq } from 'drizzle-orm';
+import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { team } from '~/db/schema';
+import { first } from '~/db/helper';
 import type { TeamMemberRelationOption } from './team-member.repository';
+import { PostTeamDocumentBodySchema } from '~/types/team.type';
+import { insertMediaFromUrl } from './media.repository';
+
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -35,4 +40,24 @@ export const getTeamById = async (
 			paymentProof: options?.paymentProof ? true : undefined,
 		},
 	});
+};
+
+export const updateTeamDocument = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+	data: z.infer<typeof PostTeamDocumentBodySchema>
+) => {
+	const insert = {
+		paymentProofMediaId: data.paymentProofMediaId
+			? (await insertMediaFromUrl(db, userId, data.paymentProofMediaId))[0].id
+			: undefined,
+	};
+
+	return await db
+		.update(team)
+		.set(insert)
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
 };

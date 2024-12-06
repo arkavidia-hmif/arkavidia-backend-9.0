@@ -1,4 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
+import { TeamIdParam, TeamSchema } from '~/types/team.type';
+import { PostTeamDocumentBodySchema } from '~/types/team.type';
+import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const joinTeamByCodeRoute = createRoute({
 	operationId: 'joinTeamByCode',
@@ -45,7 +48,29 @@ export const postTeamDocumentRoute = createRoute({
 	tags: ['team'],
 	method: 'post',
 	path: '/team/{teamId}/upload',
-	responses: {},
+	request: {
+		params: TeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamDocumentBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Succesfully updated team document upload',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
 });
 
 export const putChangeTeamNameRoute = createRoute({
