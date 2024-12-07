@@ -61,3 +61,20 @@ export const updateTeamMemberDocument = async (
 		.returning()
 		.then(first);
 };
+
+export const insertUserToTeam = async(
+  db:Database,
+  teamId:string,
+  userId:string
+)=>{
+  return await db.transaction(async(tx)=>{
+    const [insertedMember] = await tx.insert(teamMember)
+      .values({
+        teamId,
+        userId,
+        role:'leader'
+      }).returning();
+    
+    return insertedMember;
+  })
+}

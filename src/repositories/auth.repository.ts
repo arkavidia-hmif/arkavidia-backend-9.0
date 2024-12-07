@@ -44,7 +44,7 @@ export const updateUserVerification = async (db: Database, userId: string) => {
 };
 
 export const findUserIdentityByEmail = async (db: Database, email: string) => {
-	return await db
+	return db
 		.select()
 		.from(userIdentity)
 		.where(eq(userIdentity.email, email))

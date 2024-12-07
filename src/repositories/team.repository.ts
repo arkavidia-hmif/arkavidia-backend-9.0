@@ -36,3 +36,18 @@ export const getTeamById = async (
 		},
 	});
 };
+
+export const createTeam = async(
+  db: Database,
+  competitionId: string,
+  name: string,
+) =>{
+  return await db.transaction(async(tx)=>{
+    const [insertedTeam] = await tx.insert(team).values({
+      competitionId,
+      name
+    }).returning();
+
+    return insertedTeam; 
+  });
+}
