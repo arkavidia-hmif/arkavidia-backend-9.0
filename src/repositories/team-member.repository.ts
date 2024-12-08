@@ -68,12 +68,14 @@ export const getTeamMemberCount = async(
   db:Database,
   teamId:string
 ) =>{
-  const [result] = await db.select({
-    count:count()
-    }).from(teamMember)
-    .where(eq(teamMember.teamId,teamId));  
+  const result = await db.query.teamMember.findMany({
+    where:eq(teamMember.teamId,teamId),
+    columns: {
+      teamId:true
+    }
+  })
   
-  return result;
+  return {teamMemberCount:result.length};    
 }
 
 export const insertUserToTeam = async(
@@ -87,10 +89,10 @@ export const insertUserToTeam = async(
       throw new Error("Such team doesn't exist"); 
     }
 
-    const {count} = await getTeamMemberCount(db,teamId);
-    const competition = await getCompetitionById(db,team.competitionId);
+    const {teamMemberCount} = await getTeamMemberCount(db,teamId);
+    const {maxParticipants} = await getCompetitionById(db,team.competitionId);
     
-    if(competition.maxParticipants <= count){
+    if(maxParticipants <= teamMemberCount){
       throw new Error('The team is already full');
     }
 
