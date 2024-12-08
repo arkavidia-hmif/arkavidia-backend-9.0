@@ -4,6 +4,7 @@ import { team, teamMember } from '~/db/schema';
 import type { TeamMemberRelationOption } from './team-member.repository';
 import { putChangeTeamNameBodySchema, TeamMemberIdSchema } from '~/types/team.type';
 import { z } from 'zod';
+import { first } from '~/db/helper';
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -48,7 +49,8 @@ export const putChangeTeamName = async (
 		.update(team)
 		.set({ name: body.name })
 		.where(eq(team.id, teamId))
-		.returning();
+		.returning()
+		.then(first);
 }
 
 
@@ -59,5 +61,6 @@ export const deleteTeamMember = async (
 	return await db
 		.delete(teamMember)
 		.where(eq(teamMember.userId, body.userId))
-		.returning();
+		.returning()
+		.then(first);
 }
