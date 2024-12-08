@@ -1,7 +1,10 @@
 import { eq } from 'drizzle-orm';
 import type { Database } from '~/db/drizzle';
-import { team } from '~/db/schema';
+import { team, teamMember } from '~/db/schema';
 import type { TeamMemberRelationOption } from './team-member.repository';
+import { putChangeTeamNameBodySchema, TeamMemberIdSchema } from '~/types/team.type';
+import { z } from 'zod';
+import { first } from '~/db/helper';
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -36,3 +39,28 @@ export const getTeamById = async (
 		},
 	});
 };
+
+export const putChangeTeamName = async (
+	db: Database,
+	teamId: string,
+	body: z.infer<typeof putChangeTeamNameBodySchema>
+) => {
+	return await db
+		.update(team)
+		.set({ name: body.name })
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
+}
+
+
+export const deleteTeamMember = async (
+	db: Database,
+	body: z.infer<typeof TeamMemberIdSchema>
+) => {
+	return await db
+		.delete(teamMember)
+		.where(eq(teamMember.userId, body.userId))
+		.returning()
+		.then(first);
+}
