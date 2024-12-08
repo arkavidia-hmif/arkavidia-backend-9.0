@@ -48,9 +48,14 @@ teamProtectedRouter.openapi(deleteTeamMemberRoute, async (c) => {
     // check if user is the leader
     if (teamMember.role !== "leader") return c.json({ error: "You are not the leader of this team!" }, 403);
 
-    const deletedTeamMember = await deleteTeamMember(db, c.req.valid('json'));;
+    // check if the deleted team member is in the same team
+    const deletedTeamMemberId = c.req.valid('json').userId;
+    const deletedTeamMember = team.teamMembers.find((el) => el.userId === deletedTeamMemberId);
+    if (!deletedTeamMember) return c.json({ error: "Team member doesn't exist!" }, 403);
 
-    return c.json(deletedTeamMember, 200);
+    const member = await deleteTeamMember(db, c.req.valid('json'));;
+
+    return c.json(member, 200);
     
 })
 

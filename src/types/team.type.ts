@@ -10,4 +10,4 @@ export const TeamIdParam = z.object({ teamId: z.string() });
 
 export const TeamMemberIdSchema = z.object({ userId: z.string() });
 
-export const putChangeTeamNameBodySchema = z.object({ name: z.string() });
+export const putChangeTeamNameBodySchema = z.object({ name: z.string().min(1) });
