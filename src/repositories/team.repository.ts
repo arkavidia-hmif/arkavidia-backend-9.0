@@ -48,7 +48,6 @@ export const createTeam = async(
     const {participantCount} = await getCompetitionParticipantNumber(db,competitionId);
     const {maxParticipants} = await getCompetitionById(db,competitionId);
     
-    console.log(participantCount,maxParticipants)
     if(maxParticipants <= participantCount ){
       // return an error ?
       throw new Error("Maximum number of participants reached for this competition.");

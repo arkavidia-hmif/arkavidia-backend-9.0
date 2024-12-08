@@ -1,10 +1,12 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq,count } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
 import { teamMember } from '~/db/schema';
 import type { PostTeamMemberDocumentBodySchema } from '~/types/team-member.type';
 import { insertMediaFromUrl } from './media.repository';
+import { getCompetitionById } from './competition.repository';
+import { getTeamById } from './team.repository';
 
 export interface TeamMemberRelationOption {
 	user?: boolean;
@@ -62,12 +64,36 @@ export const updateTeamMemberDocument = async (
 		.then(first);
 };
 
+export const getTeamMemberCount = async(
+  db:Database,
+  teamId:string
+) =>{
+  const [result] = await db.select({
+    count:count()
+    }).from(teamMember)
+    .where(eq(teamMember.teamId,teamId));  
+  
+  return result;
+}
+
 export const insertUserToTeam = async(
   db:Database,
   teamId:string,
   userId:string
 )=>{
   return await db.transaction(async(tx)=>{
+    const team = await getTeamById(db,teamId);
+    if(!team){
+      throw new Error("Such team doesn't exist"); 
+    }
+
+    const {count} = await getTeamMemberCount(db,teamId);
+    const competition = await getCompetitionById(db,team.competitionId);
+    
+    if(competition.maxParticipants <= count){
+      throw new Error('The team is already full');
+    }
+
     const [insertedMember] = await tx.insert(teamMember)
       .values({
         teamId,

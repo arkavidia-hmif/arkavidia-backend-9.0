@@ -15,7 +15,6 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c)=>{
 
     return c.json(team,200);
   }catch(error){
-    // maybe consider creating a env key of whether it's now staging or development
     
     if( error instanceof Error){
       return c.json({
