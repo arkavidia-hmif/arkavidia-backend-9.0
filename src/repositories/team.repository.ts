@@ -2,6 +2,9 @@ import { eq } from 'drizzle-orm';
 import type { Database } from '~/db/drizzle';
 import { team } from '~/db/schema';
 import type { TeamMemberRelationOption } from './team-member.repository';
+import { first } from '~/db/helper';
+import { PostTeamVerificationBodySchema } from '~/types/team.type';
+import { z } from 'zod';
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -35,4 +38,17 @@ export const getTeamById = async (
 			paymentProof: options?.paymentProof ? true : undefined,
 		},
 	});
+};
+
+export const updateTeamVerification = async (
+	db: Database,
+	teamId: string,
+	data: z.infer<typeof PostTeamVerificationBodySchema>,
+) => {
+	return await db
+		.update(team)
+		.set(data)
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
 };

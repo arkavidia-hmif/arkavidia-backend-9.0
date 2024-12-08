@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { CompetitionAndTeamIdParam, PostTeamVerificationBodySchema } from '~/types/team.type';
+import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const joinTeamByCodeRoute = createRoute({
 	operationId: 'joinTeamByCode',
@@ -63,3 +65,28 @@ export const deleteTeamMemberRoute = createRoute({
 	path: '/team/{teamId}',
 	responses: {},
 });
+
+export const postTeamVerificationRoute = createRoute({
+  operationId: "postTeamVerification",
+  tags: ["team"],
+  method: "post",
+  path: "/admin/{competitionId}/team/{teamId}",
+  request: {
+		params: CompetitionAndTeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamVerificationBodySchema
+				}
+			}
+		}
+  },
+  responses: {
+    200: {
+			description: "Succesfully updated team verification",
+    },
+    400: createErrorResponse("UNION", "Bad request error"),
+    500: createErrorResponse("GENERIC", "Internal server error"),
+  }
+});
+

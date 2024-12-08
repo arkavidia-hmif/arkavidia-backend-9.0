@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
 import { teamMember } from '~/db/schema';
-import type { PostTeamMemberDocumentBodySchema } from '~/types/team-member.type';
+import type { PostTeamMemberDocumentBodySchema, PostTeamMemberVerificationBodySchema } from '~/types/team-member.type';
 import { insertMediaFromUrl } from './media.repository';
 
 export interface TeamMemberRelationOption {
@@ -61,3 +61,17 @@ export const updateTeamMemberDocument = async (
 		.returning()
 		.then(first);
 };
+
+export const updateTeamMemberVerification = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+	data: z.infer<typeof PostTeamMemberVerificationBodySchema>,
+) => {
+	return await db
+		.update(teamMember)
+		.set(data)
+		.where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
+		.returning()
+		.then(first);
+}
