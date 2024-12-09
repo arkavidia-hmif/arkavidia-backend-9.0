@@ -13,13 +13,22 @@ export const createUserIdentity = async (
 	return await db.insert(userIdentity).values(user).returning().then(firstSure);
 };
 
-export const getUserIdentity = async (db: Database, userId: string) => {
+export const findUserIdentityById = async (db: Database, userId: string) => {
 	return await db
 		.select()
 		.from(userIdentity)
 		.where(eq(userIdentity.id, userId))
 		.then(first);
 };
+
+export const findUserIdentityByEmail = async (db: Database, email: string) => {
+	return await db
+		.select()
+		.from(userIdentity)
+		.where(eq(userIdentity.email, email))
+		.then(first);
+};
+
 
 export const updateUserIdentity = async (
 	db: Database,
@@ -40,13 +49,5 @@ export const updateUserVerification = async (db: Database, userId: string) => {
 		.set({ isVerified: true })
 		.where(eq(userIdentity.id, userId))
 		.returning()
-		.then(first);
-};
-
-export const findUserIdentityByEmail = async (db: Database, email: string) => {
-	return await db
-		.select()
-		.from(userIdentity)
-		.where(eq(userIdentity.email, email))
 		.then(first);
 };
