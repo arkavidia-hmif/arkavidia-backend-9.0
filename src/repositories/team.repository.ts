@@ -1,82 +1,122 @@
-import { eq } from "drizzle-orm";
-import type { Database } from "~/db/drizzle";
-import { team } from "~/db/schema";
-import type { TeamMemberRelationOption } from "./team-member.repository";
-import {
-  getCompetitionById,
-  getCompetitionParticipantNumber,
-} from "./competition.repository";
+import { eq } from 'drizzle-orm';
+import type { z } from 'zod';
+import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
-import { PostTeamVerificationBodySchema } from '~/types/team.type';
-import { z } from 'zod';
+import { team, teamMember } from '~/db/schema';
+import type { PostTeamVerificationBodySchema } from '~/types/team.type';
+import {
+	getCompetitionById,
+	getCompetitionParticipantNumber,
+} from './competition.repository';
+import {
+	type TeamMemberRelationOption,
+	getTeamMemberCount,
+} from './team-member.repository';
 
 interface TeamRelationOption {
-  teamMember?: TeamMemberRelationOption | boolean;
-  competition?: boolean;
-  paymentProof?: boolean;
+	teamMember?: TeamMemberRelationOption | boolean;
+	competition?: boolean;
+	paymentProof?: boolean;
 }
 
 export const getTeamById = async (
-  db: Database,
-  teamId: string,
-  options?: TeamRelationOption,
+	db: Database,
+	teamId: string,
+	options?: TeamRelationOption,
 ) => {
-  return await db.query.team.findFirst({
-    where: eq(team.id, teamId),
-    with: {
-      teamMembers:
-        typeof options?.teamMember === "boolean"
-          ? options?.teamMember
-            ? true
-            : undefined
-          : {
-              with: {
-                user: options?.teamMember?.user ? true : undefined,
-                nisn: options?.teamMember?.nisn ? true : undefined,
-                kartu: options?.teamMember?.kartu ? true : undefined,
-                poster: options?.teamMember?.poster ? true : undefined,
-                twibbon: options?.teamMember?.twibbon ? true : undefined,
-              },
-            },
-      competition: options?.competition ? true : undefined,
-      paymentProof: options?.paymentProof ? true : undefined,
-    },
-  });
+	return await db.query.team.findFirst({
+		where: eq(team.id, teamId),
+		with: {
+			teamMembers:
+				typeof options?.teamMember === 'boolean'
+					? options?.teamMember
+						? true
+						: undefined
+					: {
+							with: {
+								user: options?.teamMember?.user ? true : undefined,
+								nisn: options?.teamMember?.nisn ? true : undefined,
+								kartu: options?.teamMember?.kartu ? true : undefined,
+								poster: options?.teamMember?.poster ? true : undefined,
+								twibbon: options?.teamMember?.twibbon ? true : undefined,
+							},
+						},
+			competition: options?.competition ? true : undefined,
+			paymentProof: options?.paymentProof ? true : undefined,
+		},
+	});
 };
 
 export const createTeam = async (
-  db: Database,
-  competitionId: string,
-  name: string,
+	db: Database,
+	competitionId: string,
+	name: string,
 ) => {
-  return await db.transaction(async (tx) => {
-    const { participantCount } = await getCompetitionParticipantNumber(
-      db,
-      competitionId,
-    );
-    const { maxParticipants } = await getCompetitionById(db, competitionId);
+	return await db.transaction(async (tx) => {
+		const { participantCount } = await getCompetitionParticipantNumber(
+			db,
+			competitionId,
+		);
+		const { maxParticipants } = await getCompetitionById(db, competitionId);
 
-    if (!maxParticipants) {
-      throw new Error("There is no such competition");
-    }
+		if (!maxParticipants) {
+			throw new Error('There is no such competition');
+		}
 
-    if (maxParticipants <= participantCount) {
-      // return an error ?
-      throw new Error(
-        "Maximum number of participants reached for this competition.",
-      );
-    }
+		if (maxParticipants <= participantCount) {
+			// return an error ?
+			throw new Error(
+				'Maximum number of participants reached for this competition.',
+			);
+		}
 
-    const [insertedTeam] = await tx
-      .insert(team)
-      .values({
-        competitionId,
-        name,
-      })
-      .returning();
+		const [insertedTeam] = await tx
+			.insert(team)
+			.values({
+				competitionId,
+				name,
+			})
+			.returning();
 
-    return insertedTeam;
-  });
+		return insertedTeam;
+	});
+};
+
+export const insertUserToTeam = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+) => {
+	return await db.transaction(async (tx) => {
+		const team = await getTeamById(db, teamId);
+		if (!team) {
+			throw new Error("Such team doesn't exist");
+		}
+
+		const { teamMemberCount } = await getTeamMemberCount(db, teamId);
+		const { maxParticipants } = await getCompetitionById(
+			db,
+			team.competitionId,
+		);
+
+		if (!maxParticipants) {
+			throw new Error('There is no such competition');
+		}
+		if (maxParticipants <= teamMemberCount) {
+			throw new Error('The team is already full');
+		}
+
+		const [insertedMember] = await tx
+			.insert(teamMember)
+			.values({
+				teamId,
+				userId,
+				role: 'leader',
+			})
+			.returning();
+
+		return insertedMember;
+	});
 };
 
 export const updateTeamVerification = async (

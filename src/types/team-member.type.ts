@@ -39,18 +39,18 @@ export const PostTeamMemberDocumentBodySchema = createInsertSchema(
 });
 
 export const CompetitionAndTeamAndUserIdParam = z.object({
-  competitionId: z.string().openapi({
-    param: {
-      in: 'path',
-      required: true,
-    },
-  }),
-  teamId: z.string().openapi({
-    param: {
-      in: 'path',
-      required: true,
-    },
-  }),
+	competitionId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
+	teamId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
 	userId: z.string().openapi({
 		param: {
 			in: 'path',

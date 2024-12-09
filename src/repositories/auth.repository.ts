@@ -29,7 +29,6 @@ export const findUserIdentityByEmail = async (db: Database, email: string) => {
 		.then(first);
 };
 
-
 export const updateUserIdentity = async (
 	db: Database,
 	userId: string,

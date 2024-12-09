@@ -62,26 +62,25 @@ export const postTeamMemberDocumentRoute = createRoute({
 });
 
 export const postTeamMemberVerificationRoute = createRoute({
-  operationId: "postTeamMemberVerification",
-  tags: ["team-member"],
-  method: "post",
-  path: "/admin/{competitionId}/team/{teamId}/{userId}",
-  request: {
+	operationId: 'postTeamMemberVerification',
+	tags: ['team-member'],
+	method: 'post',
+	path: '/admin/{competitionId}/team/{teamId}/{userId}',
+	request: {
 		params: CompetitionAndTeamAndUserIdParam,
 		body: {
 			content: {
 				'application/json': {
-					schema: PostTeamMemberVerificationBodySchema
-				}
-			}
-		}
-  },
-  responses: {
-    200: {
-			description: "Succesfully updated document verification",
-    },
-    400: createErrorResponse("UNION", "Bad request error"),
-    500: createErrorResponse("GENERIC", "Internal server error"),
-  }
+					schema: PostTeamMemberVerificationBodySchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			description: 'Succesfully updated document verification',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
 });
-

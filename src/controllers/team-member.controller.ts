@@ -56,21 +56,30 @@ teamMemberProtectedRouter.openapi(postTeamMemberDocumentRoute, async (c) => {
 	return c.json(updatedTeamMember, 200);
 });
 
-teamMemberProtectedRouter.openapi(postTeamMemberVerificationRoute, async (c) => {
-	const { competitionId, teamId, userId } = c.req.valid("param");
+teamMemberProtectedRouter.openapi(
+	postTeamMemberVerificationRoute,
+	async (c) => {
+		const { competitionId, teamId, userId } = c.req.valid('param');
 
-  const team = await getTeamById(db, teamId, { competition: true, teamMember: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+		const team = await getTeamById(db, teamId, {
+			competition: true,
+			teamMember: true,
+		});
+		if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
 
-  if (team.competition.id !== competitionId)
-    return c.json({ error: "Team and competition don't match!" }, 400);
+		if (team.competition.id !== competitionId)
+			return c.json({ error: "Team and competition don't match!" }, 400);
 
-	if (!team.teamMembers.find((el) => el.userId === userId))
-		return c.json({ error: "User isn't inside team!" }, 403);
+		if (!team.teamMembers.find((el) => el.userId === userId))
+			return c.json({ error: "User isn't inside team!" }, 403);
 
-  const body = c.req.valid("json");
+		const body = c.req.valid('json');
 
-	await updateTeamMemberVerification(db, teamId, userId, body);
+		await updateTeamMemberVerification(db, teamId, userId, body);
 
-  return c.json({ message: "Successfully updated document verification!" }, 200);
-});
+		return c.json(
+			{ message: 'Successfully updated document verification!' },
+			200,
+		);
+	},
+);
