@@ -2,7 +2,6 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { authProtectedRouter, authRouter } from './auth.controller';
 import { healthRouter } from './health.controller';
 import { mediaRouter } from './media.controller';
-import { teamProtectedRouter } from './team.controller';
 import { teamMemberProtectedRouter } from './team-member.controller';
 import { teamProtectedRouter } from './team.controller';
 

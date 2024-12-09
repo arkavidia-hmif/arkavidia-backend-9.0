@@ -3,8 +3,8 @@ import { TeamMemberSchema } from '~/types/team-member.type';
 import {
 	CompetitionAndTeamIdParam,
 	PostTeamBodySchema,
+	PostTeamDocumentBodySchema,
 	PostTeamVerificationBodySchema,
-  PostTeamDocumentBodySchema,
 	TeamIdParam,
 	TeamMemberIdSchema,
 	TeamSchema,

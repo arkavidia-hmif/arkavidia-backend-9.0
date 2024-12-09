@@ -1,9 +1,10 @@
-import { z } from "zod";
-import { createSelectSchema, createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 import { team } from '~/db/schema';
 
 export const PostTeamDocumentBodySchema = createInsertSchema(team).pick({
-  paymentProofMediaId: true,
+	paymentProofMediaId: true,
+});
 
 export const TeamSchema = createSelectSchema(team, {
 	createdAt: z.union([z.string(), z.date()]),
