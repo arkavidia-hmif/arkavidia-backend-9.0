@@ -1,12 +1,16 @@
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
-import { team } from '~/db/schema';
+import { team, teamMember } from '~/db/schema';
 import { first } from '~/db/helper';
-import type { TeamMemberRelationOption } from './team-member.repository';
-import { PostTeamDocumentBodySchema } from '~/types/team.type';
+import { type TeamMemberRelationOption, getTeamMemberCount } from './team-member.repository';
+import type { PostTeamDocumentBodySchema, TeamMemberIdSchema,
+	putChangeTeamNameBodySchema, } from '~/types/team.type';
 import { insertMediaFromUrl } from './media.repository';
-
+import {
+	getCompetitionById,
+	getCompetitionParticipantNumber,
+} from './competition.repository';
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -42,6 +46,7 @@ export const getTeamById = async (
 	});
 };
 
+
 export const updateTeamDocument = async (
 	db: Database,
 	teamId: string,
@@ -57,6 +62,115 @@ export const updateTeamDocument = async (
 	return await db
 		.update(team)
 		.set(insert)
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
+};
+=======
+export const changeTeamName = async (
+	db: Database,
+	teamId: string,
+	body: z.infer<typeof putChangeTeamNameBodySchema>,
+) => {
+	return await db
+		.update(team)
+		.set({ name: body.name })
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
+};
+
+export const deleteTeamMember = async (
+	db: Database,
+	body: z.infer<typeof TeamMemberIdSchema>,
+) => {
+	return await db
+		.delete(teamMember)
+		.where(eq(teamMember.userId, body.userId))
+		.returning()
+		.then(first);
+};
+
+export const createTeam = async (
+	db: Database,
+	competitionId: string,
+	name: string,
+) => {
+	return await db.transaction(async (tx) => {
+		const { participantCount } = await getCompetitionParticipantNumber(
+			db,
+			competitionId,
+		);
+		const { maxParticipants } = await getCompetitionById(db, competitionId);
+
+		if (!maxParticipants) {
+			throw new Error('There is no such competition');
+		}
+
+		if (maxParticipants <= participantCount) {
+			// return an error ?
+			throw new Error(
+				'Maximum number of participants reached for this competition.',
+			);
+		}
+
+		const [insertedTeam] = await tx
+			.insert(team)
+			.values({
+				competitionId,
+				name,
+			})
+			.returning();
+
+		return insertedTeam;
+	});
+};
+
+export const insertUserToTeam = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+) => {
+	return await db.transaction(async (tx) => {
+		const team = await getTeamById(db, teamId);
+		if (!team) {
+			throw new Error("Such team doesn't exist");
+		}
+
+		const { teamMemberCount } = await getTeamMemberCount(db, teamId);
+		const { maxParticipants } = await getCompetitionById(
+			db,
+			team.competitionId,
+		);
+
+		if (!maxParticipants) {
+			throw new Error('There is no such competition');
+		}
+		if (maxParticipants <= teamMemberCount) {
+			throw new Error('The team is already full');
+		}
+
+		const [insertedMember] = await tx
+			.insert(teamMember)
+			.values({
+				teamId,
+				userId,
+				role: 'leader',
+			})
+			.returning();
+
+		return insertedMember;
+	});
+};
+
+export const updateTeamVerification = async (
+	db: Database,
+	teamId: string,
+	data: z.infer<typeof PostTeamVerificationBodySchema>,
+) => {
+	return await db
+		.update(team)
+		.set(data)
 		.where(eq(team.id, teamId))
 		.returning()
 		.then(first);

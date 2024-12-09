@@ -9,11 +9,15 @@ import { sendVerificationEmail } from '~/lib/nodemailer';
 import {
 	createUserIdentity,
 	findUserIdentityByEmail,
-	getUserIdentity,
+	findUserIdentityById,
 	updateUserIdentity,
 	updateUserVerification,
 } from '~/repositories/auth.repository';
-import { findUserByEmail, updateUser } from '~/repositories/user.repository';
+import {
+	findUserByEmail,
+	findUserById,
+	updateUser,
+} from '~/repositories/user.repository';
 import {
 	basicLoginRoute,
 	basicRegisterRoute,
@@ -21,6 +25,7 @@ import {
 	googleAuthCallbackRoute,
 	googleAuthRoute,
 	logoutRoute,
+	refreshRoute,
 	selfRoute,
 } from '~/routes/auth.route';
 import {
@@ -30,7 +35,7 @@ import {
 } from '~/types/auth.type';
 import { createAuthRouter, createRouter } from '../utils/router-factory';
 
-const VERIFICATION_TOKEN_EXPIRATION_TIME = 3600; // TTL 1 hour
+const VERIFICATION_TOKEN_EXPIRATION_TIME = 360000; // TTL 1 hour
 
 export const authRouter = createRouter();
 export const authProtectedRouter = createAuthRouter();
@@ -71,14 +76,14 @@ authRouter.openapi(basicRegisterRoute, async (c) => {
 		if (
 			!user.isVerified &&
 			new Date() > new Date(user.verificationTokenExpiration)
-		)
+		) {
 			// If email already exists and old token expired, regenerate token
 			// TODO: Maybe add penalty if regenerate token? wait 1 min, 2 min, 10 min, 60 min
 			await updateUserIdentity(db, user.id, {
 				verificationToken: verifyToken,
 				verificationTokenExpiration: verifyTokenExpiration,
 			});
-		else return c.json({ message: 'User already exist' }, 400);
+		} else return c.json({ message: 'User already exist' }, 400);
 	}
 
 	const newUser = await createUserIdentity(db, {
@@ -95,7 +100,10 @@ authRouter.openapi(basicRegisterRoute, async (c) => {
 });
 
 authRouter.openapi(basicVerifyAccountRoute, async (c) => {
-	const userIdentity = await getUserIdentity(db, c.req.valid('query').user);
+	const userIdentity = await findUserIdentityById(
+		db,
+		c.req.valid('query').user,
+	);
 	const user = await findUserByEmail(db, userIdentity?.email as string);
 
 	if (!userIdentity || !user)
@@ -187,8 +195,6 @@ authRouter.openapi(googleAuthRoute, async (c) => {
 	authorizationUrl.searchParams.set('scope', 'email profile');
 	authorizationUrl.searchParams.set('access_type', 'offline');
 
-	console.log(authorizationUrl.toString());
-
 	// Redirect the user to Google Login
 	return c.redirect(authorizationUrl.toString(), 302);
 });
@@ -231,8 +237,6 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
 		},
 	);
 	const userInfo = GoogleUserSchema.parse(await userInfoResponse.json());
-	console.log(userInfo);
-
 	const userIdentity = await findUserIdentityByEmail(db, userInfo.email);
 	if (!userIdentity) {
 		// If user is not registered, then register it
@@ -294,4 +298,38 @@ authProtectedRouter.openapi(logoutRoute, async (c) => {
 authProtectedRouter.openapi(selfRoute, async (c) => {
 	const user = await UserSchema.parseAsync(c.var.user);
 	return c.json(user, 200);
+});
+
+authRouter.openapi(refreshRoute, async (c) => {
+	const decoded = await jwt.verify(
+		c.req.valid('query').token,
+		env.REFRESH_TOKEN_SECRET,
+	);
+
+	const userIdentity = await findUserIdentityById(db, decoded.userId as string);
+	const user = await findUserById(db, decoded.userId as string);
+
+	if (!userIdentity || !user) return c.json({ message: 'User not found' }, 400);
+	if (userIdentity.refreshToken !== c.req.valid('query').token)
+		return c.json({ message: "Token doesn't match!" }, 400);
+	if (!userIdentity.isVerified)
+		return c.json({ message: "User isn't verified" }, 400);
+
+	// Login user
+	const accessToken = await generateAccessToken(user, userIdentity);
+
+	setCookie(c, 'khongguan', accessToken, {
+		path: '/',
+		secure: true,
+		httpOnly: true,
+		maxAge: env.ACCESS_TOKEN_EXPIRATION,
+		sameSite: 'None',
+	});
+
+	return c.json(
+		{
+			accessToken,
+		},
+		200,
+	);
 });

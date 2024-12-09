@@ -1,6 +1,15 @@
 import { createRoute } from '@hono/zod-openapi';
-import { TeamIdParam, TeamSchema } from '~/types/team.type';
-import { PostTeamDocumentBodySchema } from '~/types/team.type';
+import { TeamMemberSchema } from '~/types/team-member.type';
+import {
+	CompetitionAndTeamIdParam,
+	PostTeamBodySchema,
+	PostTeamVerificationBodySchema,
+  PostTeamDocumentBodySchema,
+	TeamIdParam,
+	TeamMemberIdSchema,
+	TeamSchema,
+	putChangeTeamNameBodySchema,
+} from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const joinTeamByCodeRoute = createRoute({
@@ -30,9 +39,30 @@ export const getTeamByIdRoute = createRoute({
 export const postCreateTeamRoute = createRoute({
 	operationId: 'postCreateTeam',
 	tags: ['team'],
-	method: 'get',
+	method: 'post',
 	path: '/team',
-	responses: {},
+	request: {
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Successfully created a team',
+		},
+		400: createErrorResponse('UNION', 'Bad Request Error'),
+		500: createErrorResponse('GENERIC', 'Internal Server Error'),
+	},
 });
 
 export const postQuitTeamRoute = createRoute({
@@ -78,7 +108,29 @@ export const putChangeTeamNameRoute = createRoute({
 	tags: ['team'],
 	method: 'put',
 	path: '/team/{teamId}',
-	responses: {},
+	request: {
+		params: TeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: putChangeTeamNameBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Succesfully updated team name',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
 });
 
 export const deleteTeamMemberRoute = createRoute({
@@ -86,5 +138,51 @@ export const deleteTeamMemberRoute = createRoute({
 	tags: ['team'],
 	method: 'delete',
 	path: '/team/{teamId}',
-	responses: {},
+	request: {
+		params: TeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: TeamMemberIdSchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamMemberSchema,
+				},
+			},
+			description: 'Succesfully deleted team member',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
+
+export const postTeamVerificationRoute = createRoute({
+	operationId: 'postTeamVerification',
+	tags: ['team', 'admin'],
+	method: 'post',
+	path: '/admin/{competitionId}/team/{teamId}',
+	request: {
+		params: CompetitionAndTeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamVerificationBodySchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			description: 'Succesfully updated team verification',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
 });
