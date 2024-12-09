@@ -3,8 +3,13 @@ import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
 import { teamMember } from '~/db/schema';
-import type { PostTeamMemberDocumentBodySchema } from '~/types/team-member.type';
+import type {
+	PostTeamMemberDocumentBodySchema,
+	PostTeamMemberVerificationBodySchema,
+} from '~/types/team-member.type';
+import { getCompetitionById } from './competition.repository';
 import { insertMediaFromUrl } from './media.repository';
+import { getTeamById } from './team.repository';
 
 export interface TeamMemberRelationOption {
 	user?: boolean;
@@ -57,6 +62,68 @@ export const updateTeamMemberDocument = async (
 	return await db
 		.update(teamMember)
 		.set(insert)
+		.where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
+		.returning()
+		.then(first);
+};
+
+export const getTeamMemberCount = async (db: Database, teamId: string) => {
+	const result = await db.query.teamMember.findMany({
+		where: eq(teamMember.teamId, teamId),
+		columns: {
+			teamId: true,
+		},
+	});
+
+	return { teamMemberCount: result.length };
+};
+
+export const insertUserToTeam = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+) => {
+	return await db.transaction(async (tx) => {
+		const team = await getTeamById(db, teamId);
+		if (!team) {
+			throw new Error("Such team doesn't exist");
+		}
+
+		const { teamMemberCount } = await getTeamMemberCount(db, teamId);
+		const { maxParticipants } = await getCompetitionById(
+			db,
+			team.competitionId,
+		);
+
+		if (!maxParticipants) {
+			throw new Error('There is no such competition');
+		}
+		if (maxParticipants <= teamMemberCount) {
+			throw new Error('The team is already full');
+		}
+
+		const [insertedMember] = await tx
+			.insert(teamMember)
+			.values({
+				teamId,
+				userId,
+				role: 'leader',
+			})
+			.returning();
+
+		return insertedMember;
+	});
+};
+
+export const updateTeamMemberVerification = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+	data: z.infer<typeof PostTeamMemberVerificationBodySchema>,
+) => {
+	return await db
+		.update(teamMember)
+		.set(data)
 		.where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
 		.returning()
 		.then(first);
