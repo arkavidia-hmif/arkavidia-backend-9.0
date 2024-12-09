@@ -12,6 +12,7 @@ import {
 import {
 	deleteTeamMemberRoute,
 	getTeamCompetitionRoute,
+	getTeamDetailRoute,
 	postCreateTeamRoute,
 	postTeamDocumentRoute,
 	postTeamVerificationRoute,
@@ -148,4 +149,10 @@ teamProtectedRouter.openapi(getTeamCompetitionRoute, async (c) => {
 	const { competitionId } = c.req.valid('param');
 	const teams = await getTeamsByCompetitionId(db, competitionId);
 	return c.json(teams, 200);
-})
+});
+
+teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
+	const { competitionId, teamId } = c.req.valid('param');
+	const team = await getTeamById(db, teamId, { teamMember: true });
+	return c.json(team, 200);
+});
