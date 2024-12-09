@@ -9,6 +9,10 @@ export const findUserByEmail = async (db: Database, email: string) => {
 	return await db.select().from(user).where(eq(user.email, email)).then(first);
 };
 
+export const findUserById = async (db: Database, id: string) => {
+	return await db.select().from(user).where(eq(user.id, id)).then(first);
+};
+
 export const updateUser = async (
 	db: Database,
 	userId: string,
