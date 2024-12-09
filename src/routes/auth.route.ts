@@ -178,7 +178,7 @@ export const refreshRoute = createRoute({
 			description: 'Refresh access token,',
 			content: {
 				'application/json': {
-					schema: AccessTokenSchema,
+					schema: AccessRefreshTokenSchema,
 				},
 			},
 		},
