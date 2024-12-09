@@ -1,17 +1,68 @@
 import { db } from '~/db/drizzle';
 import {
-	getTeamById,
+	getTeamMemberById,
+	updateTeamMemberDocument,
+  getTeamById,
 	insertUserToTeam,
 	updateTeamVerification,
-} from '~/repositories/team.repository';
+} from '~/repositories/team-member.repository';
+import { deleteTeamMember, getTeamById, putChangeTeamName } from '~/repositories/team.repository';
 import {
-	postCreateTeamRoute,
-	postTeamVerificationRoute,
-} from '~/routes/team.route';
+  createTeam,
+	getTeamMemberRoute,
+	postTeamMemberDocumentRoute,
+} from '~/routes/team-member.route';
+import { deleteTeamMemberRoute, putChangeTeamNameRoute, postCreateTeamRoute,
+	postTeamVerificationRoute } from '~/routes/team.route';
 import { createAuthRouter } from '~/utils/router-factory';
-import { createTeam } from '../repositories/team.repository';
 
 export const teamProtectedRouter = createAuthRouter();
+
+teamProtectedRouter.openapi(putChangeTeamNameRoute, async (c) => {
+    const { teamId } = c.req.valid('param');
+
+    // Check if team exists
+    const team = await getTeamById(db, teamId, { teamMember: true });
+    if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+
+    // Check if user is in team
+    const user = c.var.user;
+    const teamMember = team.teamMembers.find((el) => el.userId === user.id);
+    if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+
+    // check if user is the leader
+    if (teamMember.role !== "leader") return c.json({ error: "You are not the leader of this team!" }, 403);
+
+    const updatedTeam = await putChangeTeamName(db, teamId, c.req.valid('json'));
+    return c.json(updatedTeam, 200);
+
+})
+
+teamProtectedRouter.openapi(deleteTeamMemberRoute, async (c) => {
+    const { teamId } = c.req.valid('param');
+
+    // Check if team exists
+	const team = await getTeamById(db, teamId, { teamMember: true });
+	if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+
+    // Check if user is in team
+	const user = c.var.user;
+	const teamMember = team.teamMembers.find((el) => el.userId === user.id);
+	if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+
+    // check if user is the leader
+    if (teamMember.role !== "leader") return c.json({ error: "You are not the leader of this team!" }, 403);
+
+    // check if the deleted team member is in the same team
+    const deletedTeamMemberId = c.req.valid('json').userId;
+    const deletedTeamMember = team.teamMembers.find((el) => el.userId === deletedTeamMemberId);
+    if (!deletedTeamMember) return c.json({ error: "Team member doesn't exist!" }, 403);
+
+    const member = await deleteTeamMember(db, c.req.valid('json'));;
+
+    return c.json(member, 200);
+    
+})
 
 teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
 	const { competitionId, teamId } = c.req.valid('param');

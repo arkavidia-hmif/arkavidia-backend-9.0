@@ -1,17 +1,15 @@
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
 import { team, teamMember } from '~/db/schema';
-import type { PostTeamVerificationBodySchema } from '~/types/team.type';
+import { type TeamMemberRelationOption, getTeamMemberCount } from './team-member.repository';
+import type { PostTeamVerificationBodySchema, putChangeTeamNameBodySchema, TeamMemberIdSchema } from '~/types/team.type';
+import { z } from 'zod';
+import { first } from '~/db/helper';
 import {
 	getCompetitionById,
 	getCompetitionParticipantNumber,
 } from './competition.repository';
-import {
-	type TeamMemberRelationOption,
-	getTeamMemberCount,
-} from './team-member.repository';
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -47,6 +45,31 @@ export const getTeamById = async (
 	});
 };
 
+export const putChangeTeamName = async (
+	db: Database,
+	teamId: string,
+	body: z.infer<typeof putChangeTeamNameBodySchema>
+) => {
+	return await db
+		.update(team)
+		.set({ name: body.name })
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
+}
+
+
+export const deleteTeamMember = async (
+	db: Database,
+	body: z.infer<typeof TeamMemberIdSchema>
+) => {
+	return await db
+		.delete(teamMember)
+		.where(eq(teamMember.userId, body.userId))
+		.returning()
+		.then(first);
+}
+=======
 export const createTeam = async (
 	db: Database,
 	competitionId: string,
