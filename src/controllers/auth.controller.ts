@@ -28,11 +28,8 @@ import {
 	refreshRoute,
 	selfRoute,
 } from '~/routes/auth.route';
-import {
-	GoogleTokenDataSchema,
-	GoogleUserSchema,
-	UserSchema,
-} from '~/types/auth.type';
+import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
+import { UserSchema } from '~/types/user.type';
 import { createAuthRouter, createRouter } from '../utils/router-factory';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 360000; // TTL 1 hour
