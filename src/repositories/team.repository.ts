@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import type { Database } from '~/db/drizzle';
-import { team } from '~/db/schema';
+import { team, teamMember, user, competition } from '~/db/schema';
 import type { TeamMemberRelationOption } from './team-member.repository';
 
 interface TeamRelationOption {
@@ -35,4 +35,14 @@ export const getTeamById = async (
 			paymentProof: options?.paymentProof ? true : undefined,
 		},
 	});
+};
+
+export const getUserTeams = async (db: Database, userId: string) => {
+	return await db
+		.select({ team })
+		.from(team)
+		.innerJoin(teamMember, eq(team.id, teamMember.teamId))
+		.innerJoin(user, eq(teamMember.userId, user.id))
+		.innerJoin(competition, eq(team.competitionId, competition.id))
+		.where(eq(user.id, userId));
 };
