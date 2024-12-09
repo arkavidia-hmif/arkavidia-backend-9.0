@@ -56,6 +56,10 @@ teamMemberProtectedRouter.openapi(postTeamMemberDocumentRoute, async (c) => {
 	return c.json(updatedTeamMember, 200);
 });
 
+teamMemberProtectedRouter.post(
+	postTeamMemberVerificationRoute.getRoutingPath(),
+	roleMiddleware('admin'),
+);
 teamMemberProtectedRouter.openapi(
 	postTeamMemberVerificationRoute,
 	async (c) => {

@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
 	changeTeamName,
 	createTeam,
@@ -68,6 +69,10 @@ teamProtectedRouter.openapi(deleteTeamMemberRoute, async (c) => {
 	return c.json(member, 200);
 });
 
+teamProtectedRouter.post(
+	postTeamVerificationRoute.getRoutingPath(),
+	roleMiddleware('admin'),
+);
 teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
 	const { competitionId, teamId } = c.req.valid('param');
 
