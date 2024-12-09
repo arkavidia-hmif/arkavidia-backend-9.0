@@ -148,11 +148,13 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
 teamProtectedRouter.openapi(getTeamCompetitionRoute, async (c) => {
 	const { competitionId } = c.req.valid('param');
 	const teams = await getTeamsByCompetitionId(db, competitionId);
+	if(!teams) return c.json({ error: "Competition doesn't exist!" }, 400);
 	return c.json(teams, 200);
 });
 
 teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
 	const { competitionId, teamId } = c.req.valid('param');
 	const team = await getTeamById(db, teamId, { teamMember: true });
+	if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
 	return c.json(team, 200);
 });
