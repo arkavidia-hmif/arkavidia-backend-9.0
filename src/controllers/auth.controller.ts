@@ -285,6 +285,7 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
 /** BOTH AUTH */
 authProtectedRouter.openapi(logoutRoute, async (c) => {
 	deleteCookie(c, 'khongguan');
+	deleteCookie(c, 'saltcheese');
 	await updateUserIdentity(db, c.var.user.id, {
 		refreshToken: null,
 	});
