@@ -4,6 +4,7 @@ import {
 	CompetitionAndTeamIdParam,
 	PostTeamBodySchema,
 	PostTeamVerificationBodySchema,
+  PostTeamDocumentBodySchema,
 	TeamIdParam,
 	TeamMemberIdSchema,
 	TeamSchema,
@@ -75,9 +76,31 @@ export const postQuitTeamRoute = createRoute({
 export const postTeamDocumentRoute = createRoute({
 	operationId: 'postTeamDocument',
 	tags: ['team'],
-	method: 'post',
+	method: 'put', // change method to put: method (post) and path intersect with other feature (team member document submit)
 	path: '/team/{teamId}/upload',
-	responses: {},
+	request: {
+		params: TeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamDocumentBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Succesfully updated team document upload',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
 });
 
 export const putChangeTeamNameRoute = createRoute({

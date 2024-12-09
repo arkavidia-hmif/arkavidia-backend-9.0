@@ -1,21 +1,16 @@
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
 import { team, teamMember } from '~/db/schema';
-import type {
-	PostTeamVerificationBodySchema,
-	TeamMemberIdSchema,
-	putChangeTeamNameBodySchema,
-} from '~/types/team.type';
+import { first } from '~/db/helper';
+import { type TeamMemberRelationOption, getTeamMemberCount } from './team-member.repository';
+import type { PostTeamDocumentBodySchema, TeamMemberIdSchema,
+	putChangeTeamNameBodySchema, } from '~/types/team.type';
+import { insertMediaFromUrl } from './media.repository';
 import {
 	getCompetitionById,
 	getCompetitionParticipantNumber,
 } from './competition.repository';
-import {
-	type TeamMemberRelationOption,
-	getTeamMemberCount,
-} from './team-member.repository';
 
 interface TeamRelationOption {
 	teamMember?: TeamMemberRelationOption | boolean;
@@ -51,6 +46,27 @@ export const getTeamById = async (
 	});
 };
 
+
+export const updateTeamDocument = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+	data: z.infer<typeof PostTeamDocumentBodySchema>
+) => {
+	const insert = {
+		paymentProofMediaId: data.paymentProofMediaId
+			? (await insertMediaFromUrl(db, userId, data.paymentProofMediaId))[0].id
+			: undefined,
+	};
+
+	return await db
+		.update(team)
+		.set(insert)
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
+};
+=======
 export const changeTeamName = async (
 	db: Database,
 	teamId: string,
