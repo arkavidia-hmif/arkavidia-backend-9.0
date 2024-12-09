@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
 	getTeamMemberById,
 	updateTeamMemberDocument,
