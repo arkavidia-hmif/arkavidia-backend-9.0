@@ -51,4 +51,3 @@ export const updateUserVerification = async (db: Database, userId: string) => {
 		.returning()
 		.then(first);
 };
-

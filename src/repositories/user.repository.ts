@@ -6,7 +6,7 @@ import { user } from '~/db/schema/user.schema';
 import type { UserUpdateSchema } from '~/types/auth.type';
 
 export const findUserByEmail = async (db: Database, email: string) => {
-	return await db.select().from(user).where(eq(user.email, email)).then(first);
+	return db.select().from(user).where(eq(user.email, email)).then(first);
 };
 
 export const findUserById = async (db: Database, id: string) => {

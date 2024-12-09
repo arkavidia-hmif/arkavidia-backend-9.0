@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { PostTeamBodySchema, TeamSchema } from '../types/team.type';
+import { createErrorResponse } from '../utils/error-response-factory';
 
 export const joinTeamByCodeRoute = createRoute({
 	operationId: 'joinTeamByCode',
@@ -27,9 +29,30 @@ export const getTeamByIdRoute = createRoute({
 export const postCreateTeamRoute = createRoute({
 	operationId: 'postCreateTeam',
 	tags: ['team'],
-	method: 'get',
+	method: 'post',
 	path: '/team',
-	responses: {},
+	request: {
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Successfully created a team',
+		},
+		400: createErrorResponse('UNION', 'Bad Request Error'),
+		500: createErrorResponse('GENERIC', 'Internal Server Error'),
+	},
 });
 
 export const postQuitTeamRoute = createRoute({
