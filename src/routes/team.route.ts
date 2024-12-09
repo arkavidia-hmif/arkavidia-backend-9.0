@@ -1,6 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import { putChangeTeamNameBodySchema, TeamIdParam, TeamMemberIdSchema, TeamSchema } from '~/types/team.type';
+import {
+	CompetitionAndTeamIdParam,
+	PostTeamBodySchema,
+	PostTeamVerificationBodySchema,
+	TeamSchema,
+} from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const joinTeamByCodeRoute = createRoute({
@@ -30,9 +36,30 @@ export const getTeamByIdRoute = createRoute({
 export const postCreateTeamRoute = createRoute({
 	operationId: 'postCreateTeam',
 	tags: ['team'],
-	method: 'get',
+	method: 'post',
 	path: '/team',
-	responses: {},
+	request: {
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Successfully created a team',
+		},
+		400: createErrorResponse('UNION', 'Bad Request Error'),
+		500: createErrorResponse('GENERIC', 'Internal Server Error'),
+	},
 });
 
 export const postQuitTeamRoute = createRoute({
@@ -105,6 +132,30 @@ export const deleteTeamMemberRoute = createRoute({
 				},
 			},
 			description: 'Succesfully deleted team member',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
+
+export const postTeamVerificationRoute = createRoute({
+	operationId: 'postTeamVerification',
+	tags: ['team', 'admin'],
+	method: 'post',
+	path: '/admin/{competitionId}/team/{teamId}',
+	request: {
+		params: CompetitionAndTeamIdParam,
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamVerificationBodySchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			description: 'Succesfully updated team verification',
 		},
 		400: createErrorResponse('UNION', 'Bad request error'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),
