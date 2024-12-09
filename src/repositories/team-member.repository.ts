@@ -92,6 +92,9 @@ export const insertUserToTeam = async (
       team.competitionId,
     );
 
+    if (!maxParticipants) {
+      throw new Error("There is no such competition");
+    }
     if (maxParticipants <= teamMemberCount) {
       throw new Error("The team is already full");
     }

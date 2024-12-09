@@ -31,28 +31,28 @@ export const postCreateTeamRoute = createRoute({
 	tags: ['team'],
 	method: 'post',
 	path: '/team',
-  request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: PostTeamBodySchema,
-        }
-      },
-      required: true,
-    }
-  },	
-  responses: {
-    200: {
-      content: {
-        'application/json': {
-          schema: TeamSchema
-        },
-      },
-      description:'Successfully created a team', 
-    },
-    400: createErrorResponse("UNION","Bad Request Error"),
-    500: createErrorResponse("GENERIC","Internal Server Error"),
-  },
+	request: {
+		body: {
+			content: {
+				'application/json': {
+					schema: PostTeamBodySchema,
+				},
+			},
+			required: true,
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Successfully created a team',
+		},
+		400: createErrorResponse('UNION', 'Bad Request Error'),
+		500: createErrorResponse('GENERIC', 'Internal Server Error'),
+	},
 });
 
 export const postQuitTeamRoute = createRoute({

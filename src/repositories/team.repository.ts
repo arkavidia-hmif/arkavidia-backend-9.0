@@ -53,6 +53,10 @@ export const createTeam = async (
     );
     const { maxParticipants } = await getCompetitionById(db, competitionId);
 
+    if (!maxParticipants) {
+      throw new Error("There is no such competition");
+    }
+
     if (maxParticipants <= participantCount) {
       // return an error ?
       throw new Error(

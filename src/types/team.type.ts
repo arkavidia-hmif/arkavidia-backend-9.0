@@ -4,10 +4,9 @@ import { team } from '../db/schema';
 
 export const TeamIdParam = z.object({ teamId: z.string() });
 
-export const PostTeamBodySchema = createInsertSchema(team)
-.pick({
-  competitionId:true, 
-  name:true
-}); 
+export const PostTeamBodySchema = createInsertSchema(team).pick({
+	competitionId: true,
+	name: true,
+});
 
 export const TeamSchema = createSelectSchema(team);
