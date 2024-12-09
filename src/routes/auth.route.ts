@@ -7,8 +7,8 @@ import {
 	BasicVerifyAccountQuerySchema,
 	GoogleCallbackQuerySchema,
 	RefreshTokenQuerySchema,
-	UserSchema,
 } from '~/types/auth.type';
+import { UserSchema } from '~/types/user.type';
 import { createErrorResponse } from '../utils/error-response-factory';
 
 /** BASIC AUTHENTICATION ROUTES (Email & Password) */
@@ -178,7 +178,7 @@ export const refreshRoute = createRoute({
 			description: 'Refresh access token,',
 			content: {
 				'application/json': {
-					schema: AccessTokenSchema,
+					schema: AccessRefreshTokenSchema,
 				},
 			},
 		},

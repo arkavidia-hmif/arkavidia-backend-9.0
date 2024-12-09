@@ -32,6 +32,9 @@ export const user = pgTable('user', {
 	idDiscord: text('id_discord'),
 	idInstagram: text('id_instagram'),
 	consent: boolean('consent').notNull().default(false),
+	isRegistrationComplete: boolean('is_registration_complete')
+		.notNull()
+		.default(false),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').$onUpdate(getNow),
 });

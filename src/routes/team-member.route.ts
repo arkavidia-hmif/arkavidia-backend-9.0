@@ -63,7 +63,7 @@ export const postTeamMemberDocumentRoute = createRoute({
 
 export const postTeamMemberVerificationRoute = createRoute({
 	operationId: 'postTeamMemberVerification',
-	tags: ['team-member'],
+	tags: ['team-member', 'admin'],
 	method: 'post',
 	path: '/admin/{competitionId}/team/{teamId}/{userId}',
 	request: {

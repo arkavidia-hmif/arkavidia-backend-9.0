@@ -1,19 +1,12 @@
 import { z } from '@hono/zod-openapi';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { userIdentity } from '~/db/schema/auth.schema';
-import { user } from '~/db/schema/user.schema';
+import { UserSchema } from './user.type';
 
 export const UserIdentitySchema = createSelectSchema(userIdentity);
 
 export const UserIdentityUpdateSchema =
 	createInsertSchema(userIdentity).partial();
-
-export const UserSchema = createSelectSchema(user, {
-	createdAt: z.union([z.string(), z.date()]),
-	updatedAt: z.union([z.string(), z.date()]),
-}).openapi('User');
-
-export const UserUpdateSchema = createInsertSchema(user).partial();
 
 export const JWTPayloadSchema = UserSchema.merge(
 	UserIdentitySchema.pick({ provider: true }),

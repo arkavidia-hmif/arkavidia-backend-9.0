@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
 	getTeamMemberById,
 	updateTeamMemberDocument,
@@ -56,6 +57,10 @@ teamMemberProtectedRouter.openapi(postTeamMemberDocumentRoute, async (c) => {
 	return c.json(updatedTeamMember, 200);
 });
 
+teamMemberProtectedRouter.post(
+	postTeamMemberVerificationRoute.getRoutingPath(),
+	roleMiddleware('admin'),
+);
 teamMemberProtectedRouter.openapi(
 	postTeamMemberVerificationRoute,
 	async (c) => {

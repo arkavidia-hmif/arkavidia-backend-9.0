@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
 import { user } from '~/db/schema/user.schema';
-import type { UserUpdateSchema } from '~/types/auth.type';
+import type { UserUpdateSchema } from '~/types/user.type';
 
 export const findUserByEmail = async (db: Database, email: string) => {
 	return db.select().from(user).where(eq(user.email, email)).then(first);
