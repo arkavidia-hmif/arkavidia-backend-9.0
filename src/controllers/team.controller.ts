@@ -4,12 +4,14 @@ import {
 	createTeam,
 	deleteTeamMember,
 	getTeamById,
+	getTeamsByCompetitionId,
 	insertUserToTeam,
 	updateTeamDocument,
 	updateTeamVerification,
 } from '~/repositories/team.repository';
 import {
 	deleteTeamMemberRoute,
+	getTeamCompetitionRoute,
 	postCreateTeamRoute,
 	postTeamDocumentRoute,
 	postTeamVerificationRoute,
@@ -141,3 +143,9 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
 
 	return c.json(updatedTeam, 200);
 });
+
+teamProtectedRouter.openapi(getTeamCompetitionRoute, async (c) => {
+	const { competitionId } = c.req.valid('param');
+	const teams = await getTeamsByCompetitionId(db, competitionId);
+	return c.json(teams, 200);
+})
