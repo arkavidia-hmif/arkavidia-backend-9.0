@@ -64,11 +64,20 @@ export const AccessRefreshTokenSchema = z
 		accessToken: z.string(),
 		refreshToken: z.string(),
 	})
-	.openapi('AccessRefreshToken');
+	.openapi('AccessAndRefreshToken');
 
 export const AccessTokenSchema = AccessRefreshTokenSchema.pick({
 	accessToken: true,
 }).openapi('AccessToken');
+
+export const RefreshTokenQuerySchema = z.object({
+	token: z.string().openapi({
+		param: {
+			in: 'query',
+			required: true,
+		},
+	}),
+});
 
 export const GoogleTokenDataSchema = z.object({
 	access_token: z.string(),

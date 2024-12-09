@@ -1,10 +1,12 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import {
 	AccessRefreshTokenSchema,
+	AccessTokenSchema,
 	BasicLoginBodySchema,
 	BasicRegisterBodySchema,
 	BasicVerifyAccountQuerySchema,
 	GoogleCallbackQuerySchema,
+	RefreshTokenQuerySchema,
 	UserSchema,
 } from '~/types/auth.type';
 import { createErrorResponse } from '../utils/error-response-factory';
@@ -163,4 +165,24 @@ export const selfRoute = createRoute({
 	},
 });
 
-// refreshTokenRoute
+export const refreshRoute = createRoute({
+	operationId: 'refresh',
+	tags: ['auth'],
+	method: 'get',
+	path: '/auth/refresh',
+	request: {
+		query: RefreshTokenQuerySchema,
+	},
+	responses: {
+		200: {
+			description: 'Refresh access token,',
+			content: {
+				'application/json': {
+					schema: AccessTokenSchema,
+				},
+			},
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
