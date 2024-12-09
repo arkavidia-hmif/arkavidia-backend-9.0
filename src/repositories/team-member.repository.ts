@@ -1,10 +1,10 @@
-import { and, eq } from "drizzle-orm";
-import type { z } from "zod";
-import type { Database } from "~/db/drizzle";
-import { first } from "~/db/helper";
-import { teamMember } from "~/db/schema";
-import type { PostTeamMemberDocumentBodySchema } from "~/types/team-member.type";
-import { insertMediaFromUrl } from "./media.repository";
+import { and, eq } from 'drizzle-orm';
+import type { z } from 'zod';
+import type { Database } from '~/db/drizzle';
+import { first } from '~/db/helper';
+import { teamMember } from '~/db/schema';
+import type { PostTeamMemberDocumentBodySchema, PostTeamMemberVerificationBodySchema, PostTeamMemberDocumentBodySchema } from '~/types/team-member.type';
+import { insertMediaFromUrl } from './media.repository';
 import { getCompetitionById } from "./competition.repository";
 import { getTeamById } from "./team.repository";
 
@@ -111,3 +111,17 @@ export const insertUserToTeam = async (
     return insertedMember;
   });
 };
+
+export const updateTeamMemberVerification = async (
+	db: Database,
+	teamId: string,
+	userId: string,
+	data: z.infer<typeof PostTeamMemberVerificationBodySchema>,
+) => {
+	return await db
+		.update(teamMember)
+		.set(data)
+		.where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
+		.returning()
+		.then(first);
+}

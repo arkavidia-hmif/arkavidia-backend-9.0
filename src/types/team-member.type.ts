@@ -37,3 +37,29 @@ export const PostTeamMemberDocumentBodySchema = createInsertSchema(
 	posterMediaId: true,
 	twibbonMediaId: true,
 });
+
+export const CompetitionAndTeamAndUserIdParam = z.object({
+  competitionId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+  teamId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+	userId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
+});
+
+export const PostTeamMemberVerificationBodySchema = z.object({
+	isVerified: z.boolean(),
+	verificationError: z.string().optional(),
+});

@@ -6,6 +6,9 @@ import {
   getCompetitionById,
   getCompetitionParticipantNumber,
 } from "./competition.repository";
+import { first } from '~/db/helper';
+import { PostTeamVerificationBodySchema } from '~/types/team.type';
+import { z } from 'zod';
 
 interface TeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
@@ -74,4 +77,17 @@ export const createTeam = async (
 
     return insertedTeam;
   });
+};
+
+export const updateTeamVerification = async (
+	db: Database,
+	teamId: string,
+	data: z.infer<typeof PostTeamVerificationBodySchema>,
+) => {
+	return await db
+		.update(team)
+		.set(data)
+		.where(eq(team.id, teamId))
+		.returning()
+		.then(first);
 };
