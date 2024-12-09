@@ -1,11 +1,13 @@
 import { createRoute } from '@hono/zod-openapi';
 import { TeamMemberSchema } from '~/types/team-member.type';
-import { putChangeTeamNameBodySchema, TeamIdParam, TeamMemberIdSchema, TeamSchema } from '~/types/team.type';
 import {
 	CompetitionAndTeamIdParam,
 	PostTeamBodySchema,
 	PostTeamVerificationBodySchema,
+	TeamIdParam,
+	TeamMemberIdSchema,
 	TeamSchema,
+	putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
@@ -92,7 +94,7 @@ export const putChangeTeamNameRoute = createRoute({
 				},
 			},
 			required: true,
-		}
+		},
 	},
 	responses: {
 		200: {
