@@ -1,3 +1,3 @@
-import "./auth.test";
-import "./health.test";
-import "./team.test";
+import './auth.test';
+import './health.test';
+import './team.test';

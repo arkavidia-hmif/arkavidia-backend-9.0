@@ -1,6 +1,8 @@
 import * as argon2 from 'argon2';
+import type { Context } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import * as jwt from 'hono/jwt';
+import { JwtTokenInvalid } from 'hono/utils/jwt/types';
 import { env } from '~/configs/env.config';
 import { db } from '~/db/drizzle';
 import type { UserIdentity } from '~/db/schema/auth.schema';
@@ -31,7 +33,6 @@ import {
 import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
 import { UserSchema } from '~/types/user.type';
 import { createAuthRouter, createRouter } from '../utils/router-factory';
-import type { Context } from 'hono';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 360000; // TTL 1 hour
 
@@ -298,31 +299,40 @@ authProtectedRouter.openapi(selfRoute, async (c) => {
 });
 
 authRouter.openapi(refreshRoute, async (c) => {
-	const decoded = await jwt.verify(
-		c.req.valid('query').token,
-		env.REFRESH_TOKEN_SECRET,
-	);
+	try {
+		const decoded = await jwt.verify(
+			c.req.valid('query').token,
+			env.REFRESH_TOKEN_SECRET,
+		);
+		const userIdentity = await findUserIdentityById(
+			db,
+			decoded.userId as string,
+		);
+		const user = await findUserById(db, decoded.userId as string);
 
-	const userIdentity = await findUserIdentityById(db, decoded.userId as string);
-	const user = await findUserById(db, decoded.userId as string);
+		if (!userIdentity || !user)
+			return c.json({ message: 'User not found' }, 400);
+		if (userIdentity.refreshToken !== c.req.valid('query').token)
+			return c.json({ message: "Token doesn't match!" }, 400);
+		if (!userIdentity.isVerified)
+			return c.json({ message: "User isn't verified" }, 400);
 
-	if (!userIdentity || !user) return c.json({ message: 'User not found' }, 400);
-	if (userIdentity.refreshToken !== c.req.valid('query').token)
-		return c.json({ message: "Token doesn't match!" }, 400);
-	if (!userIdentity.isVerified)
-		return c.json({ message: "User isn't verified" }, 400);
-
-	// Login user
-	const { accessToken, refreshToken } = await setCookiesToken(
-		c,
-		user,
-		userIdentity,
-	);
-	return c.json(
-		{
-			accessToken,
-			refreshToken,
-		},
-		200,
-	);
+		// Login user
+		const { accessToken, refreshToken } = await setCookiesToken(
+			c,
+			user,
+			userIdentity,
+		);
+		return c.json(
+			{
+				accessToken,
+				refreshToken,
+			},
+			200,
+		);
+	} catch (e) {
+		if (e instanceof JwtTokenInvalid)
+			return c.json({ message: 'You need to provide refresh token' }, 400);
+		throw e;
+	}
 });

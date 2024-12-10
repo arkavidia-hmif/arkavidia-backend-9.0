@@ -48,5 +48,5 @@ export const userIdentityRelations = relations(userIdentity, ({ one }) => ({
 
 export type UserIdentity = InferSelectModel<typeof userIdentity>;
 export type UserIdentityInsert = InferInsertModel<typeof userIdentity>;
-export type UserIdentityRolesEnum = (typeof userIdentityRoleEnum.enumValues)[number];
-
+export type UserIdentityRolesEnum =
+	(typeof userIdentityRoleEnum.enumValues)[number];
