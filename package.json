@@ -3,7 +3,7 @@
 	"scripts": {
 		"dev": "bun run --hot src/index.ts",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
+		"db:migrate": "drizzle-kit migrate && bun run src/db/migrate-trigger.ts",
 		"db:studio": "drizzle-kit studio",
 		"check": "bunx biome check src && bunx check:type",
 		"check:write": "bunx biome check --write",
