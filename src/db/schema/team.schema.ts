@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { createId, getNow } from '../../utils/drizzle-schema-util';
-import { competition } from './competition.schema';
+import { competition, competitionSubmission } from './competition.schema';
 import { media } from './media.schema';
 import { teamMember } from './team-member.schema';
 
@@ -34,4 +34,5 @@ export const teamRelations = relations(team, ({ one, many }) => ({
 		fields: [team.paymentProofMediaId],
 		references: [media.id],
 	}),
+	submission: many(competitionSubmission),
 }));
