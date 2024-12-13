@@ -2,7 +2,9 @@ import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { media, mediaBucketEnum } from '~/db/schema/media.schema';
 
-export const MediaSchema = createSelectSchema(media).openapi('Media');
+export const MediaSchema = createSelectSchema(media, {
+	createdAt: z.union([z.string(), z.date()]),
+}).openapi('Media');
 
 export const GetPresignedLinkQuerySchema = z.object({
 	filename: z.string().openapi({

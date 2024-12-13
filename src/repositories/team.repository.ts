@@ -38,11 +38,16 @@ export const getTeamById = async (
 };
 
 export const getUserTeams = async (db: Database, userId: string) => {
-	return await db
+	const teams = await db
 		.select({ team, competition })
 		.from(team)
 		.innerJoin(teamMember, eq(team.id, teamMember.teamId))
 		.innerJoin(user, eq(teamMember.userId, user.id))
 		.innerJoin(competition, eq(team.competitionId, competition.id))
 		.where(eq(user.id, userId));
+
+	return teams.map((item) => ({
+		...item.team,
+		competition: item.competition,
+	}));
 };

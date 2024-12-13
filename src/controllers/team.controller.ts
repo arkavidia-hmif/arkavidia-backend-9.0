@@ -7,8 +7,15 @@ export const teamProtectedRouter = createAuthRouter();
 teamProtectedRouter.openapi(getTeamByIdRoute, async (c) => {
 	const { teamId } = c.req.valid('param');
 	const team = await getTeamById(db, teamId, {
-		teamMember: true,
+		teamMember: {
+			user: true,
+			nisn: true,
+			kartu: true,
+			poster: true,
+			twibbon: true,
+		},
 		competition: true,
+		paymentProof: false,
 	});
 	return c.json(team, 200);
 });
