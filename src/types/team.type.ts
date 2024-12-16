@@ -13,6 +13,8 @@ export const TeamSchema = createSelectSchema(team, {
 
 export const TeamIdParam = z.object({ teamId: z.string() });
 
+export const TeamCodeParam = z.object({ teamCode: z.string() });
+
 export const TeamMemberIdSchema = z.object({ userId: z.string() });
 
 export const putChangeTeamNameBodySchema = z.object({

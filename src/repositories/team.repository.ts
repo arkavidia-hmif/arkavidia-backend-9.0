@@ -25,6 +25,16 @@ interface TeamRelationOption {
   paymentProof?: boolean;
 }
 
+export const getTeamByCode = async (
+	db: Database,
+	teamCode: string,
+	options?: TeamRelationOption,
+) => {
+	return await db.query.team.findFirst({
+		where: eq(team.joinCode, teamCode)
+	});
+};
+
 export const getTeamById = async (
   db: Database,
   teamId: string,
