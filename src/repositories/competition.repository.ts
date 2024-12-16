@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
-import type { Database } from '../db/drizzle';
-import { competition, competitionAnnouncement, team } from '../db/schema';
-import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 import type { z } from 'zod';
 import { first } from '~/db/helper';
+import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
+import type { Database } from '../db/drizzle';
+import { competition, competitionAnnouncement, team } from '../db/schema';
 
 export const getCompetitionParticipantNumber = async (
 	db: Database,

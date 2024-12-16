@@ -1,4 +1,5 @@
 import * as argon2 from 'argon2';
+import type { Context } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import * as jwt from 'hono/jwt';
 import { env } from '~/configs/env.config';
@@ -31,7 +32,6 @@ import {
 import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
 import { UserSchema } from '~/types/user.type';
 import { createAuthRouter, createRouter } from '../utils/router-factory';
-import type { Context } from 'hono';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 360000; // TTL 1 hour
 

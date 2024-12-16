@@ -15,7 +15,7 @@ userProtectedRouter.openapi(getUserRoute, async (c) => {
 userProtectedRouter.openapi(updateUserRoute, async (c) => {
 	const body = c.req.valid('json');
 	const user = await findUserById(db, c.var.user.id);
-	
+
 	if (!user) return c.json({ message: 'User not found!' }, 400);
 	// Kalau udah 'isRegistrationComplete' consent gak boleh diubah
 	if (user.isRegistrationComplete && typeof body.consent === 'boolean')

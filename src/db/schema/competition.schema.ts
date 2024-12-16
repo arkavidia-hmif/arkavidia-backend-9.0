@@ -10,9 +10,9 @@ import {
 	timestamp,
 } from 'drizzle-orm/pg-core';
 import { createId, getNow } from '../../utils/drizzle-schema-util';
+import { media } from './media.schema';
 import { team } from './team.schema';
 import { user } from './user.schema';
-import { media } from './media.schema';
 
 /** Main Compeitition Table */
 export const competition = pgTable('competition', {

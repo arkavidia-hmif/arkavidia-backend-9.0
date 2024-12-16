@@ -1,5 +1,4 @@
 import { db } from '~/db/drizzle';
-import { createAuthRouter } from '~/utils/router-factory';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
 	getAnnouncementsByCompetitionId,
@@ -12,6 +11,7 @@ import {
 	getCompetitionParticipantRoute,
 	postAdminCompAnnouncementRoute,
 } from '~/routes/competition.route';
+import { createAuthRouter } from '~/utils/router-factory';
 
 export const competitionProtectedRouter = createAuthRouter();
 

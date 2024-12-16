@@ -1,7 +1,7 @@
 /** Ini buat bikin database schema diagram */
 
-import * as schema from '~/db/schema';
 import { pgGenerate } from 'drizzle-dbml-generator';
+import * as schema from '~/db/schema';
 
 const out = './docs/schema.dbml';
 const relational = true;

@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import postgres from 'postgres';
 import path from 'node:path';
+import postgres from 'postgres';
 
 if (!process.env.DATABASE_URL) {
 	throw new Error('DATABASE_URL is required');
