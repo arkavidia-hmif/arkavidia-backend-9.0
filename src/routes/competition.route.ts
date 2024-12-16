@@ -1,6 +1,8 @@
 import { createRoute } from '@hono/zod-openapi';
 import {
 	AnnouncementSchema,
+	CompetitionParticipantSchema,
+	GetCompetitionTimeQuerySchema,
 	PostCompAnnouncementBodySchema,
 } from '~/types/competition.type';
 import { AllAnnouncementSchema } from '~/types/competition.type';
@@ -23,6 +25,29 @@ export const getAdminCompAnnouncementRoute = createRoute({
 				},
 			},
 			description: 'Succesfully fetched all announcements',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
+
+export const getCompetitionParticipantRoute = createRoute({
+	operationId: 'getCompetitionParticipant',
+	tags: ['team', 'admin', 'competition'],
+	method: 'get',
+	path: '/admin/{competitionId}/team',
+	request: {
+		params: CompetitionIdParam,
+		query: GetCompetitionTimeQuerySchema,
+	},
+	responses: {
+		200: {
+			description: "Fetched competition's participant.",
+			content: {
+				'application/json': {
+					schema: CompetitionParticipantSchema,
+				},
+			},
 		},
 		400: createErrorResponse('UNION', 'Bad request error'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),
