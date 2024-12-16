@@ -1,6 +1,11 @@
 import { eq, max } from 'drizzle-orm';
 import type { Database } from '../db/drizzle';
-import { competition, competitionAnnouncement, team } from '../db/schema';
+import {
+	competition,
+	competitionAnnouncement,
+	competitionSubmission,
+	team,
+} from '../db/schema';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 import type { z } from 'zod';
 import { first } from '~/db/helper';
@@ -62,7 +67,6 @@ export const getCompetitionById = async (
 	return { maxParticipants: result?.maxParticipants };
 };
 
-
 export const getCompetitionSubmissionById = async (
 	db: Database,
 	competitionId: string,
@@ -100,6 +104,7 @@ export const getCompetitionSubmissionById = async (
 		},
 		result,
 	};
+};
 
 export const getCompetition = async (db: Database, competitionId: string) => {
 	const result = await db.query.competition.findFirst({
@@ -134,5 +139,4 @@ export const postAnnouncement = async (
 		})
 		.returning()
 		.then(first);
-
 };

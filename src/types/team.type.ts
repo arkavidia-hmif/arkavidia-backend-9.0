@@ -49,18 +49,18 @@ export const TeamSubmissionSchema = createSelectSchema(competitionSubmission, {
 }).openapi('Team');
 
 export const CompetitionIdParam = z.object({
-  competitionId: z.string().openapi({
-    param: {
-      in: "path",
-      required: true,
-    },
-  }),
+	competitionId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
 });
 
 export const TeamCompetitionSchema = z.array(
-  TeamSchema.extend({
-    members: z.array(TeamMemberSchema),
-  })
+	TeamSchema.extend({
+		members: z.array(TeamMemberSchema),
+	}),
 );
 
 export const TeamCompetitionDetailSchema = TeamSchema.extend({

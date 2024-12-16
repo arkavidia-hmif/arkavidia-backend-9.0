@@ -4,7 +4,7 @@ import { db } from '~/db/drizzle';
 
 import {
 	getAnnouncementsByCompetitionId,
-  getCompetitionSubmissionById,
+	getCompetitionSubmissionById,
 	getCompetition,
 	getCompetitionParticipant,
 	postAnnouncement,
@@ -13,7 +13,7 @@ import {
 	getAdminCompAnnouncementRoute,
 	getCompetitionParticipantRoute,
 	postAdminCompAnnouncementRoute,
-  getCompetitionSubmissionRoute,
+	getCompetitionSubmissionRoute,
 } from '~/routes/competition.route';
 
 export const competitionProtectedRouter = createAuthRouter();
@@ -102,4 +102,3 @@ competitionProtectedRouter.openapi(
 		return c.json(announcement, 200);
 	},
 );
-
