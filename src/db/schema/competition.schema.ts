@@ -92,9 +92,9 @@ export const competitionSubmissionRelations = relations(
 			fields: [competitionSubmission.competitionId],
 			references: [competition.id],
 		}),
-		team: one(user, {
+		team: one(team, {
 			fields: [competitionSubmission.teamId],
-			references: [user.id],
+			references: [team.id],
 		}),
 		file: one(media, {
 			fields: [competitionSubmission.mediaId],
