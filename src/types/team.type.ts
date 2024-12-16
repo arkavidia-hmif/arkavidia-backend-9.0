@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { team } from '~/db/schema';
+import { competitionSubmission, team } from '~/db/schema';
 import { TeamMemberSchema } from './team-member.type';
 
 export const PostTeamDocumentBodySchema = createInsertSchema(team).pick({
@@ -44,19 +44,23 @@ export const PostTeamBodySchema = createInsertSchema(team).pick({
 	name: true,
 });
 
+export const TeamSubmissionSchema = createSelectSchema(competitionSubmission, {
+	createdAt: z.union([z.string(), z.date()]),
+}).openapi('Team');
+
 export const CompetitionIdParam = z.object({
-  competitionId: z.string().openapi({
-    param: {
-      in: "path",
-      required: true,
-    },
-  }),
+	competitionId: z.string().openapi({
+		param: {
+			in: 'path',
+			required: true,
+		},
+	}),
 });
 
 export const TeamCompetitionSchema = z.array(
-  TeamSchema.extend({
-    members: z.array(TeamMemberSchema),
-  })
+	TeamSchema.extend({
+		members: z.array(TeamMemberSchema),
+	}),
 );
 
 export const TeamCompetitionDetailSchema = TeamSchema.extend({

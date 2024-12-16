@@ -1,8 +1,10 @@
-import { db } from '~/db/drizzle';
-import { createAuthRouter } from '~/utils/router-factory';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
+import { createAuthRouter } from '~/utils/router-factory';
+import { db } from '~/db/drizzle';
+
 import {
 	getAnnouncementsByCompetitionId,
+	getCompetitionSubmissionById,
 	getCompetition,
 	getCompetitionParticipant,
 	postAnnouncement,
@@ -11,7 +13,28 @@ import {
 	getAdminCompAnnouncementRoute,
 	getCompetitionParticipantRoute,
 	postAdminCompAnnouncementRoute,
+	getCompetitionSubmissionRoute,
 } from '~/routes/competition.route';
+
+export const competitionProtectedRouter = createAuthRouter();
+
+competitionProtectedRouter.get(
+	getCompetitionSubmissionRoute.getRoutingPath(),
+	roleMiddleware('admin'),
+);
+
+competitionProtectedRouter.openapi(getCompetitionSubmissionRoute, async (c) => {
+	const { page, limit } = c.req.valid('query');
+	const { competitionId } = c.req.valid('param');
+
+	const competitionSubmission = await getCompetitionSubmissionById(
+		db,
+		competitionId,
+		{ page: Number(page), limit: Number(limit) },
+	);
+
+	return c.json(competitionSubmission, 200);
+});
 
 export const competitionProtectedRouter = createAuthRouter();
 
