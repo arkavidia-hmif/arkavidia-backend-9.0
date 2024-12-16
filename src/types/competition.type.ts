@@ -6,7 +6,7 @@ export const CompetitionIdParam = z.object({ competitionId: z.string() });
 export const GetCompetitionSubmissionQuerySchema = z.object({
 	page: z
 		.string()
-		.default("1")
+		.default('1')
 		.openapi({
 			param: {
 				in: 'query',
@@ -15,7 +15,7 @@ export const GetCompetitionSubmissionQuerySchema = z.object({
 		}),
 	limit: z
 		.string()
-		.default("10")
+		.default('10')
 		.openapi({
 			param: {
 				in: 'query',
