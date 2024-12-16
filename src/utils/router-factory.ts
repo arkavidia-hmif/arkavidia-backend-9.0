@@ -3,6 +3,7 @@ import { jwt } from 'hono/jwt';
 import { env } from '~/configs/env.config';
 import { JWTPayloadSchema } from '~/types/auth.type';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultHook: Hook<any, any, any, any> = (result, c) => {
   if (!result.success) {
     return c.json({ errors: result.error.flatten() }, 400);
