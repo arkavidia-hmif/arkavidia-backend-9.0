@@ -49,17 +49,14 @@ export const postAnnouncement = async (
 	authorId: string,
 	body: z.infer<typeof PostCompAnnouncementBodySchema>,
 ) => {
-	return await db.transaction(async (trx) => {
-		const announcement = await trx
-			.insert(competitionAnnouncement)
-			.values({
-				competitionId: competitionId,
-				authorId: authorId,
-				title: body.title,
-				description: body.description,
-			})
-			.returning()
-			.then(first);
-		return announcement;
-	});
+	return await db
+		.insert(competitionAnnouncement)
+		.values({
+			competitionId: competitionId,
+			authorId: authorId,
+			title: body.title,
+			description: body.description,
+		})
+		.returning()
+		.then(first);
 };
