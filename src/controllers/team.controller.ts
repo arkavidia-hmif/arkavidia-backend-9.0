@@ -3,6 +3,7 @@ import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
 	changeTeamName,
 	createTeam,
+	deleteTeam,
 	deleteTeamMember,
 	getTeamById,
 	getTeamsByCompetitionId,
@@ -15,6 +16,7 @@ import {
 	getTeamCompetitionRoute,
 	getTeamDetailRoute,
 	postCreateTeamRoute,
+	postQuitTeamRoute,
 	postTeamDocumentRoute,
 	postTeamVerificationRoute,
 	putChangeTeamNameRoute,
