@@ -6,7 +6,6 @@ import { team, teamMember } from '~/db/schema';
 import type {
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
-  TeamMemberIdSchema,
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 import {
