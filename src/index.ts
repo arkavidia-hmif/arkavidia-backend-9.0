@@ -38,6 +38,7 @@ app.doc('/openapi.json', {
 		{ name: 'team', description: 'Team API' },
 		{ name: 'team-member', description: 'Team Member API' },
 		{ name: 'admin', description: 'Admin API' },
+		{ name: 'user', description: 'User API' },
 	],
 });
 

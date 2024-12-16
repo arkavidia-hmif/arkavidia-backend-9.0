@@ -28,12 +28,10 @@ import {
 	refreshRoute,
 	selfRoute,
 } from '~/routes/auth.route';
-import {
-	GoogleTokenDataSchema,
-	GoogleUserSchema,
-	UserSchema,
-} from '~/types/auth.type';
+import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
+import { UserSchema } from '~/types/user.type';
 import { createAuthRouter, createRouter } from '../utils/router-factory';
+import type { Context } from 'hono';
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 360000; // TTL 1 hour
 
@@ -57,6 +55,37 @@ const generateRefreshToken = async (user: User) => {
 	};
 	const token = await jwt.sign(payload, env.REFRESH_TOKEN_SECRET);
 	return token;
+};
+
+const setCookiesToken = async (
+	c: Context,
+	user: User,
+	userIdentity: UserIdentity,
+) => {
+	const accessToken = await generateAccessToken(user, userIdentity);
+	const refreshToken = await generateRefreshToken(user);
+
+	await updateUserIdentity(db, user.id, {
+		refreshToken,
+	});
+
+	setCookie(c, 'khongguan', accessToken, {
+		path: '/',
+		secure: true,
+		httpOnly: true,
+		maxAge: env.ACCESS_TOKEN_EXPIRATION,
+		sameSite: 'None',
+	});
+
+	setCookie(c, 'saltcheese', refreshToken, {
+		path: '/',
+		secure: true,
+		httpOnly: true,
+		maxAge: env.REFRESH_TOKEN_EXPIRATION,
+		sameSite: 'None',
+	});
+
+	return { accessToken, refreshToken };
 };
 
 /** BASIC AUTHENTICATION ROUTES (Email & Password) */
@@ -117,21 +146,11 @@ authRouter.openapi(basicVerifyAccountRoute, async (c) => {
 		return c.json({ message: 'Something went wrong' }, 500);
 
 	// Login user
-	const accessToken = await generateAccessToken(user, userIdentity);
-	const refreshToken = await generateRefreshToken(user);
-
-	await updateUserIdentity(db, user.id, {
-		refreshToken,
-	});
-
-	setCookie(c, 'khongguan', accessToken, {
-		path: '/',
-		secure: true,
-		httpOnly: true,
-		maxAge: env.ACCESS_TOKEN_EXPIRATION,
-		sameSite: 'None',
-	});
-
+	const { accessToken, refreshToken } = await setCookiesToken(
+		c,
+		user,
+		userIdentity,
+	);
 	return c.json(
 		{
 			accessToken,
@@ -155,21 +174,11 @@ authRouter.openapi(basicLoginRoute, async (c) => {
 		return c.json({ message: "User isn't verified" }, 400);
 
 	// Login user
-	const accessToken = await generateAccessToken(user, userIdentity);
-	const refreshToken = await generateRefreshToken(user);
-
-	await updateUserIdentity(db, user.id, {
-		refreshToken,
-	});
-
-	setCookie(c, 'khongguan', accessToken, {
-		path: '/',
-		secure: true,
-		httpOnly: true,
-		maxAge: env.ACCESS_TOKEN_EXPIRATION,
-		sameSite: 'None',
-	});
-
+	const { accessToken, refreshToken } = await setCookiesToken(
+		c,
+		user,
+		userIdentity,
+	);
 	return c.json(
 		{
 			accessToken,
@@ -259,24 +268,11 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
 	)) as UserIdentity;
 	const existingUser = (await findUserByEmail(db, userInfo.email)) as User;
 
-	const accessToken = await generateAccessToken(
+	const { accessToken, refreshToken } = await setCookiesToken(
+		c,
 		existingUser,
 		existingUserIdentity,
 	);
-	const refreshToken = await generateRefreshToken(existingUser);
-
-	await updateUserIdentity(db, existingUser.id, {
-		refreshToken,
-	});
-
-	setCookie(c, 'khongguan', accessToken, {
-		path: '/',
-		secure: true,
-		httpOnly: true,
-		maxAge: env.ACCESS_TOKEN_EXPIRATION,
-		sameSite: 'None',
-	});
-
 	return c.json(
 		{
 			accessToken,
@@ -289,6 +285,7 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
 /** BOTH AUTH */
 authProtectedRouter.openapi(logoutRoute, async (c) => {
 	deleteCookie(c, 'khongguan');
+	deleteCookie(c, 'saltcheese');
 	await updateUserIdentity(db, c.var.user.id, {
 		refreshToken: null,
 	});
@@ -316,19 +313,15 @@ authRouter.openapi(refreshRoute, async (c) => {
 		return c.json({ message: "User isn't verified" }, 400);
 
 	// Login user
-	const accessToken = await generateAccessToken(user, userIdentity);
-
-	setCookie(c, 'khongguan', accessToken, {
-		path: '/',
-		secure: true,
-		httpOnly: true,
-		maxAge: env.ACCESS_TOKEN_EXPIRATION,
-		sameSite: 'None',
-	});
-
+	const { accessToken, refreshToken } = await setCookiesToken(
+		c,
+		user,
+		userIdentity,
+	);
 	return c.json(
 		{
 			accessToken,
+			refreshToken,
 		},
 		200,
 	);

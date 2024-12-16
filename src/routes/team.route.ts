@@ -73,7 +73,21 @@ export const postQuitTeamRoute = createRoute({
 	tags: ['team'],
 	method: 'post',
 	path: '/team/{teamId}/quit',
-	responses: {},
+	request: {
+		params: TeamIdParam,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: TeamSchema,
+				},
+			},
+			description: 'Succesfully quit team',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
 });
 
 export const postTeamDocumentRoute = createRoute({

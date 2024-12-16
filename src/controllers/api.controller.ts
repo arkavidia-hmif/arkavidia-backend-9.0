@@ -4,6 +4,8 @@ import { healthRouter } from './health.controller';
 import { mediaRouter } from './media.controller';
 import { teamMemberProtectedRouter } from './team-member.controller';
 import { teamProtectedRouter } from './team.controller';
+import { userProtectedRouter } from './user.controller';
+import { competitionProtectedRouter } from './competition.controller';
 
 const unprotectedApiRouter = new OpenAPIHono();
 unprotectedApiRouter.route('/', healthRouter);
@@ -15,6 +17,8 @@ protectedApiRouter.route('/', mediaRouter);
 protectedApiRouter.route('/', teamProtectedRouter);
 protectedApiRouter.route('/', teamMemberProtectedRouter);
 protectedApiRouter.route('/', teamProtectedRouter);
+protectedApiRouter.route('/', userProtectedRouter);
+protectedApiRouter.route('/', competitionProtectedRouter);
 
 export const apiRouter = new OpenAPIHono();
 apiRouter.route('/', unprotectedApiRouter);
