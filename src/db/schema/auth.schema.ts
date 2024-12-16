@@ -12,6 +12,11 @@ export const userIdentityProviderEnum = pgEnum('user_identity_provider_enum', [
 	'basic',
 ]);
 
+export const userIdentityRoleEnum = pgEnum('user_identity_role_enum', [
+	'admin',
+	'user',
+]);
+
 export const userIdentity = pgTable('user_identity', {
 	id: text('id').primaryKey().$defaultFn(createId),
 	email: text('email').unique().notNull(),
@@ -31,6 +36,8 @@ export const userIdentity = pgTable('user_identity', {
 
 	refreshToken: text('refresh_token'),
 
+	role: userIdentityRoleEnum('role').default('user').notNull(),
+
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').$onUpdate(getNow),
 });
@@ -41,3 +48,5 @@ export const userIdentityRelations = relations(userIdentity, ({ one }) => ({
 
 export type UserIdentity = InferSelectModel<typeof userIdentity>;
 export type UserIdentityInsert = InferInsertModel<typeof userIdentity>;
+export type UserIdentityRolesEnum =
+	(typeof userIdentityRoleEnum.enumValues)[number];

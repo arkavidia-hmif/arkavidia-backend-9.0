@@ -1,0 +1,161 @@
+enum competition_submission_type_enum {
+  uiux_poster
+}
+
+enum media_bucket_enum {
+  "competition-registration"
+}
+
+enum team_member_role_renum {
+  leader
+  member
+}
+
+enum user_education_enum {
+  s1
+  s2
+  sma
+}
+
+enum user_identity_provider_enum {
+  google
+  basic
+}
+
+enum user_identity_role_enum {
+  admin
+  user
+}
+
+table competition {
+  id text [pk, not null]
+  title text [not null]
+  description text [not null]
+  max_participants integer [not null]
+  max_team_member integer [not null]
+  guide_book_url text
+}
+
+table competition_announcement {
+  id text [pk, not null]
+  competition_id text [not null]
+  author_id text [not null]
+  title text [not null]
+  description text [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+table competition_submission {
+  team_id text [not null]
+  competition_id text [not null]
+  type competition_submission_type_enum [not null]
+  media_id text [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+
+  indexes {
+    (team_id, type) [pk]
+  }
+}
+
+table competition_timeline {
+  id text [pk, not null]
+  competition_id text [not null]
+  title text [not null]
+  date timestamp [not null]
+  show_on_landing boolean [not null, default: false]
+  show_tile boolean [not null, default: false]
+}
+
+table media {
+  id text [pk, not null]
+  creator_id text [not null]
+  name text [not null, unique]
+  bucket text [not null]
+  type text [not null]
+  url text [not null]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table team {
+  id text [pk, not null]
+  competition_id text [not null]
+  team_name text [not null]
+  team_code text [not null, unique]
+  payment_proof_media_id text
+  is_verified boolean [not null, default: false]
+  verification_error text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+table team_member {
+  user_id text [not null]
+  team_id text [not null]
+  role team_member_role_renum [not null]
+  nisn_media_id text
+  kartu_media_id text
+  poster_media_id text
+  twibbon_media_id text
+  is_verified boolean [not null, default: false]
+  verification_error text
+}
+
+table user {
+  id text [pk, not null]
+  email text [not null, unique]
+  full_name text
+  birth_date date
+  education user_education_enum
+  entry_source text
+  instance text
+  phone_number text
+  id_line text
+  id_discord text
+  id_instagram text
+  consent boolean [not null, default: false]
+  is_registration_complete boolean [not null, default: false]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+table user_identity {
+  id text [pk, not null]
+  email text [not null, unique]
+  provider user_identity_provider_enum [not null]
+  hash text [not null]
+  is_verified boolean [not null, default: false]
+  verification_token text [not null]
+  verification_token_expiration timestamp [not null]
+  password_recovery_token text
+  password_recovery_token_expiration timestamp
+  refresh_token text
+  role user_identity_role_enum [not null, default: 'user']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+ref: competition_announcement.competition_id > competition.id
+
+ref: competition_announcement.author_id - user.id
+
+ref: competition_submission.competition_id > competition.id
+
+ref: competition_submission.team_id - user.id
+
+ref: competition_submission.media_id - media.id
+
+ref: competition_timeline.competition_id > competition.id
+
+ref: team_member.user_id > user.id
+
+ref: team_member.team_id > team.id
+
+ref: team_member.twibbon_media_id - media.id
+
+ref: team.competition_id > competition.id
+
+ref: team.payment_proof_media_id - media.id
+
+ref: user.id - user_identity.id
