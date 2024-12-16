@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { team } from '~/db/schema';
+import { competitionSubmission, team } from '~/db/schema';
 
 export const PostTeamDocumentBodySchema = createInsertSchema(team).pick({
 	paymentProofMediaId: true,
@@ -42,3 +42,7 @@ export const PostTeamBodySchema = createInsertSchema(team).pick({
 	competitionId: true,
 	name: true,
 });
+
+export const TeamSubmissionSchema = createSelectSchema(competitionSubmission, {
+	createdAt: z.union([z.string(), z.date()]),
+}).openapi('Team');
