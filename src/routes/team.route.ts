@@ -2,9 +2,12 @@ import { createRoute } from '@hono/zod-openapi';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
 	CompetitionAndTeamIdParam,
+	CompetitionIdParam,
 	PostTeamBodySchema,
 	PostTeamDocumentBodySchema,
 	PostTeamVerificationBodySchema,
+	TeamCompetitionDetailSchema,
+	TeamCompetitionSchema,
 	TeamIdParam,
 	TeamMemberIdSchema,
 	TeamSchema,
@@ -200,3 +203,47 @@ export const postTeamVerificationRoute = createRoute({
 		500: createErrorResponse('GENERIC', 'Internal server error'),
 	},
 });
+
+export const getTeamCompetitionRoute = createRoute({
+  operationId: "getTeamCompetition",
+  tags: ["team", "admin"],
+  method: "get",
+  path: "/admin/{competitionId}/team",
+  request: {
+    params: CompetitionIdParam,
+  },
+  responses: {
+    200: {
+      description: "Successfully get team competition",
+      content: {
+        "application/json": {
+          schema: TeamCompetitionSchema,
+        },
+      },
+    },
+    400: createErrorResponse("UNION", "Bad request error"),
+    500: createErrorResponse("GENERIC", "Internal server error"),
+  },
+});
+
+export const getTeamDetailRoute = createRoute({
+	operationId: "getTeamDetail",
+	tags: ["team", "admin"],
+	method: "get",
+	path: "/admin/{competitionId}/team/{teamId}",
+	request: {
+		params: CompetitionAndTeamIdParam,
+	},
+	responses: {
+		200: {
+			description: "Successfully get team detail",
+			content: {
+				"application/json": {
+					schema: TeamCompetitionDetailSchema,
+				},
+			},
+		},
+		400: createErrorResponse("UNION", "Bad request error"),
+		500: createErrorResponse("GENERIC", "Internal server error"),
+	},
+})
