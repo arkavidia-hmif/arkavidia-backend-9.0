@@ -28,8 +28,10 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
+		"@softwaretechnik/dbml-renderer": "^1.0.30",
 		"@types/bun": "latest",
 		"@types/pg": "^8.11.10",
+		"drizzle-dbml-generator": "^0.10.0",
 		"drizzle-kit": "^0.27.1",
 		"tsx": "^4.19.2",
 		"typescript": "^5.7.2"

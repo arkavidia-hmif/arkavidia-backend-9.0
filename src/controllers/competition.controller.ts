@@ -1,27 +1,59 @@
-import { db } from "~/db/drizzle";
-import { getCompetitionById, getCompetitionParticipant } from "~/repositories/competition.repository";
-import { getCompetitionParticipantRoute } from "~/routes/competition.route";
-import { createAuthRouter } from "~/utils/router-factory";
-import { roleMiddleware } from "~/middlewares/role-access.middleware";
+import { db } from '~/db/drizzle';
+import { createAuthRouter } from '~/utils/router-factory';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
+import {
+	getAnnouncementsByCompetitionId,
+	getCompetition,
+	postAnnouncement,
+} from '~/repositories/competition.repository';
+import {
+	getAdminCompAnnouncementRoute,
+	postAdminCompAnnouncementRoute,
+} from '~/routes/competition.route';
 
 export const competitionProtectedRouter = createAuthRouter();
 
 competitionProtectedRouter.get(
-	getCompetitionParticipantRoute.getRoutingPath(),
+	getAdminCompAnnouncementRoute.getRoutingPath(),
 	roleMiddleware('admin'),
 );
+competitionProtectedRouter.openapi(getAdminCompAnnouncementRoute, async (c) => {
+	const { competitionId } = c.req.valid('param');
 
+	// Check if competition exists
+	const competition = await getCompetition(db, competitionId);
+	if (!competition) return c.json({ error: "Competition doesn't exist!" }, 400);
+
+	const announcements = await getAnnouncementsByCompetitionId(
+		db,
+		competitionId,
+	);
+	return c.json(announcements, 200);
+});
+
+competitionProtectedRouter.post(
+	postAdminCompAnnouncementRoute.getRoutingPath(),
+	roleMiddleware('admin'),
+);
 competitionProtectedRouter.openapi(
-  getCompetitionParticipantRoute,
-  async (c) => {
-    const { page, limit } = c.req.valid("query");
-    const { competitionId } = c.req.valid("param");
+	postAdminCompAnnouncementRoute,
+	async (c) => {
+		const { competitionId } = c.req.valid('param');
+		const body = c.req.valid('json');
 
-    const competitionParticipant = await getCompetitionParticipant(
-      db,
-      competitionId,
-      { page: Number(page), limit: Number(limit) }
-    );
-    return c.json(competitionParticipant, 200);
-  }
+		// Check if competition exists
+		const competition = await getCompetition(db, competitionId);
+		if (!competition)
+			return c.json({ error: "Competition doesn't exist!" }, 400);
+
+		// Create announcement
+		const user = c.var.user;
+		const announcement = await postAnnouncement(
+			db,
+			competitionId,
+			user.id,
+			body,
+		);
+		return c.json(announcement, 200);
+	},
 );
