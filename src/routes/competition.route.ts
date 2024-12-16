@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import {
 	AnnouncementSchema,
 	CompetitionParticipantSchema,
+	CompetitionTimelineSchema,
 	GetCompetitionTimeQuerySchema,
 	PostCompAnnouncementBodySchema,
 } from '~/types/competition.type';
@@ -78,6 +79,47 @@ export const postAdminCompAnnouncementRoute = createRoute({
 				},
 			},
 			description: 'Succesfully posted announcement',
+		},
+		400: createErrorResponse('UNION', 'Bad request error'),
+		500: createErrorResponse('GENERIC', 'Internal server error'),
+	},
+});
+
+export const getCompetitionTimelineRoute = createRoute({
+	operationId: 'getCompetitionTimeline',
+	tags: ['competition'],
+	method: 'get',
+	path: '/competition/timeline',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: CompetitionTimelineSchema
+        }
+      },
+      description: 'Successfully fetched competition timelines'
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error')
+  }
+})
+
+export const getCompetitionTimeLineByCompetitionIdRoute = createRoute({
+	operationId: 'getCompetitionTimelineWithCompetitionId',
+	tags: ['competition'],
+	method: 'get',
+	path: '/competition/{competitionId}/timeline',
+	request: {
+		params: CompetitionIdParam,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: CompetitionTimelineSchema,
+				},
+			},
+			description: 'Successfully fetched competition timelines',
 		},
 		400: createErrorResponse('UNION', 'Bad request error'),
 		500: createErrorResponse('GENERIC', 'Internal server error'),
