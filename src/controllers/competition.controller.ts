@@ -2,20 +2,42 @@ import { db } from '~/db/drizzle';
 import { createAuthRouter } from '~/utils/router-factory';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
-  getAnnouncementsByCompetitionId,
-  getCompetition,
-  postAnnouncement,
+	getAnnouncementsByCompetitionId,
+	getCompetition,
+	getCompetitionParticipant,
+	postAnnouncement,
 } from '~/repositories/competition.repository';
 import {
-  getAdminCompAnnouncementRoute,
-  postAdminCompAnnouncementRoute,
+	getAdminCompAnnouncementRoute,
+	getCompetitionParticipantRoute,
+	postAdminCompAnnouncementRoute,
 } from '~/routes/competition.route';
 
 export const competitionProtectedRouter = createAuthRouter();
 
 competitionProtectedRouter.get(
-  getAdminCompAnnouncementRoute.getRoutingPath(),
-  roleMiddleware('admin'),
+	getCompetitionParticipantRoute.getRoutingPath(),
+	roleMiddleware('admin'),
+);
+
+competitionProtectedRouter.openapi(
+	getCompetitionParticipantRoute,
+	async (c) => {
+		const { page, limit } = c.req.valid('query');
+		const { competitionId } = c.req.valid('param');
+
+		const competitionParticipant = await getCompetitionParticipant(
+			db,
+			competitionId,
+			{ page: Number(page), limit: Number(limit) },
+		);
+		return c.json(competitionParticipant, 200);
+	},
+);
+
+competitionProtectedRouter.get(
+	getAdminCompAnnouncementRoute.getRoutingPath(),
+	roleMiddleware('admin'),
 );
 competitionProtectedRouter.openapi(getAdminCompAnnouncementRoute, async (c) => {
   const { competitionId } = c.req.valid('param');
