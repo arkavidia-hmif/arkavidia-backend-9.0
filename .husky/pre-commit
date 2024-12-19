@@ -1,2 +1,3 @@
 bun i
 bun check
+docker build -t arkav-be-9.0 .
