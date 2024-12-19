@@ -6,19 +6,19 @@ import { findUserIdentityById } from '~/repositories/auth.repository';
 import type { JWTPayloadSchema } from '~/types/auth.type';
 
 const factory = createFactory<{
-	Variables: {
-		user: z.infer<typeof JWTPayloadSchema>;
-	};
+  Variables: {
+    user: z.infer<typeof JWTPayloadSchema>;
+  };
 }>();
 
 export const roleMiddleware = (requestedRole: UserIdentityRolesEnum) => {
-	return factory.createMiddleware(async (c, next) => {
-		const role = (await findUserIdentityById(db, c.var.user.id))?.role;
+  return factory.createMiddleware(async (c, next) => {
+    const role = (await findUserIdentityById(db, c.var.user.id))?.role;
 
-		if (role !== requestedRole) {
-			return c.json({ message: 'Unauthorized' }, 403);
-		}
+    if (role !== requestedRole) {
+      return c.json({ message: 'Unauthorized' }, 403);
+    }
 
-		await next();
-	});
+    await next();
+  });
 };

@@ -6,33 +6,33 @@ import { media } from './media.schema';
 import { teamMember } from './team-member.schema';
 
 export const team = pgTable('team', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	competitionId: text('competition_id')
-		.notNull()
-		.references(() => competition.id, { onDelete: 'cascade' }), // Add reference to competition
-	name: text('team_name').notNull(),
-	joinCode: text('team_code').notNull().$defaultFn(createId).unique(), // Add unique constraint
-	paymentProofMediaId: text('payment_proof_media_id').references(
-		() => media.id,
-		{ onDelete: 'cascade' },
-	), // Picture of payment proof
+  id: text('id').primaryKey().$defaultFn(createId),
+  competitionId: text('competition_id')
+    .notNull()
+    .references(() => competition.id, { onDelete: 'cascade' }), // Add reference to competition
+  name: text('team_name').notNull(),
+  joinCode: text('team_code').notNull().$defaultFn(createId).unique(), // Add unique constraint
+  paymentProofMediaId: text('payment_proof_media_id').references(
+    () => media.id,
+    { onDelete: 'cascade' },
+  ), // Picture of payment proof
 
-	isVerified: boolean('is_verified').default(false).notNull(),
-	verificationError: text('verification_error'),
+  isVerified: boolean('is_verified').default(false).notNull(),
+  verificationError: text('verification_error'),
 
-	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').$onUpdate(getNow),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').$onUpdate(getNow),
 });
 
 export const teamRelations = relations(team, ({ one, many }) => ({
-	teamMembers: many(teamMember),
-	competition: one(competition, {
-		fields: [team.competitionId],
-		references: [competition.id],
-	}),
-	paymentProof: one(media, {
-		fields: [team.paymentProofMediaId],
-		references: [media.id],
-	}),
-	submission: many(competitionSubmission),
+  teamMembers: many(teamMember),
+  competition: one(competition, {
+    fields: [team.competitionId],
+    references: [competition.id],
+  }),
+  paymentProof: one(media, {
+    fields: [team.paymentProofMediaId],
+    references: [media.id],
+  }),
+  submission: many(competitionSubmission),
 }));

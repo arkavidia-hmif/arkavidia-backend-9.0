@@ -6,93 +6,93 @@ import type { z } from 'zod';
 import { first } from '~/db/helper';
 
 export const getCompetitionParticipantNumber = async (
-	db: Database,
-	competitionId: string,
+  db: Database,
+  competitionId: string,
 ) => {
-	const result = await db.query.team.findMany({
-		where: eq(team.competitionId, competitionId),
-	});
-	return { participantCount: result.length };
+  const result = await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+  });
+  return { participantCount: result.length };
 };
 
 export const getCompetitionParticipant = async (
-	db: Database,
-	competitionId: string,
-	options: { page: number; limit: number },
+  db: Database,
+  competitionId: string,
+  options: { page: number; limit: number },
 ) => {
-	const { page, limit } = options;
-	const offset = (page - 1) * limit;
+  const { page, limit } = options;
+  const offset = (page - 1) * limit;
 
-	const result = await db.query.team.findMany({
-		where: eq(team.competitionId, competitionId),
-		limit,
-		offset,
-	});
+  const result = await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    limit,
+    offset,
+  });
 
-	const totalItems = (
-		await db.query.team.findMany({
-			where: eq(team.competitionId, competitionId),
-		})
-	).length;
+  const totalItems = (
+    await db.query.team.findMany({
+      where: eq(team.competitionId, competitionId),
+    })
+  ).length;
 
-	const totalPages = Math.ceil(totalItems / limit);
-	const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
-	const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
+  const totalPages = Math.ceil(totalItems / limit);
+  const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
+  const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
 
-	return {
-		pagination: {
-			currentPage: page,
-			totalItems,
-			totalPages,
-			next,
-			prev,
-		},
-		result,
-	};
+  return {
+    pagination: {
+      currentPage: page,
+      totalItems,
+      totalPages,
+      next,
+      prev,
+    },
+    result,
+  };
 };
 
 export const getCompetitionById = async (
-	db: Database,
-	competitionId: string,
+  db: Database,
+  competitionId: string,
 ) => {
-	const result = await db.query.competition.findFirst({
-		where: eq(competition.id, competitionId),
-	});
+  const result = await db.query.competition.findFirst({
+    where: eq(competition.id, competitionId),
+  });
 
-	return { maxParticipants: result?.maxParticipants };
+  return { maxParticipants: result?.maxParticipants };
 };
 
 export const getCompetition = async (db: Database, competitionId: string) => {
-	const result = await db.query.competition.findFirst({
-		where: eq(competition.id, competitionId),
-	});
-	return result;
+  const result = await db.query.competition.findFirst({
+    where: eq(competition.id, competitionId),
+  });
+  return result;
 };
 
 export const getAnnouncementsByCompetitionId = async (
-	db: Database,
-	competitionId: string,
+  db: Database,
+  competitionId: string,
 ) => {
-	const result = await db.query.competitionAnnouncement.findMany({
-		where: eq(competitionAnnouncement.competitionId, competitionId),
-	});
-	return result;
+  const result = await db.query.competitionAnnouncement.findMany({
+    where: eq(competitionAnnouncement.competitionId, competitionId),
+  });
+  return result;
 };
 
 export const postAnnouncement = async (
-	db: Database,
-	competitionId: string,
-	authorId: string,
-	body: z.infer<typeof PostCompAnnouncementBodySchema>,
+  db: Database,
+  competitionId: string,
+  authorId: string,
+  body: z.infer<typeof PostCompAnnouncementBodySchema>,
 ) => {
-	return await db
-		.insert(competitionAnnouncement)
-		.values({
-			competitionId: competitionId,
-			authorId: authorId,
-			title: body.title,
-			description: body.description,
-		})
-		.returning()
-		.then(first);
+  return await db
+    .insert(competitionAnnouncement)
+    .values({
+      competitionId: competitionId,
+      authorId: authorId,
+      title: body.title,
+      description: body.description,
+    })
+    .returning()
+    .then(first);
 };
