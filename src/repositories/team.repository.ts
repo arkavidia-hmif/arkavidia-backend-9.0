@@ -192,12 +192,12 @@ export const updateTeamVerification = async (
 
 export const getTeamsByCompetitionId = async (
   db: Database,
-  competitionId: string
+  competitionId: string,
 ) => {
-	return await db.query.team.findMany({
-		where: eq(team.competitionId, competitionId),
-		with: {
-			teamMembers: true,
-		}
-	});
-}
+  return await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    with: {
+      teamMembers: true,
+    },
+  });
+};

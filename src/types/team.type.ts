@@ -47,7 +47,7 @@ export const PostTeamBodySchema = createInsertSchema(team).pick({
 export const CompetitionIdParam = z.object({
   competitionId: z.string().openapi({
     param: {
-      in: "path",
+      in: 'path',
       required: true,
     },
   }),
@@ -56,9 +56,9 @@ export const CompetitionIdParam = z.object({
 export const TeamCompetitionSchema = z.array(
   TeamSchema.extend({
     members: z.array(TeamMemberSchema),
-  })
+  }),
 );
 
 export const TeamCompetitionDetailSchema = TeamSchema.extend({
-	members: z.array(TeamMemberSchema),
+  members: z.array(TeamMemberSchema),
 });
