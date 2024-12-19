@@ -1,0 +1,30 @@
+name: codecheck
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize]
+
+jobs:
+  code-check:
+    name: Run eslint and typescript check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup bun
+        uses: bun-action/setup@v3
+        with:
+          version: 0.9.0
+          run_install: true
+
+      - name: Run code check
+        run: bun check 
