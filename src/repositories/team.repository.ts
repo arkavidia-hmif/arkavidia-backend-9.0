@@ -8,6 +8,7 @@ import type {
   PostTeamVerificationBodySchema,
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
+
 import {
   getCompetitionById,
   getCompetitionParticipantNumber,

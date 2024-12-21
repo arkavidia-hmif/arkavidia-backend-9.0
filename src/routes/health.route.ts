@@ -1,4 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi';
+
 import { createErrorResponse } from '../utils/error-response-factory';
 
 export const getHealthStatusRoute = createRoute({

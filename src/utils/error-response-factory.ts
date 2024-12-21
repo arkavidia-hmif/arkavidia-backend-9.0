@@ -1,5 +1,6 @@
 import type { ResponseConfig } from '@asteasolutions/zod-to-openapi/dist/openapi-registry.js';
 import { z } from 'zod';
+
 import {
   GenericErrorShema,
   ValidationErrorSchema,

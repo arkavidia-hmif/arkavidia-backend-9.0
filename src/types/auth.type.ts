@@ -1,6 +1,7 @@
 import { z } from '@hono/zod-openapi';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { userIdentity } from '~/db/schema/auth.schema';
+
 import { UserSchema } from './user.type';
 
 export const UserIdentitySchema = createSelectSchema(userIdentity);

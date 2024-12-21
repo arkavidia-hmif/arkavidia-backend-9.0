@@ -4,6 +4,7 @@ import {
   relations,
 } from 'drizzle-orm';
 import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+
 import { createId, getNow } from '../../utils/drizzle-schema-util';
 import { user } from './user.schema';
 

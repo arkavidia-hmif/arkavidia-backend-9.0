@@ -8,6 +8,7 @@ import {
   RefreshTokenQuerySchema,
 } from '~/types/auth.type';
 import { UserSchema } from '~/types/user.type';
+
 import { createErrorResponse } from '../utils/error-response-factory';
 
 /** BASIC AUTHENTICATION ROUTES (Email & Password) */

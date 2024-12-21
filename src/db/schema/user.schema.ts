@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
+
 import { getNow } from '../../utils/drizzle-schema-util';
 import { userIdentity } from './auth.schema';
 import { teamMember } from './team-member.schema';

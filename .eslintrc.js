@@ -8,7 +8,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
-    ],
+  ],
   ignorePatterns: ['.eslintrc.js', 'node_modules/', 'drizzle/'],
   overrides: [
     {

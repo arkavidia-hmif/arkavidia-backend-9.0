@@ -1,6 +1,7 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { competitionAnnouncement } from '~/db/schema';
+
 import { TeamSchema } from './team.type';
 
 export const AnnouncementSchema = createSelectSchema(competitionAnnouncement, {

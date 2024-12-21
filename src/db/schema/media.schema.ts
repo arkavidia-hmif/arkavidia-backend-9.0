@@ -1,4 +1,5 @@
 import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+
 import { createId } from '../../utils/drizzle-schema-util';
 import { user } from './user.schema';
 

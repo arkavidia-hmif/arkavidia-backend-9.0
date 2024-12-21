@@ -1,6 +1,7 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { team } from '~/db/schema';
+
 import { TeamMemberSchema } from './team-member.type';
 
 export const PostTeamDocumentBodySchema = createInsertSchema(team).pick({

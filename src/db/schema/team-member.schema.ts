@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { boolean, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
+
 import { media } from './media.schema';
 import { team } from './team.schema';
 import { user } from './user.schema';
