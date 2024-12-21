@@ -1,23 +1,25 @@
 import { db } from '~/db/drizzle';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
-	changeTeamName,
-	createTeam,
-	deleteTeamMember,
-	getTeamById,
-	getTeamsByCompetitionId,
-	insertUserToTeam,
-	updateTeamDocument,
-	updateTeamVerification,
+  changeTeamName,
+  createTeam,
+  deleteTeam,
+  deleteTeamMember,
+  getTeamById,
+  getTeamsByCompetitionId,
+  insertUserToTeam,
+  updateTeamDocument,
+  updateTeamVerification,
 } from '~/repositories/team.repository';
 import {
-	deleteTeamMemberRoute,
-	getTeamCompetitionRoute,
-	getTeamDetailRoute,
-	postCreateTeamRoute,
-	postTeamDocumentRoute,
-	postTeamVerificationRoute,
-	putChangeTeamNameRoute,
+  deleteTeamMemberRoute,
+  getTeamCompetitionRoute,
+  getTeamDetailRoute,
+  postCreateTeamRoute,
+  postQuitTeamRoute,
+  postTeamDocumentRoute,
+  postTeamVerificationRoute,
+  putChangeTeamNameRoute,
 } from '~/routes/team.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -174,15 +176,15 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
 });
 
 teamProtectedRouter.openapi(getTeamCompetitionRoute, async (c) => {
-	const { competitionId } = c.req.valid('param');
-	const teams = await getTeamsByCompetitionId(db, competitionId);
-	if(!teams) return c.json({ error: "Competition doesn't exist!" }, 400);
-	return c.json(teams, 200);
+  const { competitionId } = c.req.valid('param');
+  const teams = await getTeamsByCompetitionId(db, competitionId);
+  if (!teams) return c.json({ error: "Competition doesn't exist!" }, 400);
+  return c.json(teams, 200);
 });
 
 teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
-	const { competitionId, teamId } = c.req.valid('param');
-	const team = await getTeamById(db, teamId, { teamMember: true });
-	if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-	return c.json(team, 200);
+  const { teamId } = c.req.valid('param');
+  const team = await getTeamById(db, teamId, { teamMember: true });
+  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+  return c.json(team, 200);
 });
