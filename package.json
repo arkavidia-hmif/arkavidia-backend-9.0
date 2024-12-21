@@ -6,11 +6,11 @@
     "db:migrate": "drizzle-kit migrate && bun run src/db/migrate-trigger.ts",
     "db:studio": "drizzle-kit studio",
     "check": "bun run typecheck && bun run codecheck",
-	"check:write": "bun run format && bun run pretty",
+    "check:write": "bun run format && bun run pretty",
     "codecheck": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "format": "eslint src --ext .ts --fix",
-	"pretty": "prettier . --write",
+    "pretty": "prettier . --write",
     "prepare": "husky"
   },
   "dependencies": {

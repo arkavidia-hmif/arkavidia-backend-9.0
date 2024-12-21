@@ -8,27 +8,27 @@ import type { UserIdentity } from '~/db/schema/auth.schema';
 import type { User } from '~/db/schema/user.schema';
 import { sendVerificationEmail } from '~/lib/nodemailer';
 import {
-  updateUser,
-  findUserByEmail,
-  findUserById,
-} from '~/repositories/user.repository';
-import {
-  basicVerifyAccountRoute,
-  basicRegisterRoute,
-  basicLoginRoute,
-  refreshRoute,
-  googleAuthCallbackRoute,
-  logoutRoute,
-  googleAuthRoute,
-  selfRoute,
-} from '~/routes/auth.route';
-import {
   createUserIdentity,
   findUserIdentityByEmail,
   findUserIdentityById,
   updateUserIdentity,
   updateUserVerification,
 } from '~/repositories/auth.repository';
+import {
+  findUserByEmail,
+  findUserById,
+  updateUser,
+} from '~/repositories/user.repository';
+import {
+  basicLoginRoute,
+  basicRegisterRoute,
+  basicVerifyAccountRoute,
+  googleAuthCallbackRoute,
+  googleAuthRoute,
+  logoutRoute,
+  refreshRoute,
+  selfRoute,
+} from '~/routes/auth.route';
 import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
 import { UserSchema } from '~/types/user.type';
 
@@ -40,12 +40,9 @@ export const authRouter = createRouter();
 export const authProtectedRouter = createAuthRouter();
 
 const generateAccessToken = async (user: User, userIdentity: UserIdentity) => {
-  
-  
-  
-  
   const payload = {
-          ...user, provider: userIdentity.provider,
+    ...user,
+    provider: userIdentity.provider,
     exp: Math.floor(Date.now() / 1000) + env.ACCESS_TOKEN_EXPIRATION,
   };
   const token = await jwt.sign(payload, env.ACCESS_TOKEN_SECRET);
