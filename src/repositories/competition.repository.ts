@@ -116,7 +116,7 @@ export const getCompetitionTimelines = async (
 	return userTeams.flatMap(team => team.competition.timeline);
 };
 
-export const getCompetitionTImelinesByCompetitionId = async (
+export const getCompetitionTimelinesByCompetitionId = async (
 	db: Database,
 	competitionId: string
 ) => {

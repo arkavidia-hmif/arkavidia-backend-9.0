@@ -6,7 +6,7 @@ import {
 	getCompetition,
 	getCompetitionParticipant,
 	getCompetitionTimelines,
-	getCompetitionTImelinesByCompetitionId,
+	getCompetitionTimelinesByCompetitionId,
 	postAnnouncement,
 } from '~/repositories/competition.repository';
 import {
@@ -95,6 +95,6 @@ competitionProtectedRouter.openapi(getCompetitionTimelineRoute, async (c) => {
 competitionProtectedRouter.openapi(getCompetitionTimeLineByCompetitionIdRoute, async (c) => {
 
 	const { competitionId } = c.req.valid('param');
-	const timelines = await getCompetitionTImelinesByCompetitionId(db, competitionId);
+	const timelines = await getCompetitionTimelinesByCompetitionId(db, competitionId);
 	return c.json(timelines, 200);
 });
