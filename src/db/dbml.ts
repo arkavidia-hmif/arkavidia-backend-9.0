@@ -1,5 +1,4 @@
 /** Ini buat bikin database schema diagram */
-
 import { pgGenerate } from 'drizzle-dbml-generator';
 import * as schema from '~/db/schema';
 

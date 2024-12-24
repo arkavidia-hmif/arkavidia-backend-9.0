@@ -1,4 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+
 import { authProtectedRouter, authRouter } from './auth.controller';
 import { competitionProtectedRouter } from './competition.controller';
 import { healthRouter } from './health.controller';
