@@ -133,7 +133,11 @@ async function seedUsers() {
         .insert(userIdentity)
         .values(userIdentityData)
         .returning();
-      const userRes = await db.insert(user).values(userData).returning();
+      const userRes = await db
+        .update(user)
+        .set(userData)
+        .where(eq(user.email, email))
+        .returning();
 
       return { accountRes, userRes };
     });
