@@ -6,9 +6,9 @@ import { team, teamMember } from '~/db/schema';
 import type {
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
-  TeamMemberIdSchema,
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
+
 import {
   getCompetitionById,
   getCompetitionParticipantNumber,
@@ -26,13 +26,13 @@ interface TeamRelationOption {
 }
 
 export const getTeamByCode = async (
-	db: Database,
-	teamCode: string,
-	options?: TeamRelationOption,
+  db: Database,
+  teamCode: string,
+  // options?: TeamRelationOption,
 ) => {
-	return await db.query.team.findFirst({
-		where: eq(team.joinCode, teamCode)
-	});
+  return await db.query.team.findFirst({
+    where: eq(team.joinCode, teamCode),
+  });
 };
 
 export const getTeamById = async (
@@ -203,12 +203,12 @@ export const updateTeamVerification = async (
 
 export const getTeamsByCompetitionId = async (
   db: Database,
-  competitionId: string
+  competitionId: string,
 ) => {
-	return await db.query.team.findMany({
-		where: eq(team.competitionId, competitionId),
-		with: {
-			teamMembers: true,
-		}
-	});
-}
+  return await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    with: {
+      teamMembers: true,
+    },
+  });
+};

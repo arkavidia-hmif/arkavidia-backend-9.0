@@ -1,27 +1,35 @@
 import { db } from '~/db/drizzle';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
-import { getAllCompetitions, getCompetition, getCompetitionById } from '~/repositories/competition.repository';
-import { getTeamMemberCount, isUserInOtherTeam } from '~/repositories/team-member.repository';
 import {
-	changeTeamName,
-	createTeam,
-	deleteTeamMember,
-	getTeamByCode,
-	getTeamById,
-	getTeamsByCompetitionId,
-	insertUserToTeam,
-	updateTeamDocument,
-	updateTeamVerification,
+  getAllCompetitions,
+  getCompetitionById,
+} from '~/repositories/competition.repository';
+import {
+  getTeamMemberCount,
+  isUserInOtherTeam,
+} from '~/repositories/team-member.repository';
+import {
+  changeTeamName,
+  createTeam,
+  deleteTeam,
+  deleteTeamMember,
+  getTeamByCode,
+  getTeamById,
+  getTeamsByCompetitionId,
+  insertUserToTeam,
+  updateTeamDocument,
+  updateTeamVerification,
 } from '~/repositories/team.repository';
 import {
-	deleteTeamMemberRoute,
-	getTeamCompetitionRoute,
-	getTeamDetailRoute,
-	joinTeamByCodeRoute,
-	postCreateTeamRoute,
-	postTeamDocumentRoute,
-	postTeamVerificationRoute,
-	putChangeTeamNameRoute,
+  deleteTeamMemberRoute,
+  getTeamCompetitionRoute,
+  getTeamDetailRoute,
+  joinTeamByCodeRoute,
+  postCreateTeamRoute,
+  postQuitTeamRoute,
+  postTeamDocumentRoute,
+  postTeamVerificationRoute,
+  putChangeTeamNameRoute,
 } from '~/routes/team.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -178,52 +186,52 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
 });
 
 teamProtectedRouter.openapi(getTeamCompetitionRoute, async (c) => {
-	const { competitionId } = c.req.valid('param');
-	const teams = await getTeamsByCompetitionId(db, competitionId);
-	if(!teams) return c.json({ error: "Competition doesn't exist!" }, 400);
-	return c.json(teams, 200);
+  const { competitionId } = c.req.valid('param');
+  const teams = await getTeamsByCompetitionId(db, competitionId);
+  if (!teams) return c.json({ error: "Competition doesn't exist!" }, 400);
+  return c.json(teams, 200);
 });
 
 teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
-	const { competitionId, teamId } = c.req.valid('param');
-	const team = await getTeamById(db, teamId, { teamMember: true });
-	if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-	return c.json(team, 200);
+  const { teamId } = c.req.valid('param');
+  const team = await getTeamById(db, teamId, { teamMember: true });
+  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+  return c.json(team, 200);
 });
 
 teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
-	const { teamCode } = c.req.valid('param');
-	const userId = c.var.user.id;
+  const { teamCode } = c.req.valid('param');
+  const userId = c.var.user.id;
 
-	// Check if the team exists
-	const team = await getTeamByCode(db, teamCode);
-	if (!team) {
-		return c.json({ error: "Team doesn't exist!" }, 400);
-	}
+  // Check if the team exists
+  const team = await getTeamByCode(db, teamCode);
+  if (!team) {
+    return c.json({ error: "Team doesn't exist!" }, 400);
+  }
 
-	// Get all competition IDs
-	const competitionIds = await getAllCompetitions(db);
+  // Get all competition IDs
+  const competitionIds = await getAllCompetitions(db);
 
-	// Check if user is in any other team across all competitions
-	for (const competitionId of competitionIds) {
-		const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
-		if (isInOtherTeam) {
-			return c.json(
-				{ error: "User is already in another team for a competition!" },
-				400
-			);
-		}
-	}
+  // Check if user is in any other team across all competitions
+  for (const competitionId of competitionIds) {
+    const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
+    if (isInOtherTeam) {
+      return c.json(
+        { error: 'User is already in another team for a competition!' },
+        400,
+      );
+    }
+  }
 
-	// Ensure team is not full
-	const { teamMemberCount } = await getTeamMemberCount(db, team.id);
-	const { maxParticipants } = await getCompetitionById(db, team.competitionId);
-	if (teamMemberCount >= (maxParticipants ?? 0)) {
-		return c.json({ error: "Team is already full!" }, 400);
-	}
+  // Ensure team is not full
+  const { teamMemberCount } = await getTeamMemberCount(db, team.id);
+  const { maxParticipants } = await getCompetitionById(db, team.competitionId);
+  if (teamMemberCount >= (maxParticipants ?? 0)) {
+    return c.json({ error: 'Team is already full!' }, 400);
+  }
 
-	// Add user to  team
-	const newTeamMember = await insertUserToTeam(db, team.id, userId);
+  // Add user to  team
+  const newTeamMember = await insertUserToTeam(db, team.id, userId);
 
-	return c.json(newTeamMember, 200);
+  return c.json(newTeamMember, 200);
 });
