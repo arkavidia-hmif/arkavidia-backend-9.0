@@ -143,22 +143,30 @@ export const postAnnouncement = async (
     .then(first);
 };
 
-export const initializelCompetitionSubmissions = async(
+export const initializelCompetitionSubmissions = async (
   db: Database,
   teamId: string,
-  competitionId: string
-) =>{
-  const requirementList = await getCompetitionRequirementById(db,competitionId);
-  
-  const submissionResult = []
-  for(const requirement of requirementList){
+  competitionId: string,
+) => {
+  const requirementList = await getCompetitionRequirementById(
+    db,
+    competitionId,
+  );
+
+  const submissionResult = [];
+  for (const requirement of requirementList) {
     // do the insertion ?
-    const res = await postCompetitionSubmission(db,teamId,requirement.typeId,competitionId)
+    const res = await postCompetitionSubmission(
+      db,
+      teamId,
+      requirement.typeId,
+      competitionId,
+    );
     submissionResult.push(res);
   }
 
   return submissionResult;
-}
+};
 
 export const getCompetitionRequirementById = async (
   db: Database,
@@ -171,16 +179,18 @@ export const getCompetitionRequirementById = async (
   return result;
 };
 
-export const postCompetitionSubmission = async(
-  db:Database,
-  teamId:string,
-  typeId:string,
-  competitionId:string,
-) =>{
-  return await db.insert(competitionSubmission)
-        .values({
-          teamId:teamId,
-          typeId:typeId,
-          competitionId:competitionId,
-        }).returning() 
-}
+export const postCompetitionSubmission = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  competitionId: string,
+) => {
+  return await db
+    .insert(competitionSubmission)
+    .values({
+      teamId: teamId,
+      typeId: typeId,
+      competitionId: competitionId,
+    })
+    .returning();
+};
