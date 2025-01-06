@@ -4,11 +4,11 @@ import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
 import { team, teamMember } from '~/db/schema';
 import type {
-	PostTeamDocumentBodySchema,
-	PostTeamVerificationBodySchema,
-	TeamMemberIdSchema,
-	putChangeTeamNameBodySchema,
+  PostTeamDocumentBodySchema,
+  PostTeamVerificationBodySchema,
+  putChangeTeamNameBodySchema,
 } from '~/types/team.type';
+
 import {
 	getCompetitionById,
 	getCompetitionParticipantNumber,
@@ -192,13 +192,13 @@ export const updateTeamVerification = async (
 };
 
 export const getTeamsByCompetitionId = async (
-	db: Database,
-	competitionId: string,
+  db: Database,
+  competitionId: string,
 ) => {
-	return await db.query.team.findMany({
-		where: eq(team.competitionId, competitionId),
-		with: {
-			teamMembers: true,
-		},
-	});
+  return await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    with: {
+      teamMembers: true,
+    },
+  });
 };
