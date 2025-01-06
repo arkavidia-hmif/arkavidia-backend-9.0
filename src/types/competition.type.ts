@@ -1,28 +1,27 @@
-import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { TeamSubmissionSchema, TeamSchema } from '~/types/team.type';
+import { z } from 'zod';
 import { competitionAnnouncement } from '~/db/schema';
-
+import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 
 export const GetCompetitionSubmissionQuerySchema = z.object({
-	page: z
-		.string()
-		.default('1')
-		.openapi({
-			param: {
-				in: 'query',
-				required: false,
-			},
-		}),
-	limit: z
-		.string()
-		.default('10')
-		.openapi({
-			param: {
-				in: 'query',
-				required: false,
-			},
-		}),
+  page: z
+    .string()
+    .default('1')
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+  limit: z
+    .string()
+    .default('10')
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
 });
 
 export const AnnouncementSchema = createSelectSchema(competitionAnnouncement, {
@@ -80,14 +79,14 @@ export const GetCompetitionTimeQuerySchema = z.object({
 });
 
 export const CompetitionSubmissionSchema = z
-	.object({
-		pagination: z.object({
-			currentPage: z.number().min(1),
-			totalItems: z.number().nonnegative(),
-			totalPages: z.number().nonnegative(),
-			next: z.string().url().nullable(),
-			prev: z.string().url().nullable(),
-		}),
-		result: z.array(TeamSubmissionSchema).min(1),
-	})
-	.openapi('CompetitionSubmission');
+  .object({
+    pagination: z.object({
+      currentPage: z.number().min(1),
+      totalItems: z.number().nonnegative(),
+      totalPages: z.number().nonnegative(),
+      next: z.string().url().nullable(),
+      prev: z.string().url().nullable(),
+    }),
+    result: z.array(TeamSubmissionSchema).min(1),
+  })
+  .openapi('CompetitionSubmission');

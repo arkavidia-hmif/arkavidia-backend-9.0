@@ -46,7 +46,7 @@ export const PostTeamBodySchema = createInsertSchema(team).pick({
 });
 
 export const TeamSubmissionSchema = createSelectSchema(competitionSubmission, {
-	createdAt: z.union([z.string(), z.date()]),
+  createdAt: z.union([z.string(), z.date()]),
 }).openapi('Team');
 
 export const CompetitionIdParam = z.object({
