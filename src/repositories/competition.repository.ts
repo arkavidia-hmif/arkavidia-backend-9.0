@@ -143,13 +143,44 @@ export const postAnnouncement = async (
     .then(first);
 };
 
+export const initializelCompetitionSubmissions = async(
+  db: Database,
+  teamId: string,
+  competitionId: string
+) =>{
+  const requirementList = await getCompetitionRequirementById(db,competitionId);
+  
+  const submissionResult = []
+  for(const requirement of requirementList){
+    // do the insertion ?
+    const res = await postCompetitionSubmission(db,teamId,requirement.typeId,competitionId)
+    submissionResult.push(res);
+  }
+
+  return submissionResult;
+}
+
 export const getCompetitionRequirementById = async (
   db: Database,
   competitionId: string,
 ) => {
-  const result = await db.query.competitionSubmissionRequirement.findFirst({
+  const result = await db.query.competitionSubmissionRequirement.findMany({
     where: eq(competitionSubmissionRequirement.competitionId, competitionId),
   });
 
   return result;
 };
+
+export const postCompetitionSubmission = async(
+  db:Database,
+  teamId:string,
+  typeId:string,
+  competitionId:string,
+) =>{
+  return await db.insert(competitionSubmission)
+        .values({
+          teamId:teamId,
+          typeId:typeId,
+          competitionId:competitionId,
+        }).returning() 
+}
