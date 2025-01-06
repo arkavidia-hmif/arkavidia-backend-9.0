@@ -62,21 +62,24 @@ export const competitionAnnouncementRelations = relations(
 
 /** Competition Submission File Type **/
 
-export const competitionSubmissionRequirement = pgTable('competition_submission_requirement', {
-  id: text('id').primaryKey().$defaultFn(createId),
+export const competitionSubmissionRequirement = pgTable(
+  'competition_submission_requirement',
+  {
+    id: text('id').primaryKey().$defaultFn(createId),
 
-  competitionId: text('competition_id')
-    .notNull()
-    .references(() => competition.id),
+    competitionId: text('competition_id')
+      .notNull()
+      .references(() => competition.id),
 
-  type: text('type').notNull(),
-});
+    type: text('type').notNull(),
+  },
+);
 
-/** Competition Submissions Table */
+/** Competition Submissions Table ( not used anymore, changed by competition_submission_requirement)
 export const competitionSubmissionTypeEnum = pgEnum(
   'competition_submission_type_enum',
   ['uiux_poster'],
-);
+); **/
 
 export const competitionSubmission = pgTable(
   'competition_submission',
@@ -88,7 +91,9 @@ export const competitionSubmission = pgTable(
       .notNull()
       .references(() => competition.id),
     type: competitionSubmissionTypeEnum('type').notNull(),
-    mediaId: text('media_id').references(()=> media.id,{onDelete:'set null'}),
+    mediaId: text('media_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').$onUpdate(getNow),
   },
