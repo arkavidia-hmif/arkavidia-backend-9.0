@@ -101,8 +101,7 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
     const team = await createTeam(db, competitionId, name);
     const userId = c.var.user.id;
     await insertUserToTeam(db, team.id, userId);
-    
-  
+
     return c.json(team, 200);
   } catch (error) {
     if (error instanceof Error) {

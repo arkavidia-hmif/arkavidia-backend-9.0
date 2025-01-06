@@ -143,11 +143,13 @@ export const postAnnouncement = async (
     .then(first);
 };
 
-export const getCompetitionRequirementById = async(
+export const getCompetitionRequirementById = async (
   db: Database,
   competitionId: string,
-)=>{
+) => {
   const result = await db.query.competitionSubmissionRequirement.findFirst({
-    where: eq(competitionSubmissionRequirement.type)
-  })
-}
+    where: eq(competitionSubmissionRequirement.competitionId, competitionId),
+  });
+
+  return result;
+};
