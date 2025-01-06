@@ -1,5 +1,5 @@
 {
-  "id": "0801919b-5505-46a3-be23-8966376d2a0b",
+  "id": "2b2290e6-4ef4-42bd-92ad-5a7ed96bc072",
   "prevId": "2e3808df-a037-4f60-ab4d-9d1f8b26d6df",
   "version": "7",
   "dialect": "postgresql",
@@ -256,10 +256,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "competition_submission_type_enum",
-          "typeSchema": "public",
+        "type_id": {
+          "name": "type_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -311,6 +310,19 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+        "competition_submission_type_id_competition_submission_requirement_type_id_fk": {
+          "name": "competition_submission_type_id_competition_submission_requirement_type_id_fk",
+          "tableFrom": "competition_submission",
+          "tableTo": "competition_submission_requirement",
+          "columnsFrom": [
+            "type_id"
+          ],
+          "columnsTo": [
+            "type_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "competition_submission_media_id_media_id_fk": {
           "name": "competition_submission_media_id_media_id_fk",
           "tableFrom": "competition_submission",
@@ -325,15 +337,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "competition_submission_team_id_type_pk": {
-          "name": "competition_submission_team_id_type_pk",
-          "columns": [
-            "team_id",
-            "type"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -343,8 +347,8 @@
       "name": "competition_submission_requirement",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "type_id": {
+          "name": "type_id",
           "type": "text",
           "primaryKey": true,
           "notNull": true
@@ -355,8 +359,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
+        "type_name": {
+          "name": "type_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -924,13 +928,6 @@
       "values": [
         "admin",
         "user"
-      ]
-    },
-    "public.competition_submission_type_enum": {
-      "name": "competition_submission_type_enum",
-      "schema": "public",
-      "values": [
-        "uiux_poster"
       ]
     },
     "public.media_bucket_enum": {

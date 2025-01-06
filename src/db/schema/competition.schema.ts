@@ -2,11 +2,12 @@ import { relations } from 'drizzle-orm';
 import {
   boolean,
   integer,
-  pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
+  foreignKey,
+  uniqueIndex
 } from 'drizzle-orm/pg-core';
 
 import { createId, getNow } from '../../utils/drizzle-schema-util';
@@ -65,13 +66,12 @@ export const competitionAnnouncementRelations = relations(
 export const competitionSubmissionRequirement = pgTable(
   'competition_submission_requirement',
   {
-    id: text('id').primaryKey().$defaultFn(createId),
-
+    typeId:text('type_id').primaryKey().$defaultFn(createId),
     competitionId: text('competition_id')
       .notNull()
       .references(() => competition.id),
 
-    type: text('type').notNull(),
+    typeName: text('type_name').notNull(),
   },
 );
 
@@ -90,16 +90,13 @@ export const competitionSubmission = pgTable(
     competitionId: text('competition_id')
       .notNull()
       .references(() => competition.id),
-    type: competitionSubmissionTypeEnum('type').notNull(),
+    typeId:text('type_id').notNull().references(() => competitionSubmissionRequirement.typeId),
     mediaId: text('media_id').references(() => media.id, {
       onDelete: 'set null',
     }),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').$onUpdate(getNow),
-  },
-  (t) => ({
-    pk: primaryKey(t.teamId, t.type),
-  }),
+  }
 );
 
 export const competitionSubmissionRelations = relations(
@@ -117,7 +114,18 @@ export const competitionSubmissionRelations = relations(
       fields: [competitionSubmission.mediaId],
       references: [media.id],
     }),
+    requirement: one(competitionSubmissionRequirement, {
+      fields: [competitionSubmission.typeId], 
+      references: [competitionSubmissionRequirement.typeId],
+    }),
   }),
+);
+
+export const competitionSubmissionRequirementRelations = relations(
+  competitionSubmissionRequirement,
+  ({ many }) => ({
+    submissions: many(competitionSubmission),
+  })
 );
 
 /** Competition Timeline Table */

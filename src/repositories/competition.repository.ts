@@ -8,6 +8,7 @@ import {
   competition,
   competitionAnnouncement,
   competitionSubmission,
+  competitionSubmissionRequirement,
   team,
 } from '../db/schema';
 
@@ -141,3 +142,12 @@ export const postAnnouncement = async (
     .returning()
     .then(first);
 };
+
+export const getCompetitionRequirementById = async(
+  db: Database,
+  competitionId: string,
+)=>{
+  const result = await db.query.competitionSubmissionRequirement.findFirst({
+    where: eq(competitionSubmissionRequirement.type)
+  })
+}
