@@ -2,7 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
-import { teamMember } from '~/db/schema';
+import { team, teamMember } from '~/db/schema';
 import type {
   PostTeamMemberDocumentBodySchema,
   PostTeamMemberVerificationBodySchema,
@@ -136,13 +136,19 @@ export const isUserInOtherTeam = async (
   userId: string,
   competitionId: string,
 ): Promise<boolean> => {
-  const existingTeamMember = await db.query.teamMember.findFirst({
-    where: eq(teamMember.userId, userId),
-    with: {
-      team: true,
-    },
-  });
+  const where = and(
+    eq(teamMember.userId, userId),
+    eq(team.competitionId, competitionId),
+  );
+
+  const existingTeamMember = await db
+    .select()
+    .from(teamMember)
+    .innerJoin(team, eq(teamMember.teamId, team.id))
+    .where(where);
+
+  console.log('existingTeamMember', existingTeamMember);
 
   // Check if the team is in the same competition
-  return existingTeamMember?.team?.competitionId === competitionId;
+  return !!existingTeamMember.length;
 };

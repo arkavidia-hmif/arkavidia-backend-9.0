@@ -211,6 +211,7 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   // Check if user is in any other team across all competitions
   const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
+  console.log('ISUSERINOTHERTEAM', isInOtherTeam);
   if (isInOtherTeam) {
     return c.json(
       { error: 'User is already in another team for a competition!' },
