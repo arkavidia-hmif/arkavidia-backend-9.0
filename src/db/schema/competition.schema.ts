@@ -3,6 +3,7 @@ import {
   boolean,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
@@ -25,7 +26,6 @@ export const competition = pgTable('competition', {
 export const competitionRelations = relations(competition, ({ many }) => ({
   team: many(team),
   announcement: many(competitionAnnouncement),
-  submission: many(competitionSubmission),
   timeline: many(competitionTimeline),
 }));
 
@@ -78,19 +78,25 @@ export const competitionSubmissionTypeEnum = pgEnum(
   ['uiux_poster'],
 ); **/
 
-export const competitionSubmission = pgTable('competition_submission', {
-  teamId: text('team_id')
-    .notNull()
-    .references(() => team.id),
-  typeId: text('type_id')
-    .notNull()
-    .references(() => competitionSubmissionRequirement.typeId),
-  mediaId: text('media_id').references(() => media.id, {
-    onDelete: 'set null',
+export const competitionSubmission = pgTable(
+  'competition_submission',
+  {
+    teamId: text('team_id')
+      .notNull()
+      .references(() => team.id),
+    typeId: text('type_id')
+      .notNull()
+      .references(() => competitionSubmissionRequirement.typeId),
+    mediaId: text('media_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').$onUpdate(getNow),
+  },
+  (t) => ({
+    pk: primaryKey(t.teamId, t.typeId),
   }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').$onUpdate(getNow),
-});
+);
 
 export const competitionSubmissionRelations = relations(
   competitionSubmission,
