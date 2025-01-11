@@ -91,6 +91,7 @@ export const competitionSubmission = pgTable(
     mediaId: text('media_id').references(() => media.id, {
       onDelete: 'set null',
     }),
+    judgeResponse: text('judge_response'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').$onUpdate(getNow),
   },

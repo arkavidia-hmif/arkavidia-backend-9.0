@@ -1,5 +1,11 @@
 import { relations } from 'drizzle-orm';
-import { boolean, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+} from 'drizzle-orm/pg-core';
 
 import { media } from './media.schema';
 import { team } from './team.schema';
@@ -10,31 +16,37 @@ export const teamMemberRoleEnum = pgEnum('team_member_role_renum', [
   'member',
 ]);
 
-export const teamMember = pgTable('team_member', {
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  teamId: text('team_id')
-    .notNull()
-    .references(() => team.id, { onDelete: 'cascade' }),
-  role: teamMemberRoleEnum('role').notNull(),
-  nisnMediaId: text('nisn_media_id').references(() => media.id, {
-    onDelete: 'cascade',
-  }),
-  kartuMediaId: text('kartu_media_id').references(() => media.id, {
-    // bisa KTM or Kartu Pelajar
-    onDelete: 'cascade',
-  }),
-  posterMediaId: text('poster_media_id').references(() => media.id, {
-    onDelete: 'cascade',
-  }),
-  twibbonMediaId: text('twibbon_media_id').references(() => media.id, {
-    onDelete: 'cascade',
-  }),
+export const teamMember = pgTable(
+  'team_member',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    teamId: text('team_id')
+      .notNull()
+      .references(() => team.id, { onDelete: 'cascade' }),
+    role: teamMemberRoleEnum('role').notNull(),
+    nisnMediaId: text('nisn_media_id').references(() => media.id, {
+      onDelete: 'cascade',
+    }),
+    kartuMediaId: text('kartu_media_id').references(() => media.id, {
+      // bisa KTM or Kartu Pelajar
+      onDelete: 'cascade',
+    }),
+    posterMediaId: text('poster_media_id').references(() => media.id, {
+      onDelete: 'cascade',
+    }),
+    twibbonMediaId: text('twibbon_media_id').references(() => media.id, {
+      onDelete: 'cascade',
+    }),
 
-  isVerified: boolean('is_verified').default(false).notNull(),
-  verificationError: text('verification_error'),
-});
+    isVerified: boolean('is_verified').default(false).notNull(),
+    verificationError: text('verification_error'),
+  },
+  (t) => ({
+    pk: primaryKey(t.userId, t.teamId),
+  }),
+);
 
 export const teamMemberRelations = relations(teamMember, ({ one }) => ({
   user: one(user, {
