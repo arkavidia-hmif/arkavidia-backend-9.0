@@ -10,7 +10,9 @@ import {
   competitionSubmission,
   competitionSubmissionRequirement,
   media,
+  competitionTimeline,
   team,
+  teamMember,
 } from '../db/schema';
 
 export const getCompetitionParticipantNumber = async (
@@ -222,4 +224,30 @@ export const postCompetitionSubmission = async (
       typeId: typeId,
     })
     .returning();
+};
+
+export const getCompetitionTimelines = async (db: Database, userId: string) => {
+  // Get user's competitions
+  const userTeams = await db.query.team.findMany({
+    where: eq(teamMember.userId, userId),
+    with: {
+      competition: {
+        with: {
+          timeline: true,
+        },
+      },
+    },
+  });
+
+  return userTeams.flatMap((team) => team.competition.timeline);
+};
+
+export const getCompetitionTimelinesByCompetitionId = async (
+  db: Database,
+  competitionId: string,
+) => {
+  const result = await db.query.competitionTimeline.findMany({
+    where: eq(competitionTimeline.competitionId, competitionId),
+  });
+  return result;
 };

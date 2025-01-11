@@ -23,6 +23,7 @@ import {
   basicLoginRoute,
   basicRegisterRoute,
   basicVerifyAccountRoute,
+  bypassRegisterRoute,
   googleAuthCallbackRoute,
   googleAuthRoute,
   logoutRoute,
@@ -326,4 +327,28 @@ authRouter.openapi(refreshRoute, async (c) => {
     },
     200,
   );
+});
+
+/** BYPASS AUTHENTICATION ROUTES (Email & Password) */
+authRouter.openapi(bypassRegisterRoute, async (c) => {
+  const { email, password, role } = c.req.valid('json');
+
+  const passwordHash = await argon2.hash(password);
+
+  const user = await findUserIdentityByEmail(db, email);
+  if (user) {
+    return c.json({ message: 'User already exist' }, 400);
+  }
+
+  await createUserIdentity(db, {
+    email: email,
+    hash: passwordHash,
+    provider: 'basic',
+    isVerified: true,
+    role,
+    verificationToken: '',
+    verificationTokenExpiration: new Date(),
+  });
+
+  return c.json({}, 204);
 });

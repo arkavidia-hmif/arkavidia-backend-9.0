@@ -1,7 +1,7 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { competitionAnnouncement } from '~/db/schema';
 import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
+import { competitionAnnouncement, competitionTimeline } from '~/db/schema';
 
 export const GetCompetitionSubmissionQuerySchema = z.object({
   page: z
@@ -78,6 +78,7 @@ export const GetCompetitionTimeQuerySchema = z.object({
     }),
 });
 
+
 export const CompetitionSubmissionSchema = z
   .object({
     pagination: z.object({
@@ -90,3 +91,7 @@ export const CompetitionSubmissionSchema = z
     result: z.array(TeamSubmissionSchema).min(1),
   })
   .openapi('CompetitionSubmission');
+
+export const CompetitionTimelineSchema = z.array(
+  createSelectSchema(competitionTimeline).openapi('CompetitionTimeline'),
+);

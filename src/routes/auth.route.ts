@@ -4,6 +4,7 @@ import {
   BasicLoginBodySchema,
   BasicRegisterBodySchema,
   BasicVerifyAccountQuerySchema,
+  BypassRegisterBodySchema,
   GoogleCallbackQuerySchema,
   RefreshTokenQuerySchema,
 } from '~/types/auth.type';
@@ -181,6 +182,30 @@ export const refreshRoute = createRoute({
           schema: AccessRefreshTokenSchema,
         },
       },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const bypassRegisterRoute = createRoute({
+  operationId: 'bypassRegister',
+  path: '/auth/bypass/register',
+  tags: ['auth'],
+  method: 'post',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: BypassRegisterBodySchema,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    204: {
+      description: 'Registration succesful. Verification token sent to email.',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

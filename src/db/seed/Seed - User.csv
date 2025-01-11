@@ -1,0 +1,8 @@
+email,full_name,birth_date,education,entry_source,instance,phone_number,id_line,id_discord,id_instagram,consent,is_registration_complete,provider,is_verified,role,password
+user@example.com,User Test,12/24/2024,s1,ig,ITB,08123456789,line_1,discord_1,ig_1,TRUE,TRUE,basic,TRUE,user,Password1!
+13522100@example.com,John Doe,12/24/2024,s1,ig,ITB,08123456789,line_1,discord_1,ig_1,TRUE,TRUE,basic,TRUE,user,Password1!
+13522101@example.com,Mary High,12/24/2024,s2,ig,ITB,08123456790,line_2,discord_2,ig_2,TRUE,TRUE,basic,FALSE,user,Password1!
+13522102@example.com,Erik Bloom,12/24/2024,sma,ig,ITB,08123456791,line_3,discord_3,ig_3,TRUE,TRUE,basic,FALSE,user,Password1!
+13522103@example.com,Abil Ganteng,12/24/2024,s1,ig,ITB,08123456792,line_4,discord_4,ig_4,TRUE,TRUE,basic,FALSE,user,Password1!
+admin1@example.com,Admin Piyo,12/24/2024,s1,ig,ITB,08123456793,line_5,discord_5,ig_5,TRUE,TRUE,basic,TRUE,admin,Password1!
+admin2@example.com,Admin Blori,12/24/2024,s1,ig,ITB,08123456794,line_6,discord_6,ig_6,TRUE,TRUE,basic,FALSE,admin,Password1!

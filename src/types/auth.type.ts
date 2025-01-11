@@ -29,6 +29,18 @@ export const BasicRegisterBodySchema = z
     path: ['confirm'], // path of error
   });
 
+export const BypassRegisterBodySchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(8, 'Password must have minimum length of 8'),
+    confirmPassword: z.string(),
+    role: z.enum(['admin', 'user']).default('user'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirm'], // path of error
+  });
+
 export const BasicVerifyAccountQuerySchema = z.object({
   user: z.string().openapi({
     param: {

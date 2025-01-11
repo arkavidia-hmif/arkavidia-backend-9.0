@@ -67,3 +67,5 @@ export const TeamCompetitionSchema = z.array(
 export const TeamCompetitionDetailSchema = TeamSchema.extend({
   members: z.array(TeamMemberSchema),
 });
+
+export const ListUserTeamSchema = z.array(TeamSchema);

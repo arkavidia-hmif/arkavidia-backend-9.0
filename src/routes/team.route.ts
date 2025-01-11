@@ -3,6 +3,7 @@ import { TeamMemberSchema } from '~/types/team-member.type';
 import {
   CompetitionAndTeamIdParam,
   CompetitionIdParam,
+  ListUserTeamSchema,
   PostTeamBodySchema,
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
@@ -28,7 +29,18 @@ export const getTeamsRoute = createRoute({
   tags: ['team'],
   method: 'get',
   path: '/team',
-  responses: {},
+  responses: {
+    200: {
+      description: 'Get user teams',
+      content: {
+        'application/json': {
+          schema: ListUserTeamSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
 });
 
 export const getTeamByIdRoute = createRoute({
@@ -36,7 +48,21 @@ export const getTeamByIdRoute = createRoute({
   tags: ['team'],
   method: 'get',
   path: '/team/{teamId}',
-  responses: {},
+  request: {
+    params: TeamIdParam,
+  },
+  responses: {
+    200: {
+      description: 'Get team by id',
+      content: {
+        'application/json': {
+          schema: TeamSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
 });
 
 export const postCreateTeamRoute = createRoute({
