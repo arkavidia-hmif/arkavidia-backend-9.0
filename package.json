@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "format": "eslint src --ext .ts --fix",
     "pretty": "prettier . --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seed": "bun run src/db/seed/seed.ts"
   },
   "dependencies": {
     "@hono/zod-openapi": "^0.18.3",
