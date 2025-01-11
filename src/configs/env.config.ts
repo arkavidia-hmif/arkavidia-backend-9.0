@@ -5,8 +5,8 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().url(),
   ALLOWED_ORIGINS: z
     .string()
-    .default('["http://localhost:5173"]')
-    .transform((value) => JSON.parse(value))
+    .default('["http://localhost:3000"]')
+    .transform((value) => JSON.parse(value.replace(/\\/g, "")))
     .pipe(z.array(z.string().url())),
   ACCESS_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_EXPIRATION: z.coerce.number(),
@@ -32,4 +32,7 @@ if (!result.success) {
   process.exit(1);
 }
 
+
 export const env = result.data;
+
+console.log(env.ALLOWED_ORIGINS)
