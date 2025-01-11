@@ -6,7 +6,7 @@ const EnvSchema = z.object({
   ALLOWED_ORIGINS: z
     .string()
     .default('["http://localhost:3000"]')
-    .transform((value) => JSON.parse(value.replace(/\\/g, "")))
+    .transform((value) => JSON.parse(value.replace(/\\/g, '')))
     .pipe(z.array(z.string().url())),
   ACCESS_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_EXPIRATION: z.coerce.number(),
@@ -32,7 +32,4 @@ if (!result.success) {
   process.exit(1);
 }
 
-
 export const env = result.data;
-
-console.log(env.ALLOWED_ORIGINS)
