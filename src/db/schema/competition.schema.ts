@@ -69,6 +69,7 @@ export const competitionSubmissionRequirement = pgTable(
       .references(() => competition.id),
 
     typeName: text('type_name').notNull(),
+    deadline: timestamp('deadline'),
   },
 );
 
