@@ -1,6 +1,9 @@
 import { db } from '~/db/drizzle';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
-import { getCompetitionById, initializelCompetitionSubmissions} from '~/repositories/competition.repository';
+import {
+  getCompetitionById,
+  initializelCompetitionSubmissions,
+} from '~/repositories/competition.repository';
 import {
   getTeamMemberCount,
   isUserInOtherTeam,
