@@ -1,7 +1,7 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 import { competitionAnnouncement, competitionTimeline } from '~/db/schema';
+import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 
 export const GetCompetitionSubmissionQuerySchema = z.object({
   page: z
@@ -77,7 +77,6 @@ export const GetCompetitionTimeQuerySchema = z.object({
       },
     }),
 });
-
 
 export const CompetitionSubmissionSchema = z
   .object({

@@ -5,8 +5,8 @@ import {
   CompetitionIdParam,
   CompetitionParticipantSchema,
   CompetitionSubmissionSchema,
-  GetCompetitionSubmissionQuerySchema,
   CompetitionTimelineSchema,
+  GetCompetitionSubmissionQuerySchema,
   GetCompetitionTimeQuerySchema,
   PostCompAnnouncementBodySchema,
 } from '~/types/competition.type';

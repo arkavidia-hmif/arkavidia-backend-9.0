@@ -9,8 +9,8 @@ import {
   competitionAnnouncement,
   competitionSubmission,
   competitionSubmissionRequirement,
-  media,
   competitionTimeline,
+  media,
   team,
   teamMember,
 } from '../db/schema';
