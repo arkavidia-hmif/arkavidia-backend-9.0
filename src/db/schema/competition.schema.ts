@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm';
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -12,6 +13,9 @@ import { createId, getNow } from '../../utils/drizzle-schema-util';
 import { media } from './media.schema';
 import { team } from './team.schema';
 import { user } from './user.schema';
+
+/** Enum */
+export const stageEnum = pgEnum('phase_enum', ['pre-eliminary', 'final']);
 
 /** Main Compeitition Table */
 export const competition = pgTable('competition', {
@@ -67,7 +71,7 @@ export const competitionSubmissionRequirement = pgTable(
     competitionId: text('competition_id')
       .notNull()
       .references(() => competition.id),
-
+    stage: stageEnum('stage').notNull().default('pre-eliminary'),
     typeName: text('type_name').notNull(),
     deadline: timestamp('deadline'),
   },
@@ -132,7 +136,8 @@ export const competitionTimeline = pgTable('competition_timeline', {
     .notNull()
     .references(() => competition.id),
   title: text('title').notNull().notNull(),
-  date: timestamp('date').notNull(),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date'),
   showOnLanding: boolean('show_on_landing').notNull().default(false),
   showTime: boolean('show_tile').notNull().default(false),
 });
