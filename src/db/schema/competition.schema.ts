@@ -2,7 +2,6 @@ import { relations } from 'drizzle-orm';
 import {
   boolean,
   integer,
-  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -27,7 +26,6 @@ export const competition = pgTable('competition', {
 export const competitionRelations = relations(competition, ({ many }) => ({
   team: many(team),
   announcement: many(competitionAnnouncement),
-  submission: many(competitionSubmission),
   timeline: many(competitionTimeline),
 }));
 
@@ -60,11 +58,26 @@ export const competitionAnnouncementRelations = relations(
   }),
 );
 
-/** Competition Submissions Table */
+/** Competition Submission File Type **/
+
+export const competitionSubmissionRequirement = pgTable(
+  'competition_submission_requirement',
+  {
+    typeId: text('type_id').primaryKey().$defaultFn(createId),
+    competitionId: text('competition_id')
+      .notNull()
+      .references(() => competition.id),
+
+    typeName: text('type_name').notNull(),
+    deadline: timestamp('deadline'),
+  },
+);
+
+/** Competition Submissions Table ( not used anymore, changed by competition_submission_requirement)
 export const competitionSubmissionTypeEnum = pgEnum(
   'competition_submission_type_enum',
   ['uiux_poster'],
-);
+); **/
 
 export const competitionSubmission = pgTable(
   'competition_submission',
@@ -72,26 +85,24 @@ export const competitionSubmission = pgTable(
     teamId: text('team_id')
       .notNull()
       .references(() => team.id),
-    competitionId: text('competition_id')
+    typeId: text('type_id')
       .notNull()
-      .references(() => competition.id),
-    type: competitionSubmissionTypeEnum('type').notNull(),
-    mediaId: text('media_id').notNull(),
+      .references(() => competitionSubmissionRequirement.typeId),
+    mediaId: text('media_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    judgeResponse: text('judge_response'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').$onUpdate(getNow),
   },
   (t) => ({
-    pk: primaryKey(t.teamId, t.type),
+    pk: primaryKey(t.teamId, t.typeId),
   }),
 );
 
 export const competitionSubmissionRelations = relations(
   competitionSubmission,
   ({ one }) => ({
-    competition: one(competition, {
-      fields: [competitionSubmission.competitionId],
-      references: [competition.id],
-    }),
     team: one(team, {
       fields: [competitionSubmission.teamId],
       references: [team.id],
@@ -100,6 +111,17 @@ export const competitionSubmissionRelations = relations(
       fields: [competitionSubmission.mediaId],
       references: [media.id],
     }),
+    requirement: one(competitionSubmissionRequirement, {
+      fields: [competitionSubmission.typeId],
+      references: [competitionSubmissionRequirement.typeId],
+    }),
+  }),
+);
+
+export const competitionSubmissionRequirementRelations = relations(
+  competitionSubmissionRequirement,
+  ({ many }) => ({
+    submissions: many(competitionSubmission),
   }),
 );
 

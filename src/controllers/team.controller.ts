@@ -1,6 +1,9 @@
 import { db } from '~/db/drizzle';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
-import { getCompetitionById } from '~/repositories/competition.repository';
+import {
+  getCompetitionById,
+  initializelCompetitionSubmissions,
+} from '~/repositories/competition.repository';
 import {
   getTeamMemberCount,
   isUserInOtherTeam,
@@ -108,6 +111,7 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
     const team = await createTeam(db, competitionId, name);
     const userId = c.var.user.id;
     await insertUserToTeam(db, team.id, userId);
+    await initializelCompetitionSubmissions(db, team.id, competitionId);
     return c.json(team, 200);
   } catch (error) {
     if (error instanceof Error) {
