@@ -1,0 +1,2 @@
+ALTER TABLE "team_member" ADD CONSTRAINT "team_member_user_id_team_id_pk" PRIMARY KEY("user_id","team_id");--> statement-breakpoint
+ALTER TABLE "competition_submission" ADD COLUMN "judge_response" text;

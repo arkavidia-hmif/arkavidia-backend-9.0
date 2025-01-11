@@ -7,10 +7,18 @@ import type { Database } from '../db/drizzle';
 import {
   competition,
   competitionAnnouncement,
+  competitionSubmission,
+  competitionSubmissionRequirement,
   competitionTimeline,
+  media,
   team,
   teamMember,
 } from '../db/schema';
+
+export const getAllCompetitions = async (db: Database) => {
+  const competitions = await db.query.competition.findMany();
+  return competitions.map((competition) => competition.id);
+};
 
 export const getCompetitionParticipantNumber = async (
   db: Database,
@@ -69,6 +77,80 @@ export const getCompetitionById = async (
   return { maxParticipants: result?.maxParticipants };
 };
 
+export const getCompetitionSubmissionById = async (
+  db: Database,
+  competitionId: string,
+  options: {
+    page: number;
+    limit: number;
+  },
+) => {
+  const { page, limit } = options;
+  const offset = (page - 1) * limit;
+
+  const totalTeam = (
+    await db.query.team.findMany({
+      where: eq(team.competitionId, competitionId),
+    })
+  ).length;
+
+  const resultTeam = await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    limit,
+    offset,
+  });
+
+  const result = [];
+  for (const team of resultTeam) {
+    const submissions = await db.query.competitionSubmission.findMany({
+      where: eq(competitionSubmission.teamId, team.id),
+    });
+
+    const documents = [];
+    for (const submission of submissions) {
+      const mediaInfo = submission.mediaId
+        ? await db.query.media.findFirst({
+            where: eq(media.id, submission.mediaId),
+          })
+        : null;
+
+      // optimize this ???
+      const typeName =
+        await db.query.competitionSubmissionRequirement.findFirst({
+          where: eq(competitionSubmissionRequirement.typeId, submission.typeId),
+        });
+
+      documents.push({
+        mediaInfo,
+        created_at: submission.createdAt,
+        updated_at: submission.updatedAt,
+        type_name: typeName?.typeName,
+      });
+    }
+
+    result.push({
+      teamId: team.id,
+      teamName: team.name,
+      documents,
+    });
+  }
+
+  const totalPages = Math.ceil(totalTeam / limit);
+  const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
+  const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
+
+  return {
+    pagination: {
+      currentPage: page,
+      totalTeam,
+      totalPages,
+      next,
+      prev,
+    },
+    result,
+  };
+};
+
 export const getCompetition = async (db: Database, competitionId: string) => {
   const result = await db.query.competition.findFirst({
     where: eq(competition.id, competitionId),
@@ -102,6 +184,51 @@ export const postAnnouncement = async (
     })
     .returning()
     .then(first);
+};
+
+export const initializelCompetitionSubmissions = async (
+  db: Database,
+  teamId: string,
+  competitionId: string,
+) => {
+  const requirementList = await getCompetitionRequirementById(
+    db,
+    competitionId,
+  );
+
+  const submissionResult = [];
+  for (const requirement of requirementList) {
+    // do the insertion
+    const res = await postCompetitionSubmission(db, teamId, requirement.typeId);
+    submissionResult.push(res);
+  }
+
+  return submissionResult;
+};
+
+export const getCompetitionRequirementById = async (
+  db: Database,
+  competitionId: string,
+) => {
+  const result = await db.query.competitionSubmissionRequirement.findMany({
+    where: eq(competitionSubmissionRequirement.competitionId, competitionId),
+  });
+
+  return result;
+};
+
+export const postCompetitionSubmission = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+) => {
+  return await db
+    .insert(competitionSubmission)
+    .values({
+      teamId: teamId,
+      typeId: typeId,
+    })
+    .returning();
 };
 
 export const getCompetitionTimelines = async (db: Database, userId: string) => {

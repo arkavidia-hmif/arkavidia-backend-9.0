@@ -5,7 +5,7 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().url(),
   ALLOWED_ORIGINS: z
     .string()
-    .default('["http://localhost:5173"]')
+    .default('["http://localhost:3000"]')
     .transform((value) => JSON.parse(value.replace(/\\/g, '')))
     .pipe(z.array(z.string().url())),
   ACCESS_TOKEN_SECRET: z.string(),

@@ -1,8 +1,28 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { competitionAnnouncement, competitionTimeline } from '~/db/schema';
+import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 
-import { TeamSchema } from './team.type';
+export const GetCompetitionSubmissionQuerySchema = z.object({
+  page: z
+    .string()
+    .default('1')
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+  limit: z
+    .string()
+    .default('10')
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+});
 
 export const AnnouncementSchema = createSelectSchema(competitionAnnouncement, {
   createdAt: z.union([z.string(), z.date()]),
@@ -57,6 +77,19 @@ export const GetCompetitionTimeQuerySchema = z.object({
       },
     }),
 });
+
+export const CompetitionSubmissionSchema = z
+  .object({
+    pagination: z.object({
+      currentPage: z.number().min(1),
+      totalItems: z.number().nonnegative(),
+      totalPages: z.number().nonnegative(),
+      next: z.string().url().nullable(),
+      prev: z.string().url().nullable(),
+    }),
+    result: z.array(TeamSubmissionSchema).min(1),
+  })
+  .openapi('CompetitionSubmission');
 
 export const CompetitionTimelineSchema = z.array(
   createSelectSchema(competitionTimeline).openapi('CompetitionTimeline'),

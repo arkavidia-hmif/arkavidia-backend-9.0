@@ -1,0 +1,1 @@
+ALTER TABLE "competition_submission" ADD CONSTRAINT "competition_submission_team_id_type_id_pk" PRIMARY KEY("team_id","type_id");
