@@ -6,7 +6,7 @@ const EnvSchema = z.object({
   ALLOWED_ORIGINS: z
     .string()
     .default('["http://localhost:5173"]')
-    .transform((value) => JSON.parse(value))
+    .transform((value) => JSON.parse(value.replace(/\\/g, '')))
     .pipe(z.array(z.string().url())),
   ACCESS_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_EXPIRATION: z.coerce.number(),
