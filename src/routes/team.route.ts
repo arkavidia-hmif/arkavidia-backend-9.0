@@ -7,6 +7,7 @@ import {
   PostTeamBodySchema,
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
+  TeamCodeQuery,
   TeamCompetitionDetailSchema,
   TeamCompetitionSchema,
   TeamIdParam,
@@ -21,7 +22,21 @@ export const joinTeamByCodeRoute = createRoute({
   tags: ['team'],
   method: 'get',
   path: '/team/join',
-  responses: {},
+  request: {
+    query: TeamCodeQuery,
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TeamSchema,
+        },
+      },
+      description: 'Successfully joined a team',
+    },
+    400: createErrorResponse('UNION', 'Bad Request Error'),
+    500: createErrorResponse('GENERIC', 'Internal Server Error'),
+  },
 });
 
 export const getTeamsRoute = createRoute({
