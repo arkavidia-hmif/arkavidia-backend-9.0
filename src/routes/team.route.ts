@@ -6,7 +6,7 @@ import {
   PostTeamBodySchema,
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
-  TeamCodeParam,
+  TeamCodeQuery,
   TeamCompetitionDetailSchema,
   TeamCompetitionSchema,
   TeamIdParam,
@@ -22,7 +22,7 @@ export const joinTeamByCodeRoute = createRoute({
   method: 'get',
   path: '/team/join',
   request: {
-    params: TeamCodeParam,
+    query: TeamCodeQuery,
   },
   responses: {
     200: {

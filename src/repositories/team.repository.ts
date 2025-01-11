@@ -175,12 +175,21 @@ export const insertUserToTeam = async (
       throw new Error('The team is already full');
     }
 
+    const existingLeader = await db.query.teamMember.findFirst({
+      where: and(
+        eq(teamMember.teamId, teamId),
+        eq(teamMember.role, 'leader'), // Check for existing leader in the team
+      ),
+    });
+
+    const roleNew = existingLeader ? 'member' : 'leader';
+
     const [insertedMember] = await tx
       .insert(teamMember)
       .values({
         teamId,
         userId,
-        role: 'leader',
+        role: roleNew,
       })
       .returning();
 

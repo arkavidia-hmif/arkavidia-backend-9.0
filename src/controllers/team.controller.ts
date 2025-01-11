@@ -1,7 +1,6 @@
 import { db } from '~/db/drizzle';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
-  getAllCompetitions,
   getCompetitionById,
 } from '~/repositories/competition.repository';
 import {
@@ -200,7 +199,7 @@ teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
 });
 
 teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
-  const { teamCode } = c.req.valid('param');
+  const { teamCode } = c.req.valid('query');
   const userId = c.var.user.id;
 
   // Check if the team exists
@@ -210,17 +209,15 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
   }
 
   // Get all competition IDs
-  const competitionIds = await getAllCompetitions(db);
+  const competitionId = team.competitionId;
 
   // Check if user is in any other team across all competitions
-  for (const competitionId of competitionIds) {
-    const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
-    if (isInOtherTeam) {
-      return c.json(
-        { error: 'User is already in another team for a competition!' },
-        400,
-      );
-    }
+  const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
+  if (isInOtherTeam) {
+    return c.json(
+      { error: 'User is already in another team for a competition!' },
+      400,
+    );
   }
 
   // Ensure team is not full
@@ -232,6 +229,8 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   // Add user to  team
   const newTeamMember = await insertUserToTeam(db, team.id, userId);
+
+  // Make user to member if leader exist
 
   return c.json(newTeamMember, 200);
 });
