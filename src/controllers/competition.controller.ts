@@ -4,11 +4,15 @@ import {
   getAnnouncementsByCompetitionId,
   getCompetition,
   getCompetitionParticipant,
+  getCompetitionTimelines,
+  getCompetitionTimelinesByCompetitionId,
   postAnnouncement,
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
   getCompetitionParticipantRoute,
+  getCompetitionTimeLineByCompetitionIdRoute,
+  getCompetitionTimelineRoute,
   postAdminCompAnnouncementRoute,
 } from '~/routes/competition.route';
 import { createAuthRouter } from '~/utils/router-factory';
@@ -77,5 +81,24 @@ competitionProtectedRouter.openapi(
       body,
     );
     return c.json(announcement, 200);
+  },
+);
+
+competitionProtectedRouter.openapi(getCompetitionTimelineRoute, async (c) => {
+  const user = c.get('user');
+  const userId = user.id;
+  const timelines = await getCompetitionTimelines(db, userId);
+  return c.json(timelines, 200);
+});
+
+competitionProtectedRouter.openapi(
+  getCompetitionTimeLineByCompetitionIdRoute,
+  async (c) => {
+    const { competitionId } = c.req.valid('param');
+    const timelines = await getCompetitionTimelinesByCompetitionId(
+      db,
+      competitionId,
+    );
+    return c.json(timelines, 200);
   },
 );

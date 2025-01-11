@@ -4,7 +4,13 @@ import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 
 import type { Database } from '../db/drizzle';
-import { competition, competitionAnnouncement, team } from '../db/schema';
+import {
+  competition,
+  competitionAnnouncement,
+  competitionTimeline,
+  team,
+  teamMember,
+} from '../db/schema';
 
 export const getCompetitionParticipantNumber = async (
   db: Database,
@@ -96,4 +102,30 @@ export const postAnnouncement = async (
     })
     .returning()
     .then(first);
+};
+
+export const getCompetitionTimelines = async (db: Database, userId: string) => {
+  // Get user's competitions
+  const userTeams = await db.query.team.findMany({
+    where: eq(teamMember.userId, userId),
+    with: {
+      competition: {
+        with: {
+          timeline: true,
+        },
+      },
+    },
+  });
+
+  return userTeams.flatMap((team) => team.competition.timeline);
+};
+
+export const getCompetitionTimelinesByCompetitionId = async (
+  db: Database,
+  competitionId: string,
+) => {
+  const result = await db.query.competitionTimeline.findMany({
+    where: eq(competitionTimeline.competitionId, competitionId),
+  });
+  return result;
 };

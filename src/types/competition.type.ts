@@ -1,6 +1,6 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { competitionAnnouncement } from '~/db/schema';
+import { competitionAnnouncement, competitionTimeline } from '~/db/schema';
 
 import { TeamSchema } from './team.type';
 
@@ -57,3 +57,7 @@ export const GetCompetitionTimeQuerySchema = z.object({
       },
     }),
 });
+
+export const CompetitionTimelineSchema = z.array(
+  createSelectSchema(competitionTimeline).openapi('CompetitionTimeline'),
+);
