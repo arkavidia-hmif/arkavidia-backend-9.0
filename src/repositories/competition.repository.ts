@@ -9,6 +9,7 @@ import {
   competitionAnnouncement,
   competitionSubmission,
   competitionSubmissionRequirement,
+  media,
   team,
 } from '../db/schema';
 
@@ -80,26 +81,61 @@ export const getCompetitionSubmissionById = async (
   const { page, limit } = options;
   const offset = (page - 1) * limit;
 
-  const result = await db.query.competitionSubmission.findMany({
-    where: eq(competitionSubmission.competitionId, competitionId),
-    limit,
-    offset,
-  });
-
-  const totalItems = (
-    await db.query.competitionSubmission.findMany({
+  const totalTeam = (
+    await db.query.team.findMany({
       where: eq(team.competitionId, competitionId),
     })
   ).length;
 
-  const totalPages = Math.ceil(totalItems / limit);
+  const resultTeam = await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    limit,
+    offset,
+  });
+
+  const result = [];
+  for (const team of resultTeam) {
+    const submissions = await db.query.competitionSubmission.findMany({
+      where: eq(competitionSubmission.teamId, team.id),
+    });
+
+    const documents = [];
+    for (const submission of submissions) {
+      const mediaInfo = submission.mediaId
+        ? await db.query.media.findFirst({
+            where: eq(media.id, submission.mediaId),
+          })
+        : null;
+
+      // optimize this ???
+      const typeName =
+        await db.query.competitionSubmissionRequirement.findFirst({
+          where: eq(competitionSubmissionRequirement.typeId, submission.typeId),
+        });
+
+      documents.push({
+        mediaInfo,
+        created_at: submission.createdAt,
+        updated_at: submission.updatedAt,
+        type_name: typeName?.typeName,
+      });
+    }
+
+    result.push({
+      teamId: team.id,
+      teamName: team.name,
+      documents,
+    });
+  }
+
+  const totalPages = Math.ceil(totalTeam / limit);
   const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
   const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
 
   return {
     pagination: {
       currentPage: page,
-      totalItems,
+      totalTeam,
       totalPages,
       next,
       prev,
@@ -155,13 +191,8 @@ export const initializelCompetitionSubmissions = async (
 
   const submissionResult = [];
   for (const requirement of requirementList) {
-    // do the insertion ?
-    const res = await postCompetitionSubmission(
-      db,
-      teamId,
-      requirement.typeId,
-      competitionId,
-    );
+    // do the insertion
+    const res = await postCompetitionSubmission(db, teamId, requirement.typeId);
     submissionResult.push(res);
   }
 
@@ -183,14 +214,12 @@ export const postCompetitionSubmission = async (
   db: Database,
   teamId: string,
   typeId: string,
-  competitionId: string,
 ) => {
   return await db
     .insert(competitionSubmission)
     .values({
       teamId: teamId,
       typeId: typeId,
-      competitionId: competitionId,
     })
     .returning();
 };

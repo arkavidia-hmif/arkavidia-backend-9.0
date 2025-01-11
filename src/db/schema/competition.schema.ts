@@ -82,9 +82,6 @@ export const competitionSubmission = pgTable('competition_submission', {
   teamId: text('team_id')
     .notNull()
     .references(() => team.id),
-  competitionId: text('competition_id')
-    .notNull()
-    .references(() => competition.id),
   typeId: text('type_id')
     .notNull()
     .references(() => competitionSubmissionRequirement.typeId),
@@ -98,10 +95,6 @@ export const competitionSubmission = pgTable('competition_submission', {
 export const competitionSubmissionRelations = relations(
   competitionSubmission,
   ({ one }) => ({
-    competition: one(competition, {
-      fields: [competitionSubmission.competitionId],
-      references: [competition.id],
-    }),
     team: one(team, {
       fields: [competitionSubmission.teamId],
       references: [team.id],
