@@ -16,16 +16,34 @@ import { createAuthRouter } from '~/utils/router-factory';
 export const teamMemberProtectedRouter = createAuthRouter();
 
 teamMemberProtectedRouter.openapi(getTeamMemberRoute, async (c) => {
-  return c.json(
-    await getTeamMemberById(db, c.req.valid('param').teamId, c.var.user.id, {
-      nisn: true,
-      user: true,
-      poster: true,
-      twibbon: true,
-      kartu: true,
-    }),
-    200,
-  );
+  try {
+    return c.json(
+      await getTeamMemberById(db, c.req.valid('param').teamId, c.var.user.id, {
+        nisn: true,
+        user: true,
+        poster: true,
+        twibbon: true,
+        kartu: true,
+      }),
+      200,
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          error: error.message,
+        },
+        500,
+      );
+    }
+
+    return c.json(
+      {
+        error: 'Unexpected error occured',
+      },
+      500,
+    );
+  }
 });
 
 teamMemberProtectedRouter.openapi(postTeamMemberDocumentRoute, async (c) => {

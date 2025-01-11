@@ -26,8 +26,8 @@ export const getTeamMemberById = async (
   userId: string,
   options?: TeamMemberRelationOption,
 ) => {
-  return await db.query.teamMember.findFirst({
-    where: and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)),
+  const teamMembers = await db.query.teamMember.findMany({
+    where: and(eq(teamMember.teamId, teamId)),
     with: {
       user: options?.user ? true : undefined,
       nisn: options?.nisn ? true : undefined,
@@ -36,6 +36,13 @@ export const getTeamMemberById = async (
       twibbon: options?.twibbon ? true : undefined,
     },
   });
+
+  const isUserInTeam = teamMembers.some((member) => member.userId === userId);
+  if (!isUserInTeam) {
+    throw new Error("User isn't inside team");
+  }
+
+  return teamMembers;
 };
 
 export const updateTeamMemberDocument = async (
