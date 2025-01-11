@@ -147,7 +147,7 @@ export const isUserInOtherTeam = async (
     .innerJoin(team, eq(teamMember.teamId, team.id))
     .where(where);
 
-  console.log('existingTeamMember', existingTeamMember);
+  //console.log('existingTeamMember', existingTeamMember);
 
   // Check if the team is in the same competition
   return !!existingTeamMember.length;
