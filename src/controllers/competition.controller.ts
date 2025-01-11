@@ -5,6 +5,7 @@ import {
   getCompetition,
   getCompetitionParticipant,
   getCompetitionSubmissionById,
+  getCompetitionSubmissionByTeamId,
   getCompetitionTimelines,
   getCompetitionTimelinesByCompetitionId,
   postAnnouncement,
@@ -13,6 +14,7 @@ import {
   getAdminCompAnnouncementRoute,
   getCompetitionParticipantRoute,
   getCompetitionSubmissionRoute,
+  getCompetitionSubmissionTeamRoute,
   getCompetitionTimeLineByCompetitionIdRoute,
   getCompetitionTimelineRoute,
   postAdminCompAnnouncementRoute,
@@ -38,6 +40,20 @@ competitionProtectedRouter.openapi(getCompetitionSubmissionRoute, async (c) => {
 
   return c.json(competitionSubmission, 200);
 });
+
+competitionProtectedRouter.openapi(
+  getCompetitionSubmissionTeamRoute,
+  async (c) => {
+    const { teamId } = c.req.valid('param');
+
+    const competitionSubmission = await getCompetitionSubmissionByTeamId(
+      db,
+      teamId,
+    );
+
+    return c.json(competitionSubmission, 200);
+  },
+);
 
 competitionProtectedRouter.openapi(
   getCompetitionParticipantRoute,

@@ -10,6 +10,7 @@ import {
   GetCompetitionTimeQuerySchema,
   PostCompAnnouncementBodySchema,
 } from '~/types/competition.type';
+import { TeamIdParam, TeamSubmissionSchema } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getCompetitionSubmissionRoute = createRoute({
@@ -27,6 +28,28 @@ export const getCompetitionSubmissionRoute = createRoute({
       content: {
         'application/json': {
           schema: CompetitionSubmissionSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getCompetitionSubmissionTeamRoute = createRoute({
+  operationId: 'getCompetitionSubmissionTeam',
+  tags: ['admin', 'competition'],
+  method: 'get',
+  path: '/admin/team/{teamId}/submission',
+  request: {
+    params: TeamIdParam,
+  },
+  responses: {
+    200: {
+      description: "Fetched team's submission.",
+      content: {
+        'application/json': {
+          schema: TeamSubmissionSchema,
         },
       },
     },

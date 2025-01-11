@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import type { z } from 'zod';
+import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 
@@ -75,6 +75,38 @@ export const getCompetitionById = async (
   });
 
   return { maxParticipants: result?.maxParticipants };
+};
+
+export const getCompetitionSubmissionByTeamId = async (
+  db: Database,
+  teamId: string,
+) => {
+  const submissions = await db.query.competitionSubmission.findMany({
+    where: eq(competitionSubmission.teamId, teamId),
+  });
+  const documents = [];
+
+  for (const submission of submissions) {
+    const mediaInfo = submission.mediaId
+      ? await db.query.media.findFirst({
+          where: eq(media.id, submission.mediaId),
+        })
+      : null;
+
+    const typeName = await db.query.competitionSubmissionRequirement.findFirst({
+      where: eq(competitionSubmissionRequirement.typeId, submission.typeId),
+    });
+    documents.push({
+      mediaInfo,
+      created_at: submission.createdAt,
+      updated_at: submission.updatedAt,
+      type_name: typeName?.typeName,
+    });
+  }
+
+  return {
+    documents,
+  };
 };
 
 export const getCompetitionSubmissionById = async (
