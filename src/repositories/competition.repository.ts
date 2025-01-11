@@ -12,6 +12,11 @@ import {
   teamMember,
 } from '../db/schema';
 
+export const getAllCompetitions = async (db: Database) => {
+  const competitions = await db.query.competition.findMany();
+  return competitions.map((competition) => competition.id);
+};
+
 export const getCompetitionParticipantNumber = async (
   db: Database,
   competitionId: string,

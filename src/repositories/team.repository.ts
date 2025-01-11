@@ -25,6 +25,16 @@ interface TeamRelationOption {
   paymentProof?: boolean;
 }
 
+export const getTeamByCode = async (
+  db: Database,
+  teamCode: string,
+  // options?: TeamRelationOption,
+) => {
+  return await db.query.team.findFirst({
+    where: eq(team.joinCode, teamCode),
+  });
+};
+
 export const getTeamById = async (
   db: Database,
   teamId: string,
@@ -165,12 +175,21 @@ export const insertUserToTeam = async (
       throw new Error('The team is already full');
     }
 
+    const existingLeader = await db.query.teamMember.findFirst({
+      where: and(
+        eq(teamMember.teamId, teamId),
+        eq(teamMember.role, 'leader'), // Check for existing leader in the team
+      ),
+    });
+
+    const roleNew = existingLeader ? 'member' : 'leader';
+
     const [insertedMember] = await tx
       .insert(teamMember)
       .values({
         teamId,
         userId,
-        role: 'leader',
+        role: roleNew,
       })
       .returning();
 

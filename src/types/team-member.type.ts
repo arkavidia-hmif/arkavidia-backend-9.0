@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { teamMember } from '~/db/schema/team-member.schema';
 
 import { MediaSchema } from './media.type';
+import { UserSchema } from './user.type';
 
 export const TeamAndUserIdParam = z.object({
   teamId: z.string().openapi({
@@ -22,6 +23,7 @@ export const TeamAndUserIdParam = z.object({
 export const TeamMemberSchema = createSelectSchema(teamMember)
   .merge(
     z.object({
+      user: UserSchema,
       nisn: MediaSchema,
       kartu: MediaSchema,
       poster: MediaSchema,
