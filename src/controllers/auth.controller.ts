@@ -20,6 +20,7 @@ import {
   bypassRegisterRoute,
   googleAuthCallbackRoute,
   googleAuthRoute,
+  googleLoginAccessTokenRoute,
   logoutRoute,
   selfRoute,
 } from '~/routes/auth.route';
@@ -150,6 +151,51 @@ authRouter.openapi(googleAuthRoute, async (c) => {
 
   // Redirect the user to Google Login
   return c.redirect(authorizationUrl.toString(), 302);
+});
+
+authRouter.openapi(googleLoginAccessTokenRoute, async (c) => {
+  const { accessToken } = c.req.valid('json');
+  const userInfoResponse = await fetch(
+    'https://www.googleapis.com/oauth2/v2/userinfo',
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+  const userInfo = GoogleUserSchema.parse(await userInfoResponse.json());
+  const userIdentity = await findUserIdentityByEmail(db, userInfo.email);
+  if (!userIdentity) {
+    // If user is not registered, then register it
+    const googleDataHash = await argon2.hash(JSON.stringify(userInfo));
+    const newUser = await createUserIdentity(db, {
+      email: userInfo.email,
+      hash: googleDataHash,
+      provider: 'google',
+      isVerified: true,
+      verificationToken: 'google',
+      verificationTokenExpiration: new Date(),
+    });
+
+    await updateUser(db, newUser.id, { fullName: userInfo.name });
+  }
+
+  const existingUserIdentity = (await findUserIdentityByEmail(
+    db,
+    userInfo.email,
+  )) as UserIdentity;
+  const existingUser = (await findUserByEmail(db, userInfo.email)) as User;
+
+  const accToken = await generateAccessToken(
+    existingUser,
+    existingUserIdentity,
+  );
+  return c.json(
+    {
+      accessToken: accToken,
+    },
+    200,
+  );
 });
 
 authRouter.openapi(googleAuthCallbackRoute, async (c) => {

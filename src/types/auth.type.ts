@@ -65,6 +65,10 @@ export const GoogleCallbackQuerySchema = z.object({
   }),
 });
 
+export const GoogleLoginAccessTokenSchema = z.object({
+  accessToken: z.string(),
+});
+
 export const AccessTokenSchema = z
   .object({
     accessToken: z.string(),

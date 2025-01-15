@@ -6,6 +6,7 @@ import {
   BasicVerifyAccountQuerySchema,
   BypassRegisterBodySchema,
   GoogleCallbackQuerySchema,
+  GoogleLoginAccessTokenSchema,
 } from '~/types/auth.type';
 import { UserSchema } from '~/types/user.type';
 
@@ -94,7 +95,7 @@ export const googleAuthRoute = createRoute({
   method: 'get',
   path: '/auth/google',
   responses: {
-    302: {
+    200: {
       description: 'Redirect to Google login',
       headers: {
         location: {
@@ -105,6 +106,34 @@ export const googleAuthRoute = createRoute({
         },
       },
     },
+  },
+});
+
+export const googleLoginAccessTokenRoute = createRoute({
+  operationId: 'googleLoginAccessToken',
+  tags: ['auth'],
+  method: 'post',
+  path: '/auth/google/login/accesstoken',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: GoogleLoginAccessTokenSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Google login access token successful',
+      content: {
+        'application/json': {
+          schema: AccessTokenSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
 
