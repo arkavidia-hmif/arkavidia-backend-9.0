@@ -1,6 +1,5 @@
 import { type Hook, OpenAPIHono, type z } from '@hono/zod-openapi';
-import { jwt } from 'hono/jwt';
-import { env } from '~/configs/env.config';
+import { authMiddleware } from '~/middlewares/auth.middleware';
 import { JWTPayloadSchema } from '~/types/auth.type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,20 +20,10 @@ export function createAuthRouter() {
     };
   }>({ defaultHook });
 
-  // JWT Hono Middleware
-  try {
-    authRouter.use(
-      jwt({
-        secret: env.ACCESS_TOKEN_SECRET,
-        cookie: 'khongguan',
-      }),
-    );
-  } catch (e) {
-    console.log(e);
-  }
+  authRouter.use(authMiddleware());
 
-  // Set user middleware
   authRouter.use(async (c, next) => {
+    console.log(c.var.jwtPayload);
     const payload = JWTPayloadSchema.parse(c.var.jwtPayload);
     c.set('user', payload);
     await next();
