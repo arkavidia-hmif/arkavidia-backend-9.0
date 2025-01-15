@@ -1,6 +1,4 @@
 import * as argon2 from 'argon2';
-import type { Context } from 'hono';
-import { deleteCookie, setCookie } from 'hono/cookie';
 import * as jwt from 'hono/jwt';
 import { env } from '~/configs/env.config';
 import { db } from '~/db/drizzle';
@@ -14,11 +12,7 @@ import {
   updateUserIdentity,
   updateUserVerification,
 } from '~/repositories/auth.repository';
-import {
-  findUserByEmail,
-  findUserById,
-  updateUser,
-} from '~/repositories/user.repository';
+import { findUserByEmail, updateUser } from '~/repositories/user.repository';
 import {
   basicLoginRoute,
   basicRegisterRoute,
@@ -27,7 +21,6 @@ import {
   googleAuthCallbackRoute,
   googleAuthRoute,
   logoutRoute,
-  refreshRoute,
   selfRoute,
 } from '~/routes/auth.route';
 import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
@@ -48,46 +41,6 @@ const generateAccessToken = async (user: User, userIdentity: UserIdentity) => {
   };
   const token = await jwt.sign(payload, env.ACCESS_TOKEN_SECRET);
   return token;
-};
-
-const generateRefreshToken = async (user: User) => {
-  const payload = {
-    userId: user.id,
-    exp: Math.floor(Date.now() / 1000) + env.REFRESH_TOKEN_EXPIRATION,
-  };
-  const token = await jwt.sign(payload, env.REFRESH_TOKEN_SECRET);
-  return token;
-};
-
-const setCookiesToken = async (
-  c: Context,
-  user: User,
-  userIdentity: UserIdentity,
-) => {
-  const accessToken = await generateAccessToken(user, userIdentity);
-  const refreshToken = await generateRefreshToken(user);
-
-  await updateUserIdentity(db, user.id, {
-    refreshToken,
-  });
-
-  setCookie(c, 'khongguan', accessToken, {
-    path: '/',
-    secure: true,
-    httpOnly: true,
-    maxAge: env.ACCESS_TOKEN_EXPIRATION,
-    sameSite: 'None',
-  });
-
-  setCookie(c, 'saltcheese', refreshToken, {
-    path: '/',
-    secure: true,
-    httpOnly: true,
-    maxAge: env.REFRESH_TOKEN_EXPIRATION,
-    sameSite: 'None',
-  });
-
-  return { accessToken, refreshToken };
 };
 
 /** BASIC AUTHENTICATION ROUTES (Email & Password) */
@@ -148,15 +101,10 @@ authRouter.openapi(basicVerifyAccountRoute, async (c) => {
     return c.json({ message: 'Something went wrong' }, 500);
 
   // Login user
-  const { accessToken, refreshToken } = await setCookiesToken(
-    c,
-    user,
-    userIdentity,
-  );
+  const accessToken = await generateAccessToken(user, userIdentity);
   return c.json(
     {
       accessToken,
-      refreshToken,
     },
     200,
   );
@@ -175,16 +123,10 @@ authRouter.openapi(basicLoginRoute, async (c) => {
   if (!userIdentity.isVerified)
     return c.json({ message: "User isn't verified" }, 400);
 
-  // Login user
-  const { accessToken, refreshToken } = await setCookiesToken(
-    c,
-    user,
-    userIdentity,
-  );
+  const accessToken = await generateAccessToken(user, userIdentity);
   return c.json(
     {
       accessToken,
-      refreshToken,
     },
     200,
   );
@@ -270,15 +212,13 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
   )) as UserIdentity;
   const existingUser = (await findUserByEmail(db, userInfo.email)) as User;
 
-  const { accessToken, refreshToken } = await setCookiesToken(
-    c,
+  const accessToken = await generateAccessToken(
     existingUser,
     existingUserIdentity,
   );
   return c.json(
     {
       accessToken,
-      refreshToken,
     },
     200,
   );
@@ -286,47 +226,12 @@ authRouter.openapi(googleAuthCallbackRoute, async (c) => {
 
 /** BOTH AUTH */
 authProtectedRouter.openapi(logoutRoute, async (c) => {
-  deleteCookie(c, 'khongguan');
-  deleteCookie(c, 'saltcheese');
-  await updateUserIdentity(db, c.var.user.id, {
-    refreshToken: null,
-  });
   return c.json({}, 204);
 });
 
 authProtectedRouter.openapi(selfRoute, async (c) => {
   const user = await UserSchema.parseAsync(c.var.user);
   return c.json(user, 200);
-});
-
-authRouter.openapi(refreshRoute, async (c) => {
-  const decoded = await jwt.verify(
-    c.req.valid('query').token,
-    env.REFRESH_TOKEN_SECRET,
-  );
-
-  const userIdentity = await findUserIdentityById(db, decoded.userId as string);
-  const user = await findUserById(db, decoded.userId as string);
-
-  if (!userIdentity || !user) return c.json({ message: 'User not found' }, 400);
-  if (userIdentity.refreshToken !== c.req.valid('query').token)
-    return c.json({ message: "Token doesn't match!" }, 400);
-  if (!userIdentity.isVerified)
-    return c.json({ message: "User isn't verified" }, 400);
-
-  // Login user
-  const { accessToken, refreshToken } = await setCookiesToken(
-    c,
-    user,
-    userIdentity,
-  );
-  return c.json(
-    {
-      accessToken,
-      refreshToken,
-    },
-    200,
-  );
 });
 
 /** BYPASS AUTHENTICATION ROUTES (Email & Password) */

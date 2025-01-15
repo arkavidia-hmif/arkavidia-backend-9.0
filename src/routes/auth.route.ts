@@ -1,12 +1,11 @@
 import { createRoute } from '@hono/zod-openapi';
 import {
-  AccessRefreshTokenSchema,
+  AccessTokenSchema,
   BasicLoginBodySchema,
   BasicRegisterBodySchema,
   BasicVerifyAccountQuerySchema,
   BypassRegisterBodySchema,
   GoogleCallbackQuerySchema,
-  RefreshTokenQuerySchema,
 } from '~/types/auth.type';
 import { UserSchema } from '~/types/user.type';
 
@@ -50,7 +49,7 @@ export const basicVerifyAccountRoute = createRoute({
       description: 'Verification sucessful, automatic login',
       content: {
         'application/json': {
-          schema: AccessRefreshTokenSchema,
+          schema: AccessTokenSchema,
         },
       },
     },
@@ -79,7 +78,7 @@ export const basicLoginRoute = createRoute({
       description: 'Login succesful',
       content: {
         'application/json': {
-          schema: AccessRefreshTokenSchema,
+          schema: AccessTokenSchema,
         },
       },
     },
@@ -121,7 +120,7 @@ export const googleAuthCallbackRoute = createRoute({
     200: {
       content: {
         'application/json': {
-          schema: AccessRefreshTokenSchema,
+          schema: AccessTokenSchema,
         },
       },
       description: 'Login succesful',
@@ -162,28 +161,6 @@ export const selfRoute = createRoute({
       },
     },
     401: createErrorResponse('GENERIC', 'Unauthorized'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
-  },
-});
-
-export const refreshRoute = createRoute({
-  operationId: 'refresh',
-  tags: ['auth'],
-  method: 'get',
-  path: '/auth/refresh',
-  request: {
-    query: RefreshTokenQuerySchema,
-  },
-  responses: {
-    200: {
-      description: 'Refresh access token,',
-      content: {
-        'application/json': {
-          schema: AccessRefreshTokenSchema,
-        },
-      },
-    },
-    400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
