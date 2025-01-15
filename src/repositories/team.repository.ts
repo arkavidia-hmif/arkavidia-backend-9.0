@@ -36,13 +36,13 @@ export const getTeamByCode = async (
 };
 
 export const getUserTeams = async (db: Database, userId: string) => {
-	return await db
-		.select({ team })
-		.from(team)
-		.innerJoin(teamMember, eq(team.id, teamMember.teamId))
-		.innerJoin(user, eq(teamMember.userId, user.id))
-		.innerJoin(competition, eq(team.competitionId, competition.id))
-		.where(eq(user.id, userId));
+  return await db
+    .select({ team })
+    .from(team)
+    .innerJoin(teamMember, eq(team.id, teamMember.teamId))
+    .innerJoin(user, eq(teamMember.userId, user.id))
+    .innerJoin(competition, eq(team.competitionId, competition.id))
+    .where(eq(user.id, userId));
 };
 
 export const getTeamById = async (
