@@ -1,8 +1,8 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
-import { competition, team, teamMember, user } from '~/db/schema';
+import { team, teamMember } from '~/db/schema';
 import type {
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
@@ -36,13 +36,21 @@ export const getTeamByCode = async (
 };
 
 export const getUserTeams = async (db: Database, userId: string) => {
-  return await db
-    .select({ team })
-    .from(team)
-    .innerJoin(teamMember, eq(team.id, teamMember.teamId))
-    .innerJoin(user, eq(teamMember.userId, user.id))
-    .innerJoin(competition, eq(team.competitionId, competition.id))
-    .where(eq(user.id, userId));
+  const userTeams = (
+    await db.query.teamMember.findMany({
+      where: eq(teamMember.userId, userId),
+      columns: {
+        teamId: true,
+      },
+    })
+  ).map((t) => t.teamId);
+
+  return await db.query.team.findMany({
+    where: inArray(team.id, userTeams),
+    with: {
+      competition: true,
+    },
+  });
 };
 
 export const getTeamById = async (

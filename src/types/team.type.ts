@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { competitionSubmission, team } from '~/db/schema';
+import { competition, competitionSubmission, team } from '~/db/schema';
 
 import { TeamMemberSchema } from './team-member.type';
 
@@ -10,7 +10,11 @@ export const PostTeamDocumentBodySchema = createInsertSchema(team).pick({
 
 export const TeamSchema = createSelectSchema(team, {
   createdAt: z.union([z.string(), z.date()]),
-}).openapi('Team');
+})
+  .extend({
+    competititon: createSelectSchema(competition).optional(),
+  })
+  .openapi('Team');
 
 export const TeamIdParam = z.object({ teamId: z.string() });
 
