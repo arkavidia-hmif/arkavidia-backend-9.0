@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -255,4 +255,24 @@ export const getCompetitionTimelinesByCompetitionId = async (
     where: eq(competitionTimeline.competitionId, competitionId),
   });
   return result;
+};
+
+export const updateSubmissionFeedback = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  feedback: string,
+) => {
+  return await db
+    .update(competitionSubmission)
+    .set({
+      judgeResponse: feedback,
+    })
+    .where(
+      and(
+        eq(competitionSubmission.teamId, teamId),
+        eq(competitionSubmission.typeId, typeId),
+      ),
+    )
+    .returning();
 };
