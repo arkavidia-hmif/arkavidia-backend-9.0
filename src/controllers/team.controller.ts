@@ -126,8 +126,14 @@ teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
 teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
   try {
     const { competitionId, name } = await c.req.json();
-    const team = await createTeam(db, competitionId, name);
     const userId = c.var.user.id;
+
+    const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
+    if (isInOtherTeam) {
+      throw new Error('User is already in another team for the competition!');
+    }
+
+    const team = await createTeam(db, competitionId, name);
     await insertUserToTeam(db, team.id, userId);
     await initializelCompetitionSubmissions(db, team.id, competitionId);
     return c.json(team, 200);

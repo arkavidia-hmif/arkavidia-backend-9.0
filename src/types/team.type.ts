@@ -54,9 +54,29 @@ export const PostTeamBodySchema = createInsertSchema(team).pick({
   name: true,
 });
 
-export const TeamSubmissionSchema = createSelectSchema(competitionSubmission, {
-  createdAt: z.union([z.string(), z.date()]),
-}).openapi('Team');
+export const TeamSubmissionSchema = createSelectSchema(
+  competitionSubmission,
+).extend({
+  file: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      createdAt: z.date(),
+      creatorId: z.string(),
+      bucket: z.string(),
+      type: z.string(),
+      url: z.string(),
+    })
+    .nullable(),
+  requirement: z.object({
+    competitionId: z.string(),
+    typeId: z.string(),
+    typeName: z.string(),
+    deadline: z.date().nullable(),
+  }),
+});
+
+type TeamSubmissionSchema = z.infer<typeof TeamSubmissionSchema>;
 
 export const CompetitionIdParam = z.object({
   competitionId: z.string().openapi({
@@ -69,12 +89,12 @@ export const CompetitionIdParam = z.object({
 
 export const TeamCompetitionSchema = z.array(
   TeamSchema.extend({
-    members: z.array(TeamMemberSchema),
+    teamMembers: z.array(TeamMemberSchema),
   }),
 );
 
 export const TeamCompetitionDetailSchema = TeamSchema.extend({
-  members: z.array(TeamMemberSchema),
+  teamMembers: z.array(TeamMemberSchema),
 });
 
 export const ListUserTeamSchema = z.array(TeamSchema);

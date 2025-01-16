@@ -1,5 +1,5 @@
-import { eq } from 'drizzle-orm';
-import type { z } from 'zod';
+import { and, eq } from 'drizzle-orm';
+import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 
@@ -75,6 +75,21 @@ export const getCompetitionById = async (
   });
 
   return { maxParticipants: result?.maxParticipants };
+};
+
+export const getCompetitionSubmissionByTeamId = async (
+  db: Database,
+  teamId: string,
+) => {
+  const submissions = await db.query.competitionSubmission.findMany({
+    where: eq(competitionSubmission.teamId, teamId),
+    with: {
+      file: true,
+      requirement: true,
+    },
+  });
+
+  return submissions;
 };
 
 export const getCompetitionSubmissionById = async (
@@ -255,4 +270,24 @@ export const getCompetitionTimelinesByCompetitionId = async (
     where: eq(competitionTimeline.competitionId, competitionId),
   });
   return result;
+};
+
+export const updateSubmissionFeedback = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  feedback: string,
+) => {
+  return await db
+    .update(competitionSubmission)
+    .set({
+      judgeResponse: feedback,
+    })
+    .where(
+      and(
+        eq(competitionSubmission.teamId, teamId),
+        eq(competitionSubmission.typeId, typeId),
+      ),
+    )
+    .returning();
 };

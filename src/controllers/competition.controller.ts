@@ -5,17 +5,21 @@ import {
   getCompetition,
   getCompetitionParticipant,
   getCompetitionSubmissionById,
+  getCompetitionSubmissionByTeamId,
   getCompetitionTimelines,
   getCompetitionTimelinesByCompetitionId,
   postAnnouncement,
+  updateSubmissionFeedback,
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
   getCompetitionParticipantRoute,
   getCompetitionSubmissionRoute,
+  getCompetitionSubmissionTeamRoute,
   getCompetitionTimeLineByCompetitionIdRoute,
   getCompetitionTimelineRoute,
   postAdminCompAnnouncementRoute,
+  updateSubmissionFeedbackRoute,
 } from '~/routes/competition.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -38,6 +42,20 @@ competitionProtectedRouter.openapi(getCompetitionSubmissionRoute, async (c) => {
 
   return c.json(competitionSubmission, 200);
 });
+
+competitionProtectedRouter.openapi(
+  getCompetitionSubmissionTeamRoute,
+  async (c) => {
+    const { teamId } = c.req.valid('param');
+
+    const competitionSubmission = await getCompetitionSubmissionByTeamId(
+      db,
+      teamId,
+    );
+
+    return c.json(competitionSubmission, 200);
+  },
+);
 
 competitionProtectedRouter.openapi(
   getCompetitionParticipantRoute,
@@ -117,3 +135,22 @@ competitionProtectedRouter.openapi(
     return c.json(timelines, 200);
   },
 );
+
+competitionProtectedRouter.get(
+  updateSubmissionFeedbackRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+
+competitionProtectedRouter.openapi(updateSubmissionFeedbackRoute, async (c) => {
+  const { teamId, typeId } = c.req.valid('param');
+  const { feedback } = c.req.valid('json');
+
+  // Update submission feedback
+  const submission = await updateSubmissionFeedback(
+    db,
+    teamId,
+    typeId,
+    feedback,
+  );
+  return c.json(submission, 200);
+});
