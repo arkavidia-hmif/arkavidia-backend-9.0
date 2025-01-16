@@ -143,10 +143,17 @@ export const createTeam = async (
     }
 
     if (maxParticipants <= participantCount) {
-      // return an error ?
       throw new Error(
         'Maximum number of participants reached for this competition.',
       );
+    }
+
+    const existingTeam = await db.query.team.findFirst({
+      where: eq(team.name, name),
+    });
+
+    if (existingTeam) {
+      throw new Error(`A team with the name "${name}" already exists.`);
     }
 
     const [insertedTeam] = await tx
