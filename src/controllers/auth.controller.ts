@@ -25,7 +25,6 @@ import {
   selfRoute,
 } from '~/routes/auth.route';
 import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
-import { UserSchema } from '~/types/user.type';
 
 import { createAuthRouter, createRouter } from '../utils/router-factory';
 
@@ -37,6 +36,7 @@ export const authProtectedRouter = createAuthRouter();
 const generateAccessToken = async (user: User, userIdentity: UserIdentity) => {
   const payload = {
     ...user,
+    role: userIdentity.role,
     provider: userIdentity.provider,
     exp: Math.floor(Date.now() / 1000) + env.ACCESS_TOKEN_EXPIRATION,
   };
@@ -276,8 +276,7 @@ authProtectedRouter.openapi(logoutRoute, async (c) => {
 });
 
 authProtectedRouter.openapi(selfRoute, async (c) => {
-  const user = await UserSchema.parseAsync(c.var.user);
-  return c.json(user, 200);
+  return c.json(c.var.user, 200);
 });
 
 /** BYPASS AUTHENTICATION ROUTES (Email & Password) */

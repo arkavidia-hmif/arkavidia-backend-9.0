@@ -10,7 +10,7 @@ export const UserIdentityUpdateSchema =
   createInsertSchema(userIdentity).partial();
 
 export const JWTPayloadSchema = UserSchema.merge(
-  UserIdentitySchema.pick({ provider: true }),
+  UserIdentitySchema.pick({ provider: true, role: true }),
 ).openapi('JWTPayload');
 
 export const BasicLoginBodySchema = z.object({

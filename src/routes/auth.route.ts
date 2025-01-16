@@ -7,8 +7,8 @@ import {
   BypassRegisterBodySchema,
   GoogleCallbackQuerySchema,
   GoogleLoginAccessTokenSchema,
+  JWTPayloadSchema,
 } from '~/types/auth.type';
-import { UserSchema } from '~/types/user.type';
 
 import { createErrorResponse } from '../utils/error-response-factory';
 
@@ -185,7 +185,7 @@ export const selfRoute = createRoute({
       description: 'Get self',
       content: {
         'application/json': {
-          schema: UserSchema,
+          schema: JWTPayloadSchema,
         },
       },
     },
