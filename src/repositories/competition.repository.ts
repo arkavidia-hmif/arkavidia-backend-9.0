@@ -83,30 +83,13 @@ export const getCompetitionSubmissionByTeamId = async (
 ) => {
   const submissions = await db.query.competitionSubmission.findMany({
     where: eq(competitionSubmission.teamId, teamId),
+    with: {
+      file: true,
+      requirement: true,
+    },
   });
-  const documents = [];
 
-  for (const submission of submissions) {
-    const mediaInfo = submission.mediaId
-      ? await db.query.media.findFirst({
-          where: eq(media.id, submission.mediaId),
-        })
-      : null;
-
-    const typeName = await db.query.competitionSubmissionRequirement.findFirst({
-      where: eq(competitionSubmissionRequirement.typeId, submission.typeId),
-    });
-    documents.push({
-      mediaInfo,
-      created_at: submission.createdAt,
-      updated_at: submission.updatedAt,
-      type_name: typeName?.typeName,
-    });
-  }
-
-  return {
-    documents,
-  };
+  return submissions;
 };
 
 export const getCompetitionSubmissionById = async (
