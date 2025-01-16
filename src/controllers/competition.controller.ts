@@ -8,6 +8,7 @@ import {
   getCompetitionTimelines,
   getCompetitionTimelinesByCompetitionId,
   postAnnouncement,
+  updateSubmissionFeedback,
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
@@ -16,6 +17,7 @@ import {
   getCompetitionTimeLineByCompetitionIdRoute,
   getCompetitionTimelineRoute,
   postAdminCompAnnouncementRoute,
+  updateSubmissionFeedbackRoute,
 } from '~/routes/competition.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -117,3 +119,22 @@ competitionProtectedRouter.openapi(
     return c.json(timelines, 200);
   },
 );
+
+competitionProtectedRouter.get(
+  updateSubmissionFeedbackRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+
+competitionProtectedRouter.openapi(updateSubmissionFeedbackRoute, async (c) => {
+  const { teamId, typeId } = c.req.valid('param');
+  const { feedback } = c.req.valid('json');
+
+  // Update submission feedback
+  const submission = await updateSubmissionFeedback(
+    db,
+    teamId,
+    typeId,
+    feedback,
+  );
+  return c.json(submission, 200);
+});

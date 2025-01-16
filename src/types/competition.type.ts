@@ -94,3 +94,22 @@ export const CompetitionSubmissionSchema = z
 export const CompetitionTimelineSchema = z.array(
   createSelectSchema(competitionTimeline).openapi('CompetitionTimeline'),
 );
+
+export const FeedbackSubmissionBodySchema = z.object({
+  feedback: z.string().min(1),
+});
+
+export const TeamAndTypeIdParam = z.object({
+  teamId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+  typeId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+});
