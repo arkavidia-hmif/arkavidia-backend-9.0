@@ -84,7 +84,7 @@ export const postAdminCompAnnouncementRoute = createRoute({
   operationId: 'postAdminCompAnnouncement',
   tags: ['admin', 'competition'],
   method: 'post',
-  path: '/api/admin/{competitionId}/announcement',
+  path: '/admin/{competitionId}/announcement',
   request: {
     params: CompetitionIdParam,
     body: {
