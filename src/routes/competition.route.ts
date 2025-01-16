@@ -6,9 +6,11 @@ import {
   CompetitionParticipantSchema,
   CompetitionSubmissionSchema,
   CompetitionTimelineSchema,
+  FeedbackSubmissionBodySchema,
   GetCompetitionSubmissionQuerySchema,
   GetCompetitionTimeQuerySchema,
   PostCompAnnouncementBodySchema,
+  TeamAndTypeIdParam,
 } from '~/types/competition.type';
 import { TeamIdParam, TeamSubmissionSchema } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
@@ -107,7 +109,7 @@ export const postAdminCompAnnouncementRoute = createRoute({
   operationId: 'postAdminCompAnnouncement',
   tags: ['admin', 'competition'],
   method: 'post',
-  path: '/api/admin/{competitionId}/announcement',
+  path: '/admin/{competitionId}/announcement',
   request: {
     params: CompetitionIdParam,
     body: {
@@ -168,6 +170,31 @@ export const getCompetitionTimeLineByCompetitionIdRoute = createRoute({
         },
       },
       description: 'Successfully fetched competition timelines',
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const updateSubmissionFeedbackRoute = createRoute({
+  operationId: 'updateSubmissionFeedback',
+  tags: ['admin', 'competition'],
+  method: 'put',
+  path: '/admin/submission/{submissionId}',
+  request: {
+    params: TeamAndTypeIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: FeedbackSubmissionBodySchema,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      description: 'Successfully updated submission feedback',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

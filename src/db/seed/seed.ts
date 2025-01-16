@@ -8,6 +8,7 @@ import { db } from '../drizzle';
 import { first } from '../helper';
 import {
   competition,
+  competitionTimeline,
   media,
   team,
   teamMember,
@@ -24,9 +25,7 @@ async function seedUsers() {
     const userInput = await new Promise<string>((resolve) => {
       process.stdin.resume();
       process.stdin.setEncoding('utf8');
-      process.stdout.write(
-        'Do you want to delete the competition table? (yes/no) ',
-      );
+      process.stdout.write('Do you want to delete the user table? (yes/no) ');
       process.stdin.on('data', (data) => {
         resolve(data.toString().trim());
       });
@@ -403,11 +402,88 @@ async function seedTeams() {
   }
 }
 
+async function seedTimelines() {
+  try {
+    // Ask if the user wants to delete the table
+    const userInput = await new Promise<string>((resolve) => {
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+      process.stdout.write(
+        'Do you want to delete the competition timeline table? (yes/no) ',
+      );
+      process.stdin.on('data', (data) => {
+        resolve(data.toString().trim());
+      });
+    });
+
+    if (userInput.toLowerCase() === 'yes') {
+      // Ask user for confirmation
+      const confirmInput = await new Promise<string>((resolve) => {
+        process.stdin.resume();
+        process.stdin.setEncoding('utf8');
+        process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
+        process.stdin.on('data', (data) => {
+          resolve(data.toString().trim());
+        });
+      });
+
+      if (confirmInput.toLowerCase() === 'yes') {
+        console.log('Deleting competition timeline table...');
+        await db.delete(team);
+        await db.delete(teamMember);
+        console.log('🗑️ Competition Timeline table deleted!');
+      }
+    }
+
+    const file = fs.readFileSync('src/db/seed/Seed - Timeline.csv', 'utf8');
+    const lines = file.split('\n');
+    lines.shift();
+    const timelines = lines.map(async (line) => {
+      const [competition_name, title, start_date, end_date, hide] = line
+        .replace('\r', '')
+        .split(',');
+
+      const competition_id = await db
+        .select()
+        .from(competition)
+        .where(eq(competition.title, competition_name))
+        .then(first);
+
+      const startDate = start_date ? new Date(start_date) : new Date();
+      const endDate = end_date ? new Date(end_date) : new Date();
+
+      const res = await db
+        .insert(competitionTimeline)
+        .values({
+          competitionId: competition_id?.id ?? '',
+          title,
+          startDate,
+          showOnLanding: hide === 'TRUE',
+          showTime: hide === 'TRUE',
+          endDate,
+        })
+        .returning()
+        .then(first);
+
+      return res;
+    });
+
+    // eslint-disable-next-line
+    const res = await Promise.all(timelines);
+
+    // console.log(res);
+    console.log('✅ Competition Timeline seeding success!');
+  } catch (err) {
+    throw '❌ Error seeding timelines!';
+  }
+}
+
 async function main() {
   await seedUsers();
   await seedCompetitions();
   await seedMedias();
   await seedTeams();
+  await seedTimelines();
 }
 
 if (require.main === module) {

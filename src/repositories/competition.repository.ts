@@ -271,3 +271,23 @@ export const getCompetitionTimelinesByCompetitionId = async (
   });
   return result;
 };
+
+export const updateSubmissionFeedback = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  feedback: string,
+) => {
+  return await db
+    .update(competitionSubmission)
+    .set({
+      judgeResponse: feedback,
+    })
+    .where(
+      and(
+        eq(competitionSubmission.teamId, teamId),
+        eq(competitionSubmission.typeId, typeId),
+      ),
+    )
+    .returning();
+};

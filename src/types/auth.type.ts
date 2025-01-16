@@ -65,25 +65,11 @@ export const GoogleCallbackQuerySchema = z.object({
   }),
 });
 
-export const AccessRefreshTokenSchema = z
+export const AccessTokenSchema = z
   .object({
     accessToken: z.string(),
-    refreshToken: z.string(),
   })
-  .openapi('AccessAndRefreshToken');
-
-export const AccessTokenSchema = AccessRefreshTokenSchema.pick({
-  accessToken: true,
-}).openapi('AccessToken');
-
-export const RefreshTokenQuerySchema = z.object({
-  token: z.string().openapi({
-    param: {
-      in: 'query',
-      required: true,
-    },
-  }),
-});
+  .openapi('AccessTokenSchema');
 
 export const GoogleTokenDataSchema = z.object({
   access_token: z.string(),

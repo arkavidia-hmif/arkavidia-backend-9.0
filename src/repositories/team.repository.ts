@@ -2,7 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
-import { team, teamMember } from '~/db/schema';
+import { competition, team, teamMember, user } from '~/db/schema';
 import type {
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
@@ -33,6 +33,16 @@ export const getTeamByCode = async (
   return await db.query.team.findFirst({
     where: eq(team.joinCode, teamCode),
   });
+};
+
+export const getUserTeams = async (db: Database, userId: string) => {
+  return await db
+    .select({ team })
+    .from(team)
+    .innerJoin(teamMember, eq(team.id, teamMember.teamId))
+    .innerJoin(user, eq(teamMember.userId, user.id))
+    .innerJoin(competition, eq(team.competitionId, competition.id))
+    .where(eq(user.id, userId));
 };
 
 export const getTeamById = async (
@@ -133,10 +143,17 @@ export const createTeam = async (
     }
 
     if (maxParticipants <= participantCount) {
-      // return an error ?
       throw new Error(
         'Maximum number of participants reached for this competition.',
       );
+    }
+
+    const existingTeam = await db.query.team.findFirst({
+      where: eq(team.name, name),
+    });
+
+    if (existingTeam) {
+      throw new Error(`A team with the name "${name}" already exists.`);
     }
 
     const [insertedTeam] = await tx

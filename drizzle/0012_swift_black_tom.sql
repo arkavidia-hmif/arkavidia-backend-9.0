@@ -1,0 +1,2 @@
+CREATE TYPE "public"."phase_enum" AS ENUM('pre-eliminary', 'final');--> statement-breakpoint
+ALTER TABLE "competition_submission_requirement" ADD COLUMN "phase" "phase_enum" DEFAULT 'pre-eliminary' NOT NULL;

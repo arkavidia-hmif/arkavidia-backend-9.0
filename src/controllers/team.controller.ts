@@ -16,14 +16,17 @@ import {
   getTeamByCode,
   getTeamById,
   getTeamsByCompetitionId,
+  getUserTeams,
   insertUserToTeam,
   updateTeamDocument,
   updateTeamVerification,
 } from '~/repositories/team.repository';
 import {
   deleteTeamMemberRoute,
+  getTeamByIdRoute,
   getTeamCompetitionRoute,
   getTeamDetailRoute,
+  getTeamsRoute,
   joinTeamByCodeRoute,
   postCreateTeamRoute,
   postQuitTeamRoute,
@@ -34,6 +37,21 @@ import {
 import { createAuthRouter } from '~/utils/router-factory';
 
 export const teamProtectedRouter = createAuthRouter();
+
+teamProtectedRouter.openapi(getTeamByIdRoute, async (c) => {
+  const { teamId } = c.req.valid('param');
+  const team = await getTeamById(db, teamId, {
+    teamMember: true,
+    competition: true,
+  });
+  return c.json(team, 200);
+});
+
+teamProtectedRouter.openapi(getTeamsRoute, async (c) => {
+  const user = c.var.user;
+  const teams = await getUserTeams(db, user.id);
+  return c.json(teams, 200);
+});
 
 teamProtectedRouter.openapi(putChangeTeamNameRoute, async (c) => {
   const { teamId } = c.req.valid('param');
@@ -108,8 +126,14 @@ teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
 teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
   try {
     const { competitionId, name } = await c.req.json();
-    const team = await createTeam(db, competitionId, name);
     const userId = c.var.user.id;
+
+    const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
+    if (isInOtherTeam) {
+      throw new Error('User is already in another team for the competition!');
+    }
+
+    const team = await createTeam(db, competitionId, name);
     await insertUserToTeam(db, team.id, userId);
     await initializelCompetitionSubmissions(db, team.id, competitionId);
     return c.json(team, 200);
