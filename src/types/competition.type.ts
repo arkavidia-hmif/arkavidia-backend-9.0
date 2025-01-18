@@ -133,7 +133,16 @@ export const CompetitionNameQuery = z.object({
     }),
 });
 
-export const CompetitionIdShema = z.object({
+export const CompetitionIdSchema = z.object({
   name: z.string(),
   id: z.string(),
+});
+
+export const CompetitionIdQuery = z.object({
+  competitionId: z.string().openapi({
+    param: {
+      in: 'query',
+      required: true,
+    },
+  }),
 });
