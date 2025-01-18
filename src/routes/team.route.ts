@@ -8,6 +8,7 @@ import {
   PostTeamVerificationBodySchema,
   TeamCodeBody,
   TeamCompetitionDetailSchema,
+  TeamDocumentVerificationResponseSchema,
   TeamIdParam,
   TeamMemberIdSchema,
   TeamSchema,
@@ -305,7 +306,7 @@ export const getTeamDocumentVerificationRoute = createRoute({
       description: 'Successfully get team submission',
       content: {
         'application/json': {
-          schema: TeamSchema,
+          schema: TeamDocumentVerificationResponseSchema,
         },
       },
     },

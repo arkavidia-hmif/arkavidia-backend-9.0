@@ -283,7 +283,7 @@ teamProtectedRouter.openapi(getTeamDocumentVerificationRoute, async (c) => {
   // document verification for each team member
   const documents = await getTeamDocumentVerification(db, teamId);
   // verificcation requirement (deadline etc)
-  const verificationRequirement = getVerificationRequirement(db, teamId);
+  const verificationRequirement = await getVerificationRequirement(db, teamId);
 
   return c.json({ documents, verificationRequirement }, 200);
 });

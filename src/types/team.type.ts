@@ -5,6 +5,7 @@ import {
   competitionSubmission,
   competitionSubmissionRequirement,
   team,
+  teamMember,
 } from '~/db/schema';
 
 import { MediaSchema } from './media.type';
@@ -109,4 +110,18 @@ export const TeamStatisticSchema = z.object({
   totalTeam: z.number(),
   totalVerifiedTeam: z.number(),
   result: z.array(CompetitionTeamStatisticSchema),
+});
+
+export const TeamDocumentVerificationResponseSchema = z.object({
+  documents: z.array(
+    createSelectSchema(teamMember).merge(
+      z.object({
+        nisn: MediaSchema,
+        kartu: MediaSchema,
+        poster: MediaSchema,
+        twibbon: MediaSchema,
+      }),
+    ),
+  ),
+  verificationRequirement: createSelectSchema(competitionSubmissionRequirement),
 });
