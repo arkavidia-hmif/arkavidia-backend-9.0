@@ -8,6 +8,7 @@ import { db } from '../drizzle';
 import { first } from '../helper';
 import {
   competition,
+  competitionSubmissionRequirement,
   competitionTimeline,
   media,
   team,
@@ -477,12 +478,91 @@ async function seedTimelines() {
   }
 }
 
+async function seedSubmissionRequirement() {
+  try {
+    // Ask if the user wants to delete the table
+    const userInput = await new Promise<string>((resolve) => {
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+      process.stdout.write(
+        'Do you want to delete the competition submission requirement table? (yes/no) ',
+      );
+      process.stdin.on('data', (data) => {
+        resolve(data.toString().trim());
+      });
+    });
+
+    if (userInput.toLowerCase() === 'yes') {
+      // Ask user for confirmation
+      const confirmInput = await new Promise<string>((resolve) => {
+        process.stdin.resume();
+        process.stdin.setEncoding('utf8');
+        process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
+        process.stdin.on('data', (data) => {
+          resolve(data.toString().trim());
+        });
+      });
+
+      if (confirmInput.toLowerCase() === 'yes') {
+        console.log('Deleting competition submission requirement table...');
+        await db.delete(competitionSubmissionRequirement);
+        console.log('🗑️ Competition submission requirement table deleted!');
+      }
+    }
+
+    const file = fs.readFileSync(
+      'src/db/seed/Seed - Submission Requirement.csv',
+      'utf8',
+    );
+    const lines = file.split('\n');
+    lines.shift();
+    const timelines = lines.map(async (line) => {
+      const [competition_name, name, start_date, deadline, stage] = line
+        .replace('\r', '')
+        .split(',');
+
+      const competition_id = await db
+        .select()
+        .from(competition)
+        .where(eq(competition.title, competition_name))
+        .then(first);
+
+      const startDate = start_date ? new Date(start_date) : new Date();
+      const endDate = deadline ? new Date(deadline) : new Date();
+      const stage_ = stage as 'pre-eliminary' | 'final' | 'verification';
+
+      const res = await db
+        .insert(competitionSubmissionRequirement)
+        .values({
+          competitionId: competition_id?.id ?? '',
+          typeName: name,
+          startDate,
+          deadline: endDate,
+          stage: stage_,
+        })
+        .returning()
+        .then(first);
+
+      return res;
+    });
+
+    // eslint-disable-next-line
+    const res = await Promise.all(timelines);
+
+    // console.log(res);
+    console.log('✅ Competition Submission Requirement seeding success!');
+  } catch (err) {
+    throw '❌ Error seeding timelines!';
+  }
+}
+
 async function main() {
   await seedUsers();
   await seedCompetitions();
   await seedMedias();
   await seedTeams();
   await seedTimelines();
+  await seedSubmissionRequirement();
 }
 
 if (require.main === module) {

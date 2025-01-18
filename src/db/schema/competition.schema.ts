@@ -15,7 +15,11 @@ import { team } from './team.schema';
 import { user } from './user.schema';
 
 /** Enum */
-export const stageEnum = pgEnum('phase_enum', ['pre-eliminary', 'final']);
+export const stageEnum = pgEnum('phase_enum', [
+  'pre-eliminary',
+  'final',
+  'verification',
+]);
 
 /** Main Compeitition Table */
 export const competition = pgTable('competition', {
@@ -73,6 +77,7 @@ export const competitionSubmissionRequirement = pgTable(
       .references(() => competition.id),
     stage: stageEnum('stage').notNull().default('pre-eliminary'),
     typeName: text('type_name').notNull(),
+    startDate: timestamp('start_date').notNull(),
     deadline: timestamp('deadline'),
   },
 );
