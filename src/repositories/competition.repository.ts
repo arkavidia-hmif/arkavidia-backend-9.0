@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
+import { aliasedTable, and, eq, gt, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -372,4 +372,58 @@ export const getCompetitionIdByName = async (
     where,
   });
   return result;
+};
+
+export const getCompetitionStageByTeamId = async (
+  db: Database,
+  teamId: string,
+) => {
+  const teamResult = await db.query.team.findFirst({
+    where: eq(team.id, teamId),
+    columns: {
+      competitionId: true,
+    },
+  });
+
+  if (!teamResult) {
+    throw new Error('Team not found');
+  }
+  // find competition stage by checking its start date (latest start date before now)
+  const competitionStartDate = await db.query.competitionTimeline.findFirst({
+    where: and(
+      eq(competitionTimeline.competitionId, teamResult.competitionId),
+      gt(competitionTimeline.startDate, new Date()),
+    ),
+    columns: {
+      startDate: true,
+    },
+    orderBy: (timeline, { desc }) => [desc(timeline.startDate)],
+  });
+
+  if (!competitionStartDate) {
+    throw new Error('Competition not found');
+  }
+  // check start date if it is equal to competition timeline start date
+  const comp_submission =
+    await db.query.competitionSubmissionRequirement.findFirst({
+      where: and(
+        eq(
+          competitionSubmissionRequirement.competitionId,
+          teamResult.competitionId,
+        ),
+        eq(
+          competitionSubmissionRequirement.startDate,
+          competitionStartDate.startDate,
+        ),
+      ),
+      columns: {
+        stage: true,
+      },
+    });
+
+  if (!comp_submission) {
+    throw new Error('Stage in Competition not found');
+  }
+
+  return comp_submission.stage;
 };
