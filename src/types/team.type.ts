@@ -18,13 +18,8 @@ export const TeamSchema = createSelectSchema(team, {
 
 export const TeamIdParam = z.object({ teamId: z.string() });
 
-export const TeamCodeQuery = z.object({
-  teamCode: z.string().openapi({
-    param: {
-      in: 'query',
-      required: true,
-    },
-  }),
+export const TeamCodeBody = z.object({
+  teamCode: z.string(),
 });
 
 export const TeamMemberIdSchema = z.object({ userId: z.string() });

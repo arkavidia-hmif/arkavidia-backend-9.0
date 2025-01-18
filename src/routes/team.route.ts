@@ -7,7 +7,7 @@ import {
   PostTeamBodySchema,
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
-  TeamCodeQuery,
+  TeamCodeBody,
   TeamCompetitionDetailSchema,
   TeamCompetitionSchema,
   TeamIdParam,
@@ -20,10 +20,17 @@ import { createErrorResponse } from '~/utils/error-response-factory';
 export const joinTeamByCodeRoute = createRoute({
   operationId: 'joinTeamByCode',
   tags: ['team'],
-  method: 'get',
+  method: 'post',
   path: '/team/join',
   request: {
-    query: TeamCodeQuery,
+    body: {
+      content: {
+        'application/json': {
+          schema: TeamCodeBody,
+        },
+      },
+      required: true,
+    },
   },
   responses: {
     200: {

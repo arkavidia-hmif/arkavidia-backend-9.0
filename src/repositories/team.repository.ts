@@ -209,14 +209,15 @@ export const insertUserToTeam = async (
 
     const roleNew = existingLeader ? 'member' : 'leader';
 
-    const [insertedMember] = await tx
+    const insertedMember = await tx
       .insert(teamMember)
       .values({
         teamId,
         userId,
         role: roleNew,
       })
-      .returning();
+      .returning()
+      .then(first);
 
     return insertedMember;
   });

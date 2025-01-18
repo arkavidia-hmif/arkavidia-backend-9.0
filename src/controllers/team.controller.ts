@@ -235,7 +235,7 @@ teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
 });
 
 teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
-  const { teamCode } = c.req.valid('query');
+  const { teamCode } = c.req.valid('json');
   const userId = c.var.user.id;
 
   // Check if the team exists
@@ -249,7 +249,6 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   // Check if user is in any other team across all competitions
   const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
-  console.log('ISUSERINOTHERTEAM', isInOtherTeam);
   if (isInOtherTeam) {
     return c.json(
       { error: 'User is already in another team for a competition!' },
