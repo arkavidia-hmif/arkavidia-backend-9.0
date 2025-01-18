@@ -26,9 +26,10 @@ import {
   postAdminCompAnnouncementRoute,
   updateSubmissionFeedbackRoute,
 } from '~/routes/competition.route';
-import { createAuthRouter } from '~/utils/router-factory';
+import { createAuthRouter, createRouter } from '~/utils/router-factory';
 
 export const competitionProtectedRouter = createAuthRouter();
+export const competitionRouter = createRouter();
 
 competitionProtectedRouter.get(
   getCompetitionSubmissionRoute.getRoutingPath(),
@@ -219,7 +220,7 @@ competitionProtectedRouter.openapi(
   },
 );
 
-competitionProtectedRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
+competitionRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
   const { name } = c.req.valid('query');
   const competition = await getCompetitionIdByName(db, name);
   return c.json(competition, 200);

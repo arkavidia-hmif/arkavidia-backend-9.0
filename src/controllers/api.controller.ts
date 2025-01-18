@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 import { authProtectedRouter, authRouter } from './auth.controller';
-import { competitionProtectedRouter } from './competition.controller';
+import { competitionProtectedRouter, competitionRouter } from './competition.controller';
 import { healthRouter } from './health.controller';
 import { mediaRouter } from './media.controller';
 import { teamMemberProtectedRouter } from './team-member.controller';
@@ -11,6 +11,7 @@ import { userProtectedRouter } from './user.controller';
 const unprotectedApiRouter = new OpenAPIHono();
 unprotectedApiRouter.route('/', healthRouter);
 unprotectedApiRouter.route('/', authRouter);
+unprotectedApiRouter.route('/', competitionRouter);
 
 const protectedApiRouter = new OpenAPIHono();
 protectedApiRouter.route('/', authProtectedRouter);
