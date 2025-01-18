@@ -5,6 +5,7 @@ import {
   competitionAnnouncement,
   competitionTimeline,
 } from '~/db/schema';
+import { submissionStatusSchema } from '~/repositories/competition.repository';
 import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 
 export const CompetitionSchema =
@@ -46,8 +47,15 @@ export const GetCompetitionSubmissionQuerySchema = z.object({
         in: 'query',
         required: false,
       },
-      description: `Filter results by stage. Acceptable values: "pre-eliminary", "final". If omitted, no stage filtering.`,
+      description: `Filter results by stage. Acceptable values: "pre-eliminary", "final"`,
     }),
+  status: submissionStatusSchema.optional().openapi({
+    param: {
+      in: 'query',
+      required: false,
+    },
+    description: `Filter results by status. Acceptable values are only from submissionStatusEnum`,
+  }),
 });
 
 export const AnnouncementSchema = createSelectSchema(competitionAnnouncement, {

@@ -1,5 +1,5 @@
 import { aliasedTable, and, eq, ilike, isNull, or } from 'drizzle-orm';
-import { type z } from 'zod';
+import { z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 
@@ -11,9 +11,13 @@ import {
   competitionSubmissionRequirement,
   competitionTimeline,
   media,
+  submissionStatusEnum,
   team,
   teamMember,
 } from '../db/schema';
+
+export const submissionStatusSchema = z.enum(submissionStatusEnum.enumValues);
+type SubmissionStatusType = z.infer<typeof submissionStatusSchema>;
 
 export const getAllCompetitions = async (db: Database) => {
   const competitions = await db.query.competition.findMany();
@@ -170,9 +174,10 @@ export const getCompetitionSubmissionById = async (
     limit: number;
     search?: string;
     stage?: 'pre-eliminary' | 'final';
+    status?: SubmissionStatusType;
   },
 ) => {
-  const { page, limit, search, stage } = options;
+  const { page, limit, search, stage, status } = options;
   const offset = (page - 1) * limit;
 
   const whereConditions = search
@@ -196,8 +201,16 @@ export const getCompetitionSubmissionById = async (
 
   const result = [];
   for (const team of resultTeam) {
+    const filters = [eq(competitionSubmission.teamId, team.id)];
+
+    if (status) {
+      filters.push(eq(competitionSubmission.status, status));
+    }
+
+    const submissionFilter = and(...filters);
+
     const submissions = await db.query.competitionSubmission.findMany({
-      where: eq(competitionSubmission.teamId, team.id),
+      where: submissionFilter, // eq(competitionSubmission.teamId, team.id),
     });
 
     const documents = [];
@@ -241,14 +254,15 @@ export const getCompetitionSubmissionById = async (
   const totalPages = Math.ceil(totalTeam / limit);
   const searchParam = search ? `&search=${search}` : '';
   const stageParam = stage ? `&stage=${stage}` : '';
+  const statusParam = status ? `&status=${status}` : '';
   const next =
     page < totalPages
-      ? `?page=${page + 1}&limit=${limit}${searchParam}${stageParam}`
+      ? `?page=${page + 1}&limit=${limit}${searchParam}${stageParam}${statusParam}`
       : null;
 
   const prev =
     page > 1
-      ? `?page=${page - 1}&limit=${limit}${searchParam}${stageParam}`
+      ? `?page=${page - 1}&limit=${limit}${searchParam}${stageParam}${statusParam}`
       : null;
 
   return {
