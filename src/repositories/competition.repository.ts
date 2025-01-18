@@ -169,9 +169,10 @@ export const getCompetitionSubmissionById = async (
     page: number;
     limit: number;
     search?: string;
+    stage?: 'pre-eliminary' | 'final';
   },
 ) => {
-  const { page, limit, search } = options;
+  const { page, limit, search, stage } = options;
   const offset = (page - 1) * limit;
 
   const whereConditions = search
@@ -207,35 +208,47 @@ export const getCompetitionSubmissionById = async (
           })
         : null;
 
-      // optimize this ???
+      const requirementFilter = stage
+        ? and(
+            eq(competitionSubmissionRequirement.typeId, submission.typeId),
+            eq(competitionSubmissionRequirement.stage, stage),
+          )
+        : eq(competitionSubmissionRequirement.typeId, submission.typeId);
+
       const typeName =
         await db.query.competitionSubmissionRequirement.findFirst({
-          where: eq(competitionSubmissionRequirement.typeId, submission.typeId),
+          where: requirementFilter, //eq(competitionSubmissionRequirement.typeId, submission.typeId),
         });
 
-      documents.push({
-        mediaInfo,
-        created_at: submission.createdAt,
-        updated_at: submission.updatedAt,
-        type_name: typeName?.typeName,
-      });
+      if (typeName) {
+        documents.push({
+          mediaInfo,
+          submission,
+          type_name: typeName?.typeName,
+        });
+      }
     }
 
-    result.push({
-      teamId: team.id,
-      teamName: team.name,
-      documents,
-    });
+    if (documents.length > 0) {
+      result.push({
+        teamId: team.id,
+        teamName: team.name,
+        documents,
+      });
+    }
   }
 
   const totalPages = Math.ceil(totalTeam / limit);
+  const searchParam = search ? `&search=${search}` : '';
+  const stageParam = stage ? `&stage=${stage}` : '';
   const next =
     page < totalPages
-      ? `?page=${page + 1}&limit=${limit}` + (search ? `&search=${search}` : '')
+      ? `?page=${page + 1}&limit=${limit}${searchParam}${stageParam}`
       : null;
+
   const prev =
     page > 1
-      ? `?page=${page - 1}&limit=${limit}` + (search ? `&search=${search}` : '')
+      ? `?page=${page - 1}&limit=${limit}${searchParam}${stageParam}`
       : null;
 
   return {

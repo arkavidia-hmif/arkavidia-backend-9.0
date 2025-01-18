@@ -38,6 +38,16 @@ export const GetCompetitionSubmissionQuerySchema = z.object({
         required: false,
       },
     }),
+  stage: z
+    .enum(['pre-eliminary', 'final'])
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+      description: `Filter results by stage. Acceptable values: "pre-eliminary", "final". If omitted, no stage filtering.`,
+    }),
 });
 
 export const AnnouncementSchema = createSelectSchema(competitionAnnouncement, {
