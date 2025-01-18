@@ -4,7 +4,10 @@ import { env } from '~/configs/env.config';
 import { db } from '~/db/drizzle';
 import type { UserIdentity } from '~/db/schema/auth.schema';
 import type { User } from '~/db/schema/user.schema';
-import { sendVerificationEmail } from '~/lib/nodemailer';
+import {
+  sendResetPasswordEmail,
+  sendVerificationEmail,
+} from '~/lib/nodemailer';
 import {
   createUserIdentity,
   findUserIdentityByEmail,
@@ -18,10 +21,12 @@ import {
   basicRegisterRoute,
   basicVerifyAccountRoute,
   bypassRegisterRoute,
+  forgotPasswordRoute,
   googleAuthCallbackRoute,
   googleAuthRoute,
   googleLoginAccessTokenRoute,
   logoutRoute,
+  resetPasswordRoute,
   selfRoute,
 } from '~/routes/auth.route';
 import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
@@ -301,4 +306,85 @@ authRouter.openapi(bypassRegisterRoute, async (c) => {
   });
 
   return c.json({}, 204);
+});
+
+authRouter.openapi(forgotPasswordRoute, async (c) => {
+  const { email } = c.req.valid('json');
+
+  const user = await findUserIdentityByEmail(db, email);
+  if (!user) {
+    return c.json({ message: 'User not found' }, 400);
+  }
+
+  // If user registered with google
+  if (user.provider !== 'basic') {
+    return c.json({ message: 'User registered with google' }, 400);
+  }
+
+  // If token already sent and not expired
+  if (
+    user.passwordRecoveryToken &&
+    user.passwordRecoveryTokenExpiration &&
+    new Date() < new Date(user.passwordRecoveryTokenExpiration)
+  ) {
+    return c.json(
+      {
+        message: 'Token already sent',
+        waitFor:
+          (new Date(user.passwordRecoveryTokenExpiration).getTime() -
+            new Date().getTime()) /
+          1000,
+      },
+      400,
+    );
+  }
+
+  // Generate new token and send email
+  const passwordRecoveryToken = await argon2.hash(
+    `${env.RESET_PASSWORD_TOKEN_SECRET}${user.email}${new Date()}${user.id}`,
+  );
+  const passwordRecoveryTokenExpiration = new Date(
+    new Date().getTime() + env.RESET_PASSWORD_TOKEN_EXPIRATION,
+  );
+
+  await updateUserIdentity(db, user.id, {
+    passwordRecoveryToken,
+    passwordRecoveryTokenExpiration,
+  });
+
+  await sendResetPasswordEmail(email, passwordRecoveryToken, user.id);
+
+  return c.json(
+    {
+      message: 'Recovery Email Sent! Please check your email',
+    },
+    200,
+  );
+});
+
+authRouter.openapi(resetPasswordRoute, async (c) => {
+  const { userId, token, password } = c.req.valid('json');
+
+  const user = await findUserIdentityById(db, userId);
+  if (!user) {
+    return c.json({ message: 'User not found' }, 400);
+  }
+  if (!user.passwordRecoveryToken || !user.passwordRecoveryTokenExpiration) {
+    return c.json({ message: 'No token found' }, 400);
+  }
+  if (user.passwordRecoveryToken !== token) {
+    return c.json({ message: 'Wrong token' }, 400);
+  }
+  if (new Date() > new Date(user.passwordRecoveryTokenExpiration)) {
+    return c.json({ message: 'Token has expired' }, 400);
+  }
+
+  const passwordHash = await argon2.hash(password);
+  await updateUserIdentity(db, user.id, {
+    hash: passwordHash,
+    passwordRecoveryToken: null,
+    passwordRecoveryTokenExpiration: null,
+  });
+
+  return c.json({ message: 'Successfuly reset your password!' }, 204);
 });

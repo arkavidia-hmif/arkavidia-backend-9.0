@@ -27,3 +27,18 @@ export const sendVerificationEmail = async (
 
   console.log('Message sent: %s', info.messageId);
 };
+
+export const sendResetPasswordEmail = async (
+  targetEmail: string,
+  resetPasswordToken: string,
+  userId: string,
+) => {
+  const info = await transporter.sendMail({
+    from: MAIL_FROM,
+    to: targetEmail,
+    subject: 'Reset your password!',
+    text: `${env.FE_URL}/reset-password?user=${encodeURIComponent(userId)}&token=${encodeURIComponent(resetPasswordToken)}`, // TODO: Change this to beautiful HTML
+  });
+
+  console.log('Message sent: %s', info.messageId);
+};

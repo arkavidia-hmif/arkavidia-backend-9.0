@@ -12,6 +12,8 @@ const EnvSchema = z.object({
   ACCESS_TOKEN_EXPIRATION: z.coerce.number(),
   REFRESH_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_EXPIRATION: z.coerce.number(),
+  RESET_PASSWORD_TOKEN_SECRET: z.string(),
+  RESET_PASSWORD_TOKEN_EXPIRATION: z.coerce.number(),
   FE_URL: z.string().url(),
   SMTP_HOST: z.string(),
   SMTP_USER: z.string(),
