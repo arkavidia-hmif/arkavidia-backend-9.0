@@ -388,22 +388,7 @@ export const getCompetitionStageByTeamId = async (
   if (!teamResult) {
     throw new Error('Team not found');
   }
-  // find competition stage by checking its start date (latest start date before now)
-  const competitionStartDate = await db.query.competitionTimeline.findFirst({
-    where: and(
-      eq(competitionTimeline.competitionId, teamResult.competitionId),
-      gt(competitionTimeline.startDate, new Date()),
-    ),
-    columns: {
-      startDate: true,
-    },
-    orderBy: (timeline, { desc }) => [desc(timeline.startDate)],
-  });
 
-  if (!competitionStartDate) {
-    throw new Error('Competition not found');
-  }
-  // check start date if it is equal to competition timeline start date
   const comp_submission =
     await db.query.competitionSubmissionRequirement.findFirst({
       where: and(
@@ -411,14 +396,12 @@ export const getCompetitionStageByTeamId = async (
           competitionSubmissionRequirement.competitionId,
           teamResult.competitionId,
         ),
-        eq(
-          competitionSubmissionRequirement.startDate,
-          competitionStartDate.startDate,
-        ),
+        gt(competitionSubmissionRequirement.startDate, new Date()),
       ),
       columns: {
         stage: true,
       },
+      orderBy: (requirement, { desc }) => [desc(requirement.startDate)],
     });
 
   if (!comp_submission) {
