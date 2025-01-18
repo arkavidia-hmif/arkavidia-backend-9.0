@@ -3,6 +3,7 @@ import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   getAnnouncementsByCompetitionId,
   getCompetition,
+  getCompetitionIdByName,
   getCompetitionParticipant,
   getCompetitionSubmissionById,
   // getCompetitionSubmissionByTeamId,
@@ -14,6 +15,7 @@ import {
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
+  getCompetitionIdByNameRoute,
   getCompetitionParticipantRoute,
   getCompetitionSubmissionRequirementRoute,
   getCompetitionSubmissionRoute,
@@ -210,3 +212,9 @@ competitionProtectedRouter.openapi(
     }
   },
 );
+
+competitionProtectedRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
+  const { name } = c.req.valid('query');
+  const competition = await getCompetitionIdByName(db, name);
+  return c.json(competition, 200);
+});

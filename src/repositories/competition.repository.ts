@@ -361,3 +361,15 @@ export const updateSubmissionFeedback = async (
     )
     .returning();
 };
+
+export const getCompetitionIdByName = async (
+  db: Database,
+  name: string | undefined,
+) => {
+  const where = name ? eq(competition.title, name) : undefined;
+
+  const result = await db.query.competition.findMany({
+    where,
+  });
+  return result;
+};

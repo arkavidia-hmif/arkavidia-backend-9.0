@@ -120,3 +120,20 @@ export const TeamAndTypeIdParam = z.object({
     },
   }),
 });
+
+export const CompetitionNameQuery = z.object({
+  name: z
+    .string()
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+});
+
+export const CompetitionIdShema = z.object({
+  name: z.string(),
+  id: z.string(),
+});

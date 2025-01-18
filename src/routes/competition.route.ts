@@ -3,6 +3,8 @@ import {
   AllAnnouncementSchema,
   AnnouncementSchema,
   CompetitionIdParam,
+  CompetitionIdShema,
+  CompetitionNameQuery,
   CompetitionParticipantSchema,
   CompetitionSubmissionSchema,
   CompetitionTimelineSchema,
@@ -220,6 +222,28 @@ export const getCompetitionSubmissionRequirementRoute = createRoute({
       content: {
         'application/json': {
           schema: ListSubmissionRequirementSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getCompetitionIdByNameRoute = createRoute({
+  operationId: 'getCompetitionIdByName',
+  tags: ['competition'],
+  method: 'get',
+  path: '/competition/id',
+  request: {
+    query: CompetitionNameQuery,
+  },
+  responses: {
+    200: {
+      description: 'Successfully fetched competition id',
+      content: {
+        'application/json': {
+          schema: CompetitionIdShema,
         },
       },
     },
