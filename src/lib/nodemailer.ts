@@ -22,7 +22,7 @@ export const sendVerificationEmail = async (
     from: MAIL_FROM,
     to: targetEmail,
     subject: 'Verify your account!',
-    text: `http://api.arkavidia.com/api/verify?user=${userId}&token=${verificationToken}`, // TODO: Change this to beautiful HTML
+    text: `${env.FE_URL}/auth/verify?user=${encodeURIComponent(userId)}&token=${encodeURIComponent(verificationToken)}`, // TODO: Change this to beautiful HTML
   });
 
   console.log('Message sent: %s', info.messageId);
