@@ -4,6 +4,7 @@ import {
   competition,
   competitionAnnouncement,
   competitionTimeline,
+  submissionStatusEnum,
 } from '~/db/schema';
 import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 
@@ -136,4 +137,11 @@ export const CompetitionNameQuery = z.object({
 export const CompetitionIdShema = z.object({
   name: z.string(),
   id: z.string(),
+});
+
+export const StatusSubmissionSchema = z.object({
+  status: z.enum(submissionStatusEnum.enumValues).openapi({
+    description: 'The current status of the submission',
+    example: 'pending',
+  }),
 });

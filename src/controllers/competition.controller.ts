@@ -12,6 +12,7 @@ import {
   getCompetitionTimelinesByCompetitionId,
   postAnnouncement,
   updateSubmissionFeedback,
+  updateSubmissionStatus,
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
@@ -24,6 +25,7 @@ import {
   getCompetitionTimelineRoute,
   postAdminCompAnnouncementRoute,
   updateSubmissionFeedbackRoute,
+  updateSubmissionStatusRoute,
 } from '~/routes/competition.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -222,4 +224,13 @@ competitionProtectedRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
   const { name } = c.req.valid('query');
   const competition = await getCompetitionIdByName(db, name);
   return c.json(competition, 200);
+});
+
+competitionProtectedRouter.openapi(updateSubmissionStatusRoute, async (c) => {
+  const { teamId, typeId } = c.req.valid('param');
+  const { status } = c.req.valid('json');
+
+  const statusUpdate = await updateSubmissionStatus(db, teamId, typeId, status);
+
+  return c.json(statusUpdate, 200);
 });

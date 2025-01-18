@@ -1,5 +1,5 @@
 import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
-import { type z } from 'zod';
+import { z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
 
@@ -11,9 +11,12 @@ import {
   competitionSubmissionRequirement,
   competitionTimeline,
   media,
+  submissionStatusEnum,
   team,
   teamMember,
 } from '../db/schema';
+
+const submissionStatusSchema = z.enum(submissionStatusEnum.enumValues);
 
 export const getAllCompetitions = async (db: Database) => {
   const competitions = await db.query.competition.findMany();
@@ -372,4 +375,24 @@ export const getCompetitionIdByName = async (
     where,
   });
   return result;
+};
+
+export const updateSubmissionStatus = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  status: z.infer<typeof submissionStatusSchema>,
+) => {
+  return await db
+    .update(competitionSubmission)
+    .set({
+      status,
+    })
+    .where(
+      and(
+        eq(competitionSubmission.teamId, teamId),
+        eq(competitionSubmission.typeId, typeId),
+      ),
+    )
+    .returning();
 };

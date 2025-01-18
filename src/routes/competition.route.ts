@@ -12,6 +12,7 @@ import {
   GetCompetitionSubmissionQuerySchema,
   GetCompetitionTimeQuerySchema,
   PostCompAnnouncementBodySchema,
+  StatusSubmissionSchema,
   TeamAndTypeIdParam,
 } from '~/types/competition.type';
 import {
@@ -246,6 +247,31 @@ export const getCompetitionIdByNameRoute = createRoute({
           schema: CompetitionIdShema,
         },
       },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const updateSubmissionStatusRoute = createRoute({
+  operationId: 'updateSubmissionStatus',
+  tags: ['admin', 'competition'],
+  method: 'put',
+  path: '/admin/submission/status/{teamId}/{typeId}',
+  request: {
+    params: TeamAndTypeIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: StatusSubmissionSchema,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      description: 'Successfully updated submission status',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
