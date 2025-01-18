@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
+import { aliasedTable, and, eq, gt, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -372,4 +372,41 @@ export const getCompetitionIdByName = async (
     where,
   });
   return result;
+};
+
+export const getCompetitionStageByTeamId = async (
+  db: Database,
+  teamId: string,
+) => {
+  const teamResult = await db.query.team.findFirst({
+    where: eq(team.id, teamId),
+    columns: {
+      competitionId: true,
+    },
+  });
+
+  if (!teamResult) {
+    throw new Error('Team not found');
+  }
+
+  const comp_submission =
+    await db.query.competitionSubmissionRequirement.findFirst({
+      where: and(
+        eq(
+          competitionSubmissionRequirement.competitionId,
+          teamResult.competitionId,
+        ),
+        gt(competitionSubmissionRequirement.startDate, new Date()),
+      ),
+      columns: {
+        stage: true,
+      },
+      orderBy: (requirement, { desc }) => [desc(requirement.startDate)],
+    });
+
+  if (!comp_submission) {
+    throw new Error('Stage in Competition not found');
+  }
+
+  return comp_submission.stage;
 };
