@@ -11,6 +11,7 @@ import {
   TeamIdParam,
   TeamMemberIdSchema,
   TeamSchema,
+  TeamStatisticSchema,
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
@@ -264,6 +265,25 @@ export const getTeamDetailRoute = createRoute({
       content: {
         'application/json': {
           schema: TeamCompetitionDetailSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getTeamStatisticRoute = createRoute({
+  operationId: 'getTeamStatistic',
+  tags: ['team', 'admin'],
+  method: 'get',
+  path: '/admin/team/statistic',
+  responses: {
+    200: {
+      description: 'Successfully get team statistic',
+      content: {
+        'application/json': {
+          schema: TeamStatisticSchema,
         },
       },
     },

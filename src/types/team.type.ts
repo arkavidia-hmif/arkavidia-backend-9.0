@@ -98,3 +98,15 @@ export const TeamCompetitionDetailSchema = TeamSchema.extend({
 });
 
 export const ListUserTeamSchema = z.array(TeamSchema);
+
+export const CompetitionTeamStatisticSchema = z.object({
+  competitionId: z.string(),
+  totalTeam: z.number(),
+  totalVerifiedTeam: z.number(),
+});
+
+export const TeamStatisticSchema = z.object({
+  totalTeam: z.number(),
+  totalVerifiedTeam: z.number(),
+  result: z.array(CompetitionTeamStatisticSchema),
+});

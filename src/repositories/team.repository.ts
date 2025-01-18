@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
@@ -234,4 +234,54 @@ export const updateTeamVerification = async (
     .where(eq(team.id, teamId))
     .returning()
     .then(first);
+};
+
+export const getTeamStatistic = async (db: Database) => {
+  const allTeam = await db
+    .select({
+      totalTeam: count(),
+    })
+    .from(team)
+    .groupBy(team.isVerified)
+    .then(first);
+
+  const allVerifiedTeam = await db
+    .select({
+      totalVerifiedTeam: count(),
+    })
+    .from(team)
+    .where(eq(team.isVerified, true))
+    .then(first);
+
+  const compeTeams: {
+    competitionId: string;
+    totalTeam: number;
+    totalVerifiedTeam?: number;
+  }[] = await db
+    .select({
+      competitionId: team.competitionId,
+      totalTeam: count(),
+    })
+    .from(team)
+    .groupBy(team.competitionId, team.isVerified)
+    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
+
+  const compeTeamsVerified = await db
+    .select({
+      competitionId: team.competitionId,
+      totalVerifiedTeam: count(),
+    })
+    .from(team)
+    .where(eq(team.isVerified, true))
+    .groupBy(team.competitionId)
+    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
+
+  compeTeams.forEach((team) => {
+    const verifiedTeam = compeTeamsVerified.find(
+      (vTeam) => vTeam.competitionId === team.competitionId,
+    );
+    team.totalVerifiedTeam = verifiedTeam?.totalVerifiedTeam || 0;
+  });
+
+  return { ...allTeam, ...allVerifiedTeam, result: compeTeams };
 };

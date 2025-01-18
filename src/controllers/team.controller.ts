@@ -15,6 +15,7 @@ import {
   deleteTeamMember,
   getTeamByCode,
   getTeamById,
+  getTeamStatistic,
   getUserTeams,
   insertUserToTeam,
   updateTeamDocument,
@@ -24,6 +25,7 @@ import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
   getTeamDetailRoute,
+  getTeamStatisticRoute,
   getTeamsRoute,
   joinTeamByCodeRoute,
   postCreateTeamRoute,
@@ -255,4 +257,14 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
   // Make user to member if leader exist
 
   return c.json(newTeamMember, 200);
+});
+
+teamProtectedRouter.get(
+  getTeamStatisticRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+
+teamProtectedRouter.openapi(getTeamStatisticRoute, async (c) => {
+  const team = await getTeamStatistic(db);
+  return c.json(team, 200);
 });
