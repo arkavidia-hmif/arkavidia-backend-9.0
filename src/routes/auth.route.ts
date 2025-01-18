@@ -5,9 +5,11 @@ import {
   BasicRegisterBodySchema,
   BasicVerifyAccountQuerySchema,
   BypassRegisterBodySchema,
+  EmailBodySchema,
   GoogleCallbackQuerySchema,
   GoogleLoginAccessTokenSchema,
   JWTPayloadSchema,
+  ResetPasswordBodySchema,
 } from '~/types/auth.type';
 
 import { createErrorResponse } from '../utils/error-response-factory';
@@ -212,6 +214,54 @@ export const bypassRegisterRoute = createRoute({
   responses: {
     204: {
       description: 'Registration succesful. Verification token sent to email.',
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const forgotPasswordRoute = createRoute({
+  operationId: 'forgotPassword',
+  path: '/auth/forgot-password',
+  tags: ['auth'],
+  method: 'put',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: EmailBodySchema,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    204: {
+      description: 'Forgot password email sent',
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const resetPasswordRoute = createRoute({
+  operationId: 'resetPassword',
+  path: '/auth/reset-password',
+  tags: ['auth'],
+  method: 'put',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: ResetPasswordBodySchema,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    204: {
+      description: 'Password reset successful',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

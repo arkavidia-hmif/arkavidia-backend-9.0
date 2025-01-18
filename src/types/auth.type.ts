@@ -95,3 +95,19 @@ export const GoogleUserSchema = z.object({
   locale: z.string().optional(),
   hd: z.string().optional(),
 });
+
+export const EmailBodySchema = z.object({
+  email: z.string().email(),
+});
+
+export const ResetPasswordBodySchema = z
+  .object({
+    userId: z.string(),
+    token: z.string(),
+    password: z.string().min(8, 'Password must have minimum length of 8'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirm'], // path of error
+  });
