@@ -2,7 +2,11 @@ import { and, count, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
-import { team, teamMember } from '~/db/schema';
+import {
+  competitionSubmissionRequirement,
+  team,
+  teamMember,
+} from '~/db/schema';
 import type {
   PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema,
@@ -284,4 +288,59 @@ export const getTeamStatistic = async (db: Database) => {
   });
 
   return { ...allTeam, ...allVerifiedTeam, result: compeTeams };
+};
+
+export const isUserInATeam = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+) => {
+  return await db.query.teamMember.findFirst({
+    where: and(eq(teamMember.userId, userId), eq(teamMember.teamId, teamId)),
+  });
+};
+
+export const getTeamDocumentVerification = async (
+  db: Database,
+  teamId: string,
+) => {
+  const teamMemberDocs = await db.query.teamMember.findMany({
+    where: eq(teamMember.teamId, teamId),
+    with: {
+      nisn: true,
+      kartu: true,
+      poster: true,
+      twibbon: true,
+    },
+  });
+  return teamMemberDocs;
+};
+
+export const getVerificationRequirement = async (
+  db: Database,
+  teamId: string,
+) => {
+  const competitionId = await db.query.team.findFirst({
+    where: eq(team.id, teamId),
+    columns: {
+      competitionId: true,
+    },
+  });
+
+  if (!competitionId?.competitionId) {
+    throw new Error('Competition ID not found');
+  }
+
+  const verificationRequirement =
+    await db.query.competitionSubmissionRequirement.findFirst({
+      where: and(
+        eq(
+          competitionSubmissionRequirement.competitionId,
+          competitionId.competitionId,
+        ),
+        eq(competitionSubmissionRequirement.stage, 'verification'),
+      ),
+    });
+
+  return verificationRequirement;
 };

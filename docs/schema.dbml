@@ -1,9 +1,11 @@
-enum competition_submission_type_enum {
-  uiux_poster
-}
-
 enum media_bucket_enum {
   "competition-registration"
+}
+
+enum phase_enum {
+  "pre-eliminary"
+  final
+  verification
 }
 
 enum team_member_role_renum {
@@ -48,22 +50,33 @@ table competition_announcement {
 
 table competition_submission {
   team_id text [not null]
-  competition_id text [not null]
-  type competition_submission_type_enum [not null]
-  media_id text [not null]
+  type_id text [not null]
+  media_id text
+  judge_response text
   created_at timestamp [default: `now()`]
   updated_at timestamp
 
   indexes {
-    (team_id, type) [pk]
+    (team_id, type_id) [pk]
   }
+}
+
+table competition_submission_requirement {
+  type_id text [pk, not null]
+  competition_id text [not null]
+  stage phase_enum [not null, default: 'pre-eliminary']
+  type_name text [not null]
+  description text [not null]
+  start_date timestamp [not null]
+  deadline timestamp
 }
 
 table competition_timeline {
   id text [pk, not null]
   competition_id text [not null]
   title text [not null]
-  date timestamp [not null]
+  start_date timestamp [not null]
+  end_date timestamp
   show_on_landing boolean [not null, default: false]
   show_tile boolean [not null, default: false]
 }
@@ -100,6 +113,10 @@ table team_member {
   twibbon_media_id text
   is_verified boolean [not null, default: false]
   verification_error text
+
+  indexes {
+    (user_id, team_id) [pk]
+  }
 }
 
 table user {
@@ -115,6 +132,7 @@ table user {
   id_discord text
   id_instagram text
   consent boolean [not null, default: false]
+  media_identity_card_id text
   is_registration_complete boolean [not null, default: false]
   created_at timestamp [default: `now()`]
   updated_at timestamp
@@ -140,11 +158,11 @@ ref: competition_announcement.competition_id > competition.id
 
 ref: competition_announcement.author_id - user.id
 
-ref: competition_submission.competition_id > competition.id
-
-ref: competition_submission.team_id - user.id
+ref: competition_submission.team_id > team.id
 
 ref: competition_submission.media_id - media.id
+
+ref: competition_submission.type_id > competition_submission_requirement.type_id
 
 ref: competition_timeline.competition_id > competition.id
 
@@ -157,5 +175,7 @@ ref: team_member.twibbon_media_id - media.id
 ref: team.competition_id > competition.id
 
 ref: team.payment_proof_media_id - media.id
+
+ref: user.media_identity_card_id - media.id
 
 ref: user.id - user_identity.id

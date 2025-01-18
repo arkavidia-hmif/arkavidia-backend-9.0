@@ -291,3 +291,25 @@ export const getTeamStatisticRoute = createRoute({
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
+
+export const getTeamDocumentVerificationRoute = createRoute({
+  operationId: 'getTeamDocumentVerification',
+  tags: ['team'],
+  method: 'get',
+  path: '/team/{teamId}/documentverification',
+  request: {
+    params: TeamIdParam,
+  },
+  responses: {
+    200: {
+      description: 'Successfully get team submission',
+      content: {
+        'application/json': {
+          schema: TeamSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});

@@ -15,9 +15,12 @@ import {
   deleteTeamMember,
   getTeamByCode,
   getTeamById,
+  getTeamDocumentVerification,
   getTeamStatistic,
   getUserTeams,
+  getVerificationRequirement,
   insertUserToTeam,
+  isUserInATeam,
   updateTeamDocument,
   updateTeamVerification,
 } from '~/repositories/team.repository';
@@ -25,6 +28,7 @@ import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
   getTeamDetailRoute,
+  getTeamDocumentVerificationRoute,
   getTeamStatisticRoute,
   getTeamsRoute,
   joinTeamByCodeRoute,
@@ -267,4 +271,19 @@ teamProtectedRouter.get(
 teamProtectedRouter.openapi(getTeamStatisticRoute, async (c) => {
   const team = await getTeamStatistic(db);
   return c.json(team, 200);
+});
+
+teamProtectedRouter.openapi(getTeamDocumentVerificationRoute, async (c) => {
+  const { teamId } = c.req.valid('param');
+  // check if that user belong to that team
+  const user = c.var.user;
+  const teamMember = await isUserInATeam(db, user.id, teamId);
+  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+
+  // document verification for each team member
+  const documents = await getTeamDocumentVerification(db, teamId);
+  // verificcation requirement (deadline etc)
+  const verificationRequirement = getVerificationRequirement(db, teamId);
+
+  return c.json({ documents, verificationRequirement }, 200);
 });
