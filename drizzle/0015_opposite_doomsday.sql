@@ -1,0 +1,1 @@
+ALTER TABLE "competition_submission_requirement" ADD COLUMN "description" text NOT NULL;

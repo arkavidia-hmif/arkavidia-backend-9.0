@@ -517,9 +517,8 @@ async function seedSubmissionRequirement() {
     const lines = file.split('\n');
     lines.shift();
     const timelines = lines.map(async (line) => {
-      const [competition_name, name, start_date, deadline, stage] = line
-        .replace('\r', '')
-        .split(',');
+      const [competition_name, name, description, start_date, deadline, stage] =
+        line.replace('\r', '').split(',');
 
       const competition_id = await db
         .select()
@@ -537,6 +536,7 @@ async function seedSubmissionRequirement() {
           competitionId: competition_id?.id ?? '',
           typeName: name,
           startDate,
+          description,
           deadline: endDate,
           stage: stage_,
         })
@@ -552,7 +552,8 @@ async function seedSubmissionRequirement() {
     // console.log(res);
     console.log('✅ Competition Submission Requirement seeding success!');
   } catch (err) {
-    throw '❌ Error seeding timelines!';
+    console.log(err);
+    throw '❌ Error seeding competition submission requirement!';
   }
 }
 

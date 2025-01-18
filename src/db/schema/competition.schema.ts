@@ -77,6 +77,7 @@ export const competitionSubmissionRequirement = pgTable(
       .references(() => competition.id),
     stage: stageEnum('stage').notNull().default('pre-eliminary'),
     typeName: text('type_name').notNull(),
+    description: text('description').notNull(),
     startDate: timestamp('start_date').notNull(),
     deadline: timestamp('deadline'),
   },

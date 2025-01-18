@@ -1,19 +1,19 @@
-competition,name,start_date,deadline,stage
-Arkalogica,Arkalogica Submission,1/10/2025,2/20/2025,pre-eliminary
-Arkalogica,Arkalogica Submission,1/10/2025,2/20/2025,final
-Arkalogica,Arkalogica Submission,1/10/2025,2/20/2025,verification
-CP,CP Submission,1/10/2025,2/20/2025,pre-eliminary
-CP,CP Submission,1/10/2025,2/20/2025,final
-CP,CP Submission,1/10/2025,2/20/2025,verification
-CTF,CTF Submission,1/10/2025,2/20/2025,pre-eliminary
-CTF,CTF Submission,1/10/2025,2/20/2025,final
-CTF,CTF Submission,1/10/2025,2/20/2025,verification
-Datavidia,Datavidia Submission,1/10/2025,2/20/2025,pre-eliminary
-Datavidia,Datavidia Submission,1/10/2025,2/20/2025,final
-Datavidia,Datavidia Submission,1/10/2025,2/20/2025,verification
-Hackvidia,Hackvidia Submission,1/10/2025,2/20/2025,pre-eliminary
-Hackvidia,Hackvidia Submission,1/10/2025,2/20/2025,final
-Hackvidia,Hackvidia Submission,1/10/2025,2/20/2025,verification
-UXvidia,UXvidia Submission,1/10/2025,2/20/2025,pre-eliminary
-UXvidia,UXvidia Submission,1/10/2025,2/20/2025,final
-UXvidia,UXvidia Submission,1/10/2025,2/20/2025,verification
+competition,name,description,start_date,deadline,stage
+Arkalogica,Arkalogica Submission pre-eliminary,this is description,1/10/2025,2/20/2025,pre-eliminary
+Arkalogica,Arkalogica Submission final,this is description,1/10/2025,2/20/2025,final
+Arkalogica,Arkalogica Submission verif,this is description,1/10/2025,2/20/2025,verification
+CP,CP Submission pre-eliminary,this is description,1/10/2025,2/20/2025,pre-eliminary
+CP,CP Submission final,this is description,1/10/2025,2/20/2025,final
+CP,CP Submission verif,this is description,1/10/2025,2/20/2025,verification
+CTF,CTF Submission pre-eliminary,this is description,1/10/2025,2/20/2025,pre-eliminary
+CTF,CTF Submission final,this is description,1/10/2025,2/20/2025,final
+CTF,CTF Submission verif,this is description,1/10/2025,2/20/2025,verification
+Datavidia,Datavidia Submission pre-eliminary,this is description,1/10/2025,2/20/2025,pre-eliminary
+Datavidia,Datavidia Submission final,this is description,1/10/2025,2/20/2025,final
+Datavidia,Datavidia Submission verif,this is description,1/10/2025,2/20/2025,verification
+Hackvidia,Hackvidia Submission pre-eliminary,this is description,1/10/2025,2/20/2025,pre-eliminary
+Hackvidia,Hackvidia Submission final,this is description,1/10/2025,2/20/2025,final
+Hackvidia,Hackvidia Submission verif,this is description,1/10/2025,2/20/2025,verification
+UXvidia,UXvidia Submission pre-eliminary,this is description,1/10/2025,2/20/2025,pre-eliminary
+UXvidia,UXvidia Submission final,this is description,1/10/2025,2/20/2025,final
+UXvidia,UXvidia Submission verif,this is description,1/10/2025,2/20/2025,verification
