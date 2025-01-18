@@ -332,7 +332,7 @@ authRouter.openapi(forgotPasswordRoute, async (c) => {
         message: 'Token already sent',
         waitFor:
           (new Date(user.passwordRecoveryTokenExpiration).getTime() -
-            new Date().getTime()) *
+            new Date().getTime()) /
           1000,
       },
       400,
@@ -354,7 +354,12 @@ authRouter.openapi(forgotPasswordRoute, async (c) => {
 
   await sendResetPasswordEmail(email, passwordRecoveryToken, user.id);
 
-  return c.json({}, 204);
+  return c.json(
+    {
+      message: 'Recovery Email Sent! Please check your email',
+    },
+    200,
+  );
 });
 
 authRouter.openapi(resetPasswordRoute, async (c) => {
@@ -367,11 +372,11 @@ authRouter.openapi(resetPasswordRoute, async (c) => {
   if (!user.passwordRecoveryToken || !user.passwordRecoveryTokenExpiration) {
     return c.json({ message: 'No token found' }, 400);
   }
-  if (new Date() > new Date(user.passwordRecoveryTokenExpiration)) {
-    return c.json({ message: 'Token has expired' }, 400);
-  }
   if (user.passwordRecoveryToken !== token) {
     return c.json({ message: 'Wrong token' }, 400);
+  }
+  if (new Date() > new Date(user.passwordRecoveryTokenExpiration)) {
+    return c.json({ message: 'Token has expired' }, 400);
   }
 
   const passwordHash = await argon2.hash(password);
@@ -381,5 +386,5 @@ authRouter.openapi(resetPasswordRoute, async (c) => {
     passwordRecoveryTokenExpiration: null,
   });
 
-  return c.json({}, 204);
+  return c.json({ message: 'Successfuly reset your password!' }, 204);
 });
