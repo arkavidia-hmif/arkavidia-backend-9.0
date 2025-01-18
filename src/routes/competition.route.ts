@@ -200,3 +200,25 @@ export const updateSubmissionFeedbackRoute = createRoute({
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
+
+export const getCompetitionSubmissionRequirementRoute = createRoute({
+  operationId: 'getCompetitionSubmissionRequirement',
+  tags: ['competition'],
+  method: 'get',
+  path: '/submission/requirement/{teamId}',
+  request: {
+    params: TeamIdParam,
+  },
+  responses: {
+    200: {
+      description: 'Successfully fetched competition submission requirement',
+      content: {
+        'application/json': {
+          schema: TeamSubmissionSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});

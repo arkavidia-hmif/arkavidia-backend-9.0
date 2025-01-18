@@ -80,7 +80,20 @@ export const getCompetitionById = async (
 export const getCompetitionSubmissionByTeamId = async (
   db: Database,
   teamId: string,
+  userId: string | undefined = undefined,
 ) => {
+  // Check if user is in team
+  if (userId) {
+    const isUserInTeam = await db
+      .select()
+      .from(teamMember)
+      .where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
+      .then(first);
+    if (!isUserInTeam) {
+      throw new Error('User are not in team!');
+    }
+  }
+
   const submissions = await db.query.competitionSubmission.findMany({
     where: eq(competitionSubmission.teamId, teamId),
     with: {

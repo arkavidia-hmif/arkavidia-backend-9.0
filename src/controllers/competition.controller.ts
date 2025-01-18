@@ -14,6 +14,7 @@ import {
 import {
   getAdminCompAnnouncementRoute,
   getCompetitionParticipantRoute,
+  getCompetitionSubmissionRequirementRoute,
   getCompetitionSubmissionRoute,
   getCompetitionSubmissionTeamRoute,
   getCompetitionTimeLineByCompetitionIdRoute,
@@ -154,3 +155,34 @@ competitionProtectedRouter.openapi(updateSubmissionFeedbackRoute, async (c) => {
   );
   return c.json(submission, 200);
 });
+
+competitionProtectedRouter.openapi(
+  getCompetitionSubmissionRequirementRoute,
+  async (c) => {
+    try {
+      const { teamId } = c.req.valid('param');
+      const submission = await getCompetitionSubmissionByTeamId(
+        db,
+        teamId,
+        c.var.user.id,
+      );
+      return c.json(submission, 200);
+    } catch (error) {
+      if (error instanceof Error) {
+        return c.json(
+          {
+            error: error.message,
+          },
+          500,
+        );
+      }
+
+      return c.json(
+        {
+          error: 'Unexpected error occured',
+        },
+        500,
+      );
+    }
+  },
+);

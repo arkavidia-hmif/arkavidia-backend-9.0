@@ -71,6 +71,8 @@ export const TeamSubmissionSchema = createSelectSchema(
     competitionId: z.string(),
     typeId: z.string(),
     typeName: z.string(),
+    description: z.string(),
+    stage: z.string(),
     deadline: z.date().nullable(),
   }),
 });
