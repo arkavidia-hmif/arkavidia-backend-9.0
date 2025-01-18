@@ -180,7 +180,7 @@ export const updateSubmissionFeedbackRoute = createRoute({
   operationId: 'updateSubmissionFeedback',
   tags: ['admin', 'competition'],
   method: 'put',
-  path: '/admin/submission/{submissionId}',
+  path: '/admin/submission/feedback/{teamId}/{typeId}',
   request: {
     params: TeamAndTypeIdParam,
     body: {
