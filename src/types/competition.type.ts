@@ -139,10 +139,25 @@ export const CompetitionIdSchema = z.object({
 });
 
 export const CompetitionIdQuery = z.object({
-  competitionId: z.string().openapi({
-    param: {
-      in: 'query',
-      required: true,
-    },
-  }),
+  competitionId: z
+    .string()
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+});
+
+export const CompetitionStatisticSchema = z.object({
+  competitionId: z.string(),
+  submissions: z.array(
+    z.object({
+      typeId: z.string(),
+      typeName: z.string(),
+      submitedTeams: z.number(),
+      deadline: z.union([z.string(), z.date()]),
+    }),
+  ),
 });
