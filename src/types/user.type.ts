@@ -16,3 +16,5 @@ export const UpdateUserBodyRoute = UserUpdateSchema.omit({
   updatedAt: true,
   isRegistrationComplete: true,
 });
+
+export const UserIdCardUrlBodySchema = z.object({ userIdCardUrl: z.string() });

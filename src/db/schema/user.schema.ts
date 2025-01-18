@@ -10,6 +10,7 @@ import {
 
 import { getNow } from '../../utils/drizzle-schema-util';
 import { userIdentity } from './auth.schema';
+import { media } from './media.schema';
 import { teamMember } from './team-member.schema';
 
 export const userEducationEnum = pgEnum('user_education_enum', [
@@ -33,6 +34,7 @@ export const user = pgTable('user', {
   idDiscord: text('id_discord'),
   idInstagram: text('id_instagram'),
   consent: boolean('consent').notNull().default(false),
+  mediaIdentityCardId: text('media_identity_card_id'),
   isRegistrationComplete: boolean('is_registration_complete')
     .notNull()
     .default(false),
@@ -41,6 +43,10 @@ export const user = pgTable('user', {
 });
 
 export const userRelations = relations(user, ({ one, many }) => ({
+  mediaIdentitiyCard: one(media, {
+    fields: [user.mediaIdentityCardId],
+    references: [media.id],
+  }),
   userIdentity: one(userIdentity, {
     fields: [user.id],
     references: [userIdentity.id],
