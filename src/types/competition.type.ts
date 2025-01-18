@@ -29,6 +29,15 @@ export const GetCompetitionSubmissionQuerySchema = z.object({
         required: false,
       },
     }),
+  search: z
+    .string()
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
 });
 
 export const AnnouncementSchema = createSelectSchema(competitionAnnouncement, {

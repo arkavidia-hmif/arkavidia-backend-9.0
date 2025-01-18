@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
+import { aliasedTable, and, eq, ilike, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -168,19 +168,27 @@ export const getCompetitionSubmissionById = async (
   options: {
     page: number;
     limit: number;
+    search?: string;
   },
 ) => {
-  const { page, limit } = options;
+  const { page, limit, search } = options;
   const offset = (page - 1) * limit;
+
+  const whereConditions = search
+    ? and(
+        eq(team.competitionId, competitionId),
+        ilike(team.name, `%${search}%`),
+      )
+    : eq(team.competitionId, competitionId);
 
   const totalTeam = (
     await db.query.team.findMany({
-      where: eq(team.competitionId, competitionId),
+      where: whereConditions, // eq(team.competitionId, competitionId),
     })
   ).length;
 
   const resultTeam = await db.query.team.findMany({
-    where: eq(team.competitionId, competitionId),
+    where: whereConditions, //eq(team.competitionId, competitionId),
     limit,
     offset,
   });
@@ -221,8 +229,14 @@ export const getCompetitionSubmissionById = async (
   }
 
   const totalPages = Math.ceil(totalTeam / limit);
-  const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
-  const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
+  const next =
+    page < totalPages
+      ? `?page=${page + 1}&limit=${limit}` + (search ? `&search=${search}` : '')
+      : null;
+  const prev =
+    page > 1
+      ? `?page=${page - 1}&limit=${limit}` + (search ? `&search=${search}` : '')
+      : null;
 
   return {
     pagination: {

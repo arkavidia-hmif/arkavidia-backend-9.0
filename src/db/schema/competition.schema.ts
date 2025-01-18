@@ -21,6 +21,12 @@ export const stageEnum = pgEnum('phase_enum', [
   'verification',
 ]);
 
+export const submissionStatusEnum = pgEnum('submission_status_enum', [
+  'pending',
+  'under_review',
+  'approved',
+]);
+
 /** Main Compeitition Table */
 export const competition = pgTable('competition', {
   id: text('id').primaryKey().$defaultFn(createId),
@@ -102,6 +108,7 @@ export const competitionSubmission = pgTable(
       onDelete: 'set null',
     }),
     judgeResponse: text('judge_response'),
+    status: submissionStatusEnum('status').notNull().default('pending'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').$onUpdate(getNow),
   },

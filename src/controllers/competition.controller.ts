@@ -35,13 +35,13 @@ competitionProtectedRouter.get(
 );
 
 competitionProtectedRouter.openapi(getCompetitionSubmissionRoute, async (c) => {
-  const { page, limit } = c.req.valid('query');
+  const { page, limit, search } = c.req.valid('query');
   const { competitionId } = c.req.valid('param');
 
   const competitionSubmission = await getCompetitionSubmissionById(
     db,
     competitionId,
-    { page: Number(page), limit: Number(limit) },
+    { page: Number(page), limit: Number(limit), search },
   );
 
   return c.json(competitionSubmission, 200);
