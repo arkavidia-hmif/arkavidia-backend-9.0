@@ -12,7 +12,11 @@ import {
   PostCompAnnouncementBodySchema,
   TeamAndTypeIdParam,
 } from '~/types/competition.type';
-import { TeamIdParam, TeamSubmissionSchema } from '~/types/team.type';
+import {
+  ListSubmissionRequirementSchema,
+  StageQuery,
+  TeamIdParam,
+} from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getCompetitionSubmissionRoute = createRoute({
@@ -44,6 +48,7 @@ export const getCompetitionSubmissionTeamRoute = createRoute({
   method: 'get',
   path: '/admin/team/{teamId}/submission',
   request: {
+    query: StageQuery,
     params: TeamIdParam,
   },
   responses: {
@@ -51,7 +56,7 @@ export const getCompetitionSubmissionTeamRoute = createRoute({
       description: "Fetched team's submission.",
       content: {
         'application/json': {
-          schema: TeamSubmissionSchema,
+          schema: ListSubmissionRequirementSchema,
         },
       },
     },
@@ -214,7 +219,7 @@ export const getCompetitionSubmissionRequirementRoute = createRoute({
       description: 'Successfully fetched competition submission requirement',
       content: {
         'application/json': {
-          schema: TeamSubmissionSchema,
+          schema: ListSubmissionRequirementSchema,
         },
       },
     },

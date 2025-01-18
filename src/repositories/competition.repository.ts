@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -77,10 +77,27 @@ export const getCompetitionById = async (
   return { maxParticipants: result?.maxParticipants };
 };
 
+//
 export const getCompetitionSubmissionByTeamId = async (
   db: Database,
   teamId: string,
+) => {
+  const submissions = await db.query.competitionSubmission.findMany({
+    where: eq(competitionSubmission.teamId, teamId),
+    with: {
+      file: true,
+      requirement: true,
+    },
+  });
+
+  return submissions;
+};
+
+export const getCompetitionSubmissionRequirementByTeamId = async (
+  db: Database,
+  teamId: string,
   userId: string | undefined = undefined,
+  stage: string | undefined = undefined,
 ) => {
   // Check if user is in team
   if (userId) {
@@ -89,18 +106,58 @@ export const getCompetitionSubmissionByTeamId = async (
       .from(teamMember)
       .where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
       .then(first);
+
     if (!isUserInTeam) {
       throw new Error('User are not in team!');
     }
   }
 
-  const submissions = await db.query.competitionSubmission.findMany({
-    where: eq(competitionSubmission.teamId, teamId),
-    with: {
-      file: true,
-      requirement: true,
-    },
+  // find compe id
+  const teamResult = await db.query.team.findFirst({
+    where: eq(team.id, teamId),
   });
+
+  if (!teamResult) {
+    throw new Error('Team not found');
+  }
+
+  const competitionId = teamResult.competitionId;
+
+  const requirement = aliasedTable(
+    competitionSubmissionRequirement,
+    'requirement',
+  );
+
+  const where = stage
+    ? and(
+        or(
+          eq(competitionSubmission.teamId, teamId),
+          isNull(competitionSubmission.teamId),
+        ),
+        eq(
+          requirement.stage,
+          stage as 'pre-eliminary' | 'final' | 'verification',
+        ),
+        eq(requirement.competitionId, competitionId),
+      )
+    : and(
+        or(
+          eq(competitionSubmission.teamId, teamId),
+          isNull(competitionSubmission.teamId),
+        ),
+        eq(requirement.competitionId, competitionId),
+      );
+
+  const submissions = await db
+    .select()
+    .from(requirement)
+    .leftJoin(
+      competitionSubmission,
+      eq(competitionSubmission.typeId, requirement.typeId),
+    )
+    .leftJoin(media, eq(competitionSubmission.mediaId, media.id))
+    .where(where)
+    .orderBy(requirement.deadline, requirement.typeName);
 
   return submissions;
 };

@@ -5,7 +5,8 @@ import {
   getCompetition,
   getCompetitionParticipant,
   getCompetitionSubmissionById,
-  getCompetitionSubmissionByTeamId,
+  // getCompetitionSubmissionByTeamId,
+  getCompetitionSubmissionRequirementByTeamId,
   getCompetitionTimelines,
   getCompetitionTimelinesByCompetitionId,
   postAnnouncement,
@@ -47,14 +48,37 @@ competitionProtectedRouter.openapi(getCompetitionSubmissionRoute, async (c) => {
 competitionProtectedRouter.openapi(
   getCompetitionSubmissionTeamRoute,
   async (c) => {
-    const { teamId } = c.req.valid('param');
+    try {
+      const { teamId } = c.req.valid('param');
+      const { stage } = c.req.valid('query');
 
-    const competitionSubmission = await getCompetitionSubmissionByTeamId(
-      db,
-      teamId,
-    );
+      const competitionSubmission =
+        await getCompetitionSubmissionRequirementByTeamId(
+          db,
+          teamId,
+          undefined,
+          stage,
+        );
 
-    return c.json(competitionSubmission, 200);
+      return c.json(competitionSubmission, 200);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Error) {
+        return c.json(
+          {
+            error: error.message,
+          },
+          500,
+        );
+      }
+
+      return c.json(
+        {
+          error: 'Unexpected error occured',
+        },
+        500,
+      );
+    }
   },
 );
 
@@ -161,7 +185,7 @@ competitionProtectedRouter.openapi(
   async (c) => {
     try {
       const { teamId } = c.req.valid('param');
-      const submission = await getCompetitionSubmissionByTeamId(
+      const submission = await getCompetitionSubmissionRequirementByTeamId(
         db,
         teamId,
         c.var.user.id,
