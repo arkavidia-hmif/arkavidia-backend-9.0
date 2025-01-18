@@ -4,7 +4,16 @@ import { createId } from '../../utils/drizzle-schema-util';
 import { user } from './user.schema';
 
 export const mediaBucketEnum = pgEnum('media_bucket_enum', [
-  'competition-registration',
+  'twibbon',
+  'poster',
+  'kartu-identitas',
+  'bukti-pembayaran',
+  'submission-cp',
+  'submission-ctf',
+  'submission-uxvidia',
+  'submission-arkalogica',
+  'submission-hackvidia',
+  'submission-datavidia',
 ]);
 
 export const media = pgTable('media', {

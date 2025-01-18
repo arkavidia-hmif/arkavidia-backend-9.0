@@ -5,6 +5,7 @@ import {
   getCompetition,
   getCompetitionIdByName,
   getCompetitionParticipant,
+  getCompetitionStatistic,
   getCompetitionSubmissionById,
   // getCompetitionSubmissionByTeamId,
   getCompetitionSubmissionRequirementByTeamId,
@@ -15,8 +16,10 @@ import {
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
+  getCompetitionByIdRoute,
   getCompetitionIdByNameRoute,
   getCompetitionParticipantRoute,
+  getCompetitionStatisticRoute,
   getCompetitionSubmissionRequirementRoute,
   getCompetitionSubmissionRoute,
   getCompetitionSubmissionTeamRoute,
@@ -25,9 +28,10 @@ import {
   postAdminCompAnnouncementRoute,
   updateSubmissionFeedbackRoute,
 } from '~/routes/competition.route';
-import { createAuthRouter } from '~/utils/router-factory';
+import { createAuthRouter, createRouter } from '~/utils/router-factory';
 
 export const competitionProtectedRouter = createAuthRouter();
+export const competitionRouter = createRouter();
 
 competitionProtectedRouter.get(
   getCompetitionSubmissionRoute.getRoutingPath(),
@@ -218,8 +222,25 @@ competitionProtectedRouter.openapi(
   },
 );
 
-competitionProtectedRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
+competitionRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
   const { name } = c.req.valid('query');
   const competition = await getCompetitionIdByName(db, name);
+  return c.json(competition, 200);
+});
+
+competitionProtectedRouter.openapi(getCompetitionByIdRoute, async (c) => {
+  const { competitionId } = c.req.valid('param');
+  const competition = await getCompetition(db, competitionId);
+  return c.json(competition, 200);
+});
+
+competitionProtectedRouter.get(
+  getCompetitionStatisticRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+
+competitionProtectedRouter.openapi(getCompetitionStatisticRoute, async (c) => {
+  const { competitionId } = c.req.valid('query');
+  const competition = await getCompetitionStatistic(db, competitionId);
   return c.json(competition, 200);
 });

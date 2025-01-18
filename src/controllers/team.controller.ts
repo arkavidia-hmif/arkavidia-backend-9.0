@@ -2,6 +2,7 @@ import { db } from '~/db/drizzle';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   getCompetitionById,
+  getCompetitionStageByTeamId,
   initializelCompetitionSubmissions,
 } from '~/repositories/competition.repository';
 import {
@@ -216,10 +217,35 @@ teamProtectedRouter.get(
 );
 
 teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
-  const { teamId } = c.req.valid('param');
-  const team = await getTeamById(db, teamId, { teamMember: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-  return c.json(team, 200);
+  try {
+    const { teamId } = c.req.valid('param');
+    const team = await getTeamById(db, teamId, { teamMember: true });
+    if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+    const competitionStage = await getCompetitionStageByTeamId(db, teamId);
+    return c.json(
+      {
+        ...team,
+        competitionStage,
+      },
+      200,
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          error: error.message,
+        },
+        500,
+      );
+    }
+
+    return c.json(
+      {
+        error: 'Unexpected error occurred',
+      },
+      500,
+    );
+  }
 });
 
 teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
