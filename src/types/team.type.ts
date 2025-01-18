@@ -18,7 +18,7 @@ export const TeamSchema = createSelectSchema(team, {
   createdAt: z.union([z.string(), z.date()]),
 })
   .extend({
-    competititon: createSelectSchema(competition).optional(),
+    competition: createSelectSchema(competition).optional(),
   })
   .openapi('Team');
 
