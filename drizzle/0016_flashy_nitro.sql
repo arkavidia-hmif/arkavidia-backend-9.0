@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "media_identity_card_id" text;
