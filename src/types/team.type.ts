@@ -93,12 +93,6 @@ export const CompetitionIdParam = z.object({
   }),
 });
 
-export const TeamCompetitionSchema = z.array(
-  TeamSchema.extend({
-    teamMembers: z.array(TeamMemberSchema),
-  }),
-);
-
 export const TeamCompetitionDetailSchema = TeamSchema.extend({
   teamMembers: z.array(TeamMemberSchema),
 });

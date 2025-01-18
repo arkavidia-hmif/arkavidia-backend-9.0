@@ -15,7 +15,6 @@ import {
   deleteTeamMember,
   getTeamByCode,
   getTeamById,
-  getTeamsByCompetitionId,
   getUserTeams,
   insertUserToTeam,
   updateTeamDocument,
@@ -24,7 +23,6 @@ import {
 import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
-  getTeamCompetitionRoute,
   getTeamDetailRoute,
   getTeamsRoute,
   joinTeamByCodeRoute,
@@ -208,18 +206,6 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
   );
 
   return c.json(updatedTeam, 200);
-});
-
-teamProtectedRouter.get(
-  getTeamCompetitionRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
-
-teamProtectedRouter.openapi(getTeamCompetitionRoute, async (c) => {
-  const { competitionId } = c.req.valid('param');
-  const teams = await getTeamsByCompetitionId(db, competitionId);
-  if (!teams) return c.json({ error: "Competition doesn't exist!" }, 400);
-  return c.json(teams, 200);
 });
 
 teamProtectedRouter.get(

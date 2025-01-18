@@ -84,6 +84,11 @@ competitionProtectedRouter.openapi(
   },
 );
 
+competitionProtectedRouter.get(
+  getCompetitionParticipantRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+
 competitionProtectedRouter.openapi(
   getCompetitionParticipantRoute,
   async (c) => {
