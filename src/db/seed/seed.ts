@@ -429,8 +429,7 @@ async function seedTimelines() {
 
       if (confirmInput.toLowerCase() === 'yes') {
         console.log('Deleting competition timeline table...');
-        await db.delete(team);
-        await db.delete(teamMember);
+        await db.delete(competitionTimeline);
         console.log('🗑️ Competition Timeline table deleted!');
       }
     }
@@ -450,7 +449,7 @@ async function seedTimelines() {
         .then(first);
 
       const startDate = start_date ? new Date(start_date) : new Date();
-      const endDate = end_date ? new Date(end_date) : new Date();
+      const endDate = end_date ? new Date(end_date) : null;
 
       const res = await db
         .insert(competitionTimeline)
