@@ -153,7 +153,7 @@ competitionProtectedRouter.openapi(
   },
 );
 
-competitionProtectedRouter.openapi(getCompetitionTimelineRoute, async (c) => {
+competitionRouter.openapi(getCompetitionTimelineRoute, async (c) => {
   const user = c.get('user');
   const userId = user.id;
   const timelines = await getCompetitionTimelines(db, userId);

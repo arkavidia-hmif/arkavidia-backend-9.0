@@ -1,3 +1,5 @@
+import fs from 'fs';
+import handlebars from 'handlebars';
 import nodemailer from 'nodemailer';
 import { env } from '~/configs/env.config';
 
@@ -13,6 +15,19 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+export const generateEmailTemplate = async (data: {
+  title: string;
+  message: string;
+  link: string;
+}) => {
+  console.log('Generating email template with data:', data);
+  const cwd = process.cwd();
+  console.log('Current working directory:', cwd);
+  const source = fs.readFileSync('src/lib/email.html', 'utf8');
+  const template = handlebars.compile(source);
+  return template({ ...data, fe_url: env.FE_URL });
+};
+
 export const sendVerificationEmail = async (
   targetEmail: string,
   verificationToken: string,
@@ -21,8 +36,12 @@ export const sendVerificationEmail = async (
   const info = await transporter.sendMail({
     from: MAIL_FROM,
     to: targetEmail,
-    subject: 'Verify your account!',
-    text: `${env.FE_URL}/auth/verify?user=${encodeURIComponent(userId)}&token=${encodeURIComponent(verificationToken)}`, // TODO: Change this to beautiful HTML
+    subject: 'Arkavidia - Verify your account!',
+    html: await generateEmailTemplate({
+      title: 'Verify Your Account',
+      message: 'Tekan tombol dibawah ini untuk melakukan verifikasi akun.',
+      link: `${env.FE_URL}/auth/verify?user=${encodeURIComponent(userId)}&token=${encodeURIComponent(verificationToken)}`,
+    }),
   });
 
   console.log('Message sent: %s', info.messageId);
@@ -36,8 +55,12 @@ export const sendResetPasswordEmail = async (
   const info = await transporter.sendMail({
     from: MAIL_FROM,
     to: targetEmail,
-    subject: 'Reset your password!',
-    text: `${env.FE_URL}/reset-password?user=${encodeURIComponent(userId)}&token=${encodeURIComponent(resetPasswordToken)}`, // TODO: Change this to beautiful HTML
+    subject: 'Arkavidia - Reset your password!',
+    html: await generateEmailTemplate({
+      title: 'Reset your password',
+      message: 'Tekan tombol dibawah ini untuk melakukan reset password.',
+      link: `${env.FE_URL}/reset-password?user=${encodeURIComponent(userId)}&token=${encodeURIComponent(resetPasswordToken)}`,
+    }),
   });
 
   console.log('Message sent: %s', info.messageId);
