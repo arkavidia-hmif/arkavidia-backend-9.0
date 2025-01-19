@@ -29,7 +29,7 @@ export const getTeamDocument = async (
   teamId: string,
   type: TeamDocumentTypeEnum,
 ) => {
-  return db.query.userDocument.findFirst({
+  return db.query.teamDocument.findFirst({
     where: and(eq(teamDocument.teamId, teamId), eq(teamDocument.type, type)),
   });
 };
