@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { teamMemberDocument } from '~/db/schema';
 import { teamMember } from '~/db/schema/team-member.schema';
 
-import { MediaSchema } from './media.type';
 import { UserSchema } from './user.type';
 
 export const TeamMemberDocumentSchema =

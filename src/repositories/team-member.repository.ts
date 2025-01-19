@@ -13,7 +13,6 @@ import type {
 } from '~/types/team-member.type';
 
 import { getCompetitionById } from './competition.repository';
-import { insertMediaFromUrl } from './media.repository';
 import { getTeamById } from './team.repository';
 import { UserRelationOption } from './user.repository';
 
