@@ -69,10 +69,9 @@ export const getTeamById = async (
           : {
               with: {
                 user: options?.teamMember?.user ? true : undefined,
-                nisn: options?.teamMember?.nisn ? true : undefined,
-                kartu: options?.teamMember?.kartu ? true : undefined,
-                poster: options?.teamMember?.poster ? true : undefined,
-                twibbon: options?.teamMember?.twibbon ? true : undefined,
+                document: options?.teamMember?.document
+                  ? { with: { media: true } }
+                  : undefined,
               },
             },
       competition: options?.competition ? true : undefined,

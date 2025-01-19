@@ -1,15 +1,14 @@
-import { createRoute } from '@hono/zod-openapi';
+import { createRoute, z } from '@hono/zod-openapi';
 import {
-  CompetitionAndTeamAndUserIdParam,
-  PostTeamMemberDocumentBodySchema,
-  PostTeamMemberVerificationBodySchema,
+  TeamAndUserIdParam,
   TeamMemberSchema,
+  UpdateTeamMemberDocumentRouteSchema,
 } from '~/types/team-member.type';
 import { TeamIdParam } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
-export const getTeamMemberRoute = createRoute({
-  operationId: 'getTeamMember',
+export const getTeamMembersRoute = createRoute({
+  operationId: 'getTeamMembers',
   tags: ['team-member'],
   method: 'get',
   path: '/team/{teamId}/member',
@@ -20,27 +19,51 @@ export const getTeamMemberRoute = createRoute({
     200: {
       content: {
         'application/json': {
-          schema: TeamMemberSchema,
+          schema: z.array(TeamMemberSchema),
         },
       },
-      description: 'Succesfully fetched tean member',
+      description: 'Succesfully fetched all team member',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
+    403: createErrorResponse('UNION', 'Forbidden'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
 
-export const postTeamMemberDocumentRoute = createRoute({
-  operationId: 'postTeamMemberDocument',
+export const getTeamMemberByIdRoute = createRoute({
+  operationId: 'getTeamMembers',
   tags: ['team-member'],
-  method: 'post',
-  path: '/team/{teamId}/upload',
+  method: 'get',
+  path: '/team/{teamId}/member/{userId}',
   request: {
-    params: TeamIdParam,
+    params: TeamAndUserIdParam,
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TeamMemberSchema,
+        },
+      },
+      description: 'Succesfully fetched all team member',
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    403: createErrorResponse('UNION', 'Forbidden'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const updateTeamMemberDocumentRoute = createRoute({
+  operationId: 'updateTeamMemberDocument',
+  tags: ['team-member'],
+  method: 'put',
+  path: '/team/{teamId}/member/{userId}/document',
+  request: {
+    params: TeamAndUserIdParam,
     body: {
       content: {
         'application/json': {
-          schema: PostTeamMemberDocumentBodySchema,
+          schema: UpdateTeamMemberDocumentRouteSchema,
         },
       },
       required: true,
@@ -54,30 +77,6 @@ export const postTeamMemberDocumentRoute = createRoute({
         },
       },
       description: 'Succesfully updated document upload',
-    },
-    400: createErrorResponse('UNION', 'Bad request error'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
-  },
-});
-
-export const postTeamMemberVerificationRoute = createRoute({
-  operationId: 'postTeamMemberVerification',
-  tags: ['team-member', 'admin'],
-  method: 'post',
-  path: '/admin/{competitionId}/team/{teamId}/{userId}',
-  request: {
-    params: CompetitionAndTeamAndUserIdParam,
-    body: {
-      content: {
-        'application/json': {
-          schema: PostTeamMemberVerificationBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Succesfully updated document verification',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

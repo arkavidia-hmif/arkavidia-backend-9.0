@@ -68,7 +68,7 @@ export const isUserDocumentsVerified = async (db: Database, userId: string) => {
 
 /** USER DOCUMENT REPOSITORIES */
 
-interface UserRelationOption {
+export interface UserRelationOption {
   document?: boolean;
 }
 

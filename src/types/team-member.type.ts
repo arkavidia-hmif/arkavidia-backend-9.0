@@ -1,9 +1,21 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
+import { teamMemberDocument } from '~/db/schema';
 import { teamMember } from '~/db/schema/team-member.schema';
 
 import { MediaSchema } from './media.type';
 import { UserSchema } from './user.type';
+
+export const TeamMemberDocumentSchema =
+  createSelectSchema(teamMemberDocument).openapi('TeamMemberDocument');
+export const InsertTeamMemberDocumentSchema =
+  createInsertSchema(teamMemberDocument);
+export const UpdateTeamMemberDocumentSchema =
+  InsertTeamMemberDocumentSchema.partial().omit({
+    teamId: true,
+    userId: true,
+    type: true,
+  });
 
 export const TeamAndUserIdParam = z.object({
   teamId: z.string().openapi({
@@ -24,21 +36,14 @@ export const TeamMemberSchema = createSelectSchema(teamMember)
   .merge(
     z.object({
       user: UserSchema,
-      nisn: MediaSchema,
-      kartu: MediaSchema,
-      poster: MediaSchema,
-      twibbon: MediaSchema,
+      document: TeamMemberDocumentSchema,
     }),
   )
   .openapi('TeamMember');
 
-export const PostTeamMemberDocumentBodySchema = createInsertSchema(
-  teamMember,
-).pick({
-  nisnMediaId: true,
-  kartuMediaId: true,
-  posterMediaId: true,
-  twibbonMediaId: true,
+export const UpdateTeamMemberDocumentRouteSchema = z.object({
+  posterMediaId: z.string().optional(),
+  twibbonMediaId: z.string().optional(),
 });
 
 export const CompetitionAndTeamAndUserIdParam = z.object({
@@ -60,9 +65,4 @@ export const CompetitionAndTeamAndUserIdParam = z.object({
       required: true,
     },
   }),
-});
-
-export const PostTeamMemberVerificationBodySchema = z.object({
-  isVerified: z.boolean(),
-  verificationError: z.string().optional(),
 });

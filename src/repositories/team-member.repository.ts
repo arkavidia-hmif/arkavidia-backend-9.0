@@ -1,78 +1,166 @@
 import { and, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
-import { team, teamMember } from '~/db/schema';
+import {
+  TeamMemberDocumentTypeEnum,
+  team,
+  teamMember,
+  teamMemberDocument,
+} from '~/db/schema';
 import type {
-  PostTeamMemberDocumentBodySchema,
-  PostTeamMemberVerificationBodySchema,
+  InsertTeamMemberDocumentSchema,
+  UpdateTeamMemberDocumentSchema,
 } from '~/types/team-member.type';
 
 import { getCompetitionById } from './competition.repository';
 import { insertMediaFromUrl } from './media.repository';
 import { getTeamById } from './team.repository';
+import { UserRelationOption } from './user.repository';
 
 export interface TeamMemberRelationOption {
-  user?: boolean;
-  nisn?: boolean;
-  kartu?: boolean;
-  poster?: boolean;
-  twibbon?: boolean;
+  user?: UserRelationOption;
+  document?: boolean;
 }
 
-export const getTeamMemberById = async (
+export const isUserInTeam = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  const x = await db.query.teamMember.findFirst({
+    where: and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)),
+    columns: { userId: true },
+  });
+  if (!x) return false;
+  return true;
+};
+
+export const getTeamMember = async (
   db: Database,
   teamId: string,
   userId: string,
   options?: TeamMemberRelationOption,
 ) => {
-  const teamMembers = await db.query.teamMember.findMany({
-    where: and(eq(teamMember.teamId, teamId)),
+  return await db.query.teamMember.findFirst({
+    where: and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)),
     with: {
-      user: options?.user ? true : undefined,
-      nisn: options?.nisn ? true : undefined,
-      kartu: options?.kartu ? true : undefined,
-      poster: options?.poster ? true : undefined,
-      twibbon: options?.twibbon ? true : undefined,
+      document: options?.document ? { with: { media: true } } : undefined,
+      user:
+        typeof options?.user === 'boolean'
+          ? options?.user
+            ? true
+            : undefined
+          : {
+              with: {
+                document: options?.user?.document
+                  ? { with: { media: true } }
+                  : undefined,
+              },
+            },
     },
   });
+};
 
-  const isUserInTeam = teamMembers.some((member) => member.userId === userId);
-  if (!isUserInTeam) {
-    throw new Error("User isn't inside team");
-  }
+export const getAllTeamMembers = async (
+  db: Database,
+  teamId: string,
+  options?: TeamMemberRelationOption,
+) => {
+  return await db.query.teamMember.findMany({
+    where: and(eq(teamMember.teamId, teamId)),
+    with: {
+      document: options?.document ? { with: { media: true } } : undefined,
+      user:
+        typeof options?.user === 'boolean'
+          ? options?.user
+            ? true
+            : undefined
+          : {
+              with: {
+                document: options?.user?.document
+                  ? { with: { media: true } }
+                  : undefined,
+              },
+            },
+    },
+  });
+};
 
-  return teamMembers;
+export const getTeamMemberDocument = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+  type: TeamMemberDocumentTypeEnum,
+) => {
+  return db.query.teamMemberDocument.findFirst({
+    where: and(
+      eq(teamMemberDocument.userId, userId),
+      eq(teamMemberDocument.userId, teamId),
+      eq(teamMemberDocument.type, type),
+    ),
+  });
+};
+
+export const createTeamMemberDocument = async (
+  db: Database,
+  values: z.infer<typeof InsertTeamMemberDocumentSchema>,
+) => {
+  return await db.insert(teamMemberDocument).values(values).returning();
 };
 
 export const updateTeamMemberDocument = async (
   db: Database,
-  teamId: string,
   userId: string,
-  data: z.infer<typeof PostTeamMemberDocumentBodySchema>,
+  teamId: string,
+  values: z.infer<typeof UpdateTeamMemberDocumentSchema>,
 ) => {
-  // create media
-  const insert = {
-    nisnMediaId: data.nisnMediaId
-      ? (await insertMediaFromUrl(db, userId, data.nisnMediaId))[0].id
-      : undefined,
-    kartuMediaId: data.kartuMediaId
-      ? (await insertMediaFromUrl(db, userId, data.kartuMediaId))[0].id
-      : undefined,
-    twibbonMediaId: data.twibbonMediaId
-      ? (await insertMediaFromUrl(db, userId, data.twibbonMediaId))[0].id
-      : undefined,
-    posterMediaId: data.posterMediaId
-      ? (await insertMediaFromUrl(db, userId, data.posterMediaId))[0].id
-      : undefined,
-  };
-
   return await db
-    .update(teamMember)
-    .set(insert)
+    .update(teamMemberDocument)
+    .set(values)
     .where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
-    .returning()
-    .then(first);
+    .returning();
+};
+
+export const updatePosterTeamMember = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+  posterMediaId: string,
+) => {
+  const poster = await getTeamMemberDocument(db, userId, teamId, 'poster');
+  if (poster) {
+    await updateTeamMemberDocument(db, userId, teamId, {
+      mediaId: posterMediaId,
+    });
+  } else {
+    await createTeamMemberDocument(db, {
+      userId,
+      teamId,
+      mediaId: posterMediaId,
+      type: 'poster',
+    });
+  }
+};
+
+export const updateTwibbonTeamMember = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+  twibbonMediaId: string,
+) => {
+  const twibbon = await getTeamMemberDocument(db, userId, teamId, 'twibbon');
+  if (twibbon) {
+    await updateTeamMemberDocument(db, userId, teamId, {
+      mediaId: twibbonMediaId,
+    });
+  } else {
+    await createTeamMemberDocument(db, {
+      userId,
+      teamId,
+      mediaId: twibbonMediaId,
+      type: 'twibbon',
+    });
+  }
 };
 
 export const getTeamMemberCount = async (db: Database, teamId: string) => {
@@ -123,21 +211,6 @@ export const insertUserToTeam = async (
   });
 };
 
-export const updateTeamMemberVerification = async (
-  db: Database,
-  teamId: string,
-  userId: string,
-  data: z.infer<typeof PostTeamMemberVerificationBodySchema>,
-) => {
-  return await db
-    .update(teamMember)
-    .set(data)
-    .where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
-    .returning()
-    .then(first);
-};
-
-// args : competition
 export const isUserInOtherTeam = async (
   db: Database,
   userId: string,

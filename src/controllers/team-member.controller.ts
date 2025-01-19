@@ -1,108 +1,72 @@
 import { db } from '~/db/drizzle';
-import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
-  getTeamMemberById,
-  updateTeamMemberDocument,
-  updateTeamMemberVerification,
+  getAllTeamMembers,
+  getTeamMember,
+  isUserInTeam,
+  updatePosterTeamMember,
+  updateTwibbonTeamMember,
 } from '~/repositories/team-member.repository';
 import { getTeamById } from '~/repositories/team.repository';
 import {
-  getTeamMemberRoute,
-  postTeamMemberDocumentRoute,
-  postTeamMemberVerificationRoute,
+  getTeamMemberByIdRoute,
+  getTeamMembersRoute,
+  updateTeamMemberDocumentRoute,
 } from '~/routes/team-member.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
 export const teamMemberProtectedRouter = createAuthRouter();
 
-teamMemberProtectedRouter.openapi(getTeamMemberRoute, async (c) => {
-  try {
-    return c.json(
-      await getTeamMemberById(db, c.req.valid('param').teamId, c.var.user.id, {
-        nisn: true,
-        user: true,
-        poster: true,
-        twibbon: true,
-        kartu: true,
-      }),
-      200,
-    );
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        {
-          error: error.message,
-        },
-        500,
-      );
-    }
+teamMemberProtectedRouter.openapi(getTeamMembersRoute, async (c) => {
+  const teamId = c.req.valid('param').teamId;
+  const userId = c.var.user.id;
 
-    return c.json(
-      {
-        error: 'Unexpected error occured',
-      },
-      500,
-    );
-  }
+  const teamMembers = await getAllTeamMembers(db, teamId, {
+    document: true,
+    user: { document: true },
+  });
+  if (teamMembers.length === 0) return c.json({ error: 'Team not found!' });
+
+  const isUserInTeam = teamMembers.find((tm) => tm.userId === userId);
+  if (!isUserInTeam)
+    return c.json({ error: 'You are not a member of this team!' });
+
+  return c.json(teamMembers, 200);
 });
 
-teamMemberProtectedRouter.openapi(postTeamMemberDocumentRoute, async (c) => {
-  const { teamId } = c.req.valid('param');
+teamMemberProtectedRouter.openapi(getTeamMemberByIdRoute, async (c) => {
+  const { teamId, userId } = c.req.valid('param');
+
+  if (!(await isUserInTeam(db, teamId, userId)))
+    return c.json({ error: 'You are not a member of this team!' });
+
+  const teamMember = await getTeamMember(db, teamId, userId, {
+    document: true,
+    user: { document: true },
+  });
+  if (!teamMember) return c.json({ error: 'Team member not found!' });
+  return c.json(teamMember, 200);
+});
+
+teamMemberProtectedRouter.openapi(updateTeamMemberDocumentRoute, async (c) => {
+  const { teamId, userId } = c.req.valid('param');
+  const { posterMediaId, twibbonMediaId } = c.req.valid('json');
 
   // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+  if (!(await isUserInTeam(db, teamId, userId)))
+    return c.json({ error: 'You are not a member of this team!' });
 
-  // Check if user is in team
-  const user = c.var.user;
-  const teamMember = team.teamMembers.find((el) => el.userId === user.id);
-  console.log(team);
-  console.log(user.id, teamMember);
-  console.log(user);
-  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+  console.log(posterMediaId, twibbonMediaId);
 
-  // Check if user member hasn't been verified yet
-  if (teamMember.isVerified)
-    return c.json({ error: 'You are already verified!' }, 403);
+  if (posterMediaId)
+    await updatePosterTeamMember(db, userId, teamId, posterMediaId);
+  if (twibbonMediaId)
+    await updateTwibbonTeamMember(db, userId, teamId, twibbonMediaId);
 
-  const updatedTeamMember = await updateTeamMemberDocument(
-    db,
-    teamId,
-    user.id,
-    c.req.valid('json'),
-  );
-
+  const updatedTeamMember = await getTeamMember(db, teamId, userId, {
+    document: true,
+    user: { document: true },
+  });
   return c.json(updatedTeamMember, 200);
 });
-
-teamMemberProtectedRouter.post(
-  postTeamMemberVerificationRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
-teamMemberProtectedRouter.openapi(
-  postTeamMemberVerificationRoute,
-  async (c) => {
-    const { competitionId, teamId, userId } = c.req.valid('param');
-
-    const team = await getTeamById(db, teamId, {
-      competition: true,
-      teamMember: true,
-    });
-    if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-
-    if (team.competition.id !== competitionId)
-      return c.json({ error: "Team and competition don't match!" }, 400);
-
-    if (!team.teamMembers.find((el) => el.userId === userId))
-      return c.json({ error: "User isn't inside team!" }, 403);
-
-    const body = c.req.valid('json');
-
-    await updateTeamMemberVerification(db, teamId, userId, body);
-
-    return c.json(
-      { message: 'Successfully updated document verification!' },
-      200,
-    );
-  },
-);
