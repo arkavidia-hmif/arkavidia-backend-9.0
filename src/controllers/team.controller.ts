@@ -8,6 +8,7 @@ import {
 import {
   getTeamMemberCount,
   isUserInOtherTeam,
+  isUserInTeam,
 } from '~/repositories/team-member.repository';
 import {
   changeTeamName,
@@ -19,8 +20,8 @@ import {
   getTeamStatistic,
   getUserTeams,
   insertUserToTeam,
-  updateTeamDocument,
-  updateTeamVerification,
+  updatePaymentProofTeam,
+  // updateTeamVerification,
 } from '~/repositories/team.repository';
 import {
   deleteTeamMemberRoute,
@@ -32,7 +33,7 @@ import {
   postCreateTeamRoute,
   postQuitTeamRoute,
   postTeamDocumentRoute,
-  postTeamVerificationRoute,
+  // postTeamVerificationRoute,
   putChangeTeamNameRoute,
 } from '~/routes/team.route';
 import { createAuthRouter } from '~/utils/router-factory';
@@ -42,7 +43,8 @@ export const teamProtectedRouter = createAuthRouter();
 teamProtectedRouter.openapi(getTeamByIdRoute, async (c) => {
   const { teamId } = c.req.valid('param');
   const team = await getTeamById(db, teamId, {
-    teamMember: true,
+    document: true,
+    teamMember: { document: true, user: { document: true } },
     competition: true,
   });
   return c.json(team, 200);
@@ -104,25 +106,25 @@ teamProtectedRouter.openapi(deleteTeamMemberRoute, async (c) => {
   return c.json(member, 200);
 });
 
-teamProtectedRouter.post(
-  postTeamVerificationRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
-teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
-  const { competitionId, teamId } = c.req.valid('param');
+// teamProtectedRouter.post(
+//   postTeamVerificationRoute.getRoutingPath(),
+//   roleMiddleware('admin'),
+// );
+// teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
+//   const { competitionId, teamId } = c.req.valid('param');
 
-  const team = await getTeamById(db, teamId, { competition: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+//   const team = await getTeamById(db, teamId, { competition: true });
+//   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
 
-  if (team.competition.id !== competitionId)
-    return c.json({ error: "Team and competition don't match!" }, 400);
+//   if (team.competition.id !== competitionId)
+//     return c.json({ error: "Team and competition don't match!" }, 400);
 
-  const body = c.req.valid('json');
+//   const body = c.req.valid('json');
 
-  await updateTeamVerification(db, teamId, body);
+//   await updateTeamVerification(db, teamId, body);
 
-  return c.json({ message: 'Successfully updated team verification!' }, 200);
-});
+//   return c.json({ message: 'Successfully updated team verification!' }, 200);
+// });
 
 teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
   try {
@@ -181,32 +183,21 @@ teamProtectedRouter.openapi(postQuitTeamRoute, async (c) => {
 
 teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
   const { teamId } = c.req.valid('param');
+  const userId = c.var.user.id;
+  const { paymentProofMediaId } = c.req.valid('json');
 
   // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+  if (!(await isUserInTeam(db, teamId, userId)))
+    return c.json({ error: 'You are not a member of this team!' }, 403);
 
-  // Check if user is in team
-  const user = c.var.user;
-  const teamMember = team.teamMembers.find((el) => el.userId === user.id);
-  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+  await updatePaymentProofTeam(db, teamId, paymentProofMediaId);
 
-  // Check if payment proof hasn't been verified yet
-  if (team.isVerified) {
-    return c.json({ error: 'Your team already verified!' }, 400);
-  }
-
-  // Check if paymentProofId exist
-  const { paymentProofMediaId } = c.req.valid('json');
-  if (!paymentProofMediaId)
-    return c.json({ error: 'paymentProofMediaId id is required!' }, 400);
-
-  const updatedTeam = await updateTeamDocument(
-    db,
-    teamId,
-    user.id,
-    c.req.valid('json'),
-  );
+  const updatedTeam = await getTeamById(db, teamId, {
+    document: true,
+    competition: true,
+  });
 
   return c.json(updatedTeam, 200);
 });

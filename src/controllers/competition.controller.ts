@@ -18,7 +18,7 @@ import {
 import {
   getAdminCompAnnouncementRoute,
   getCompetitionByIdRoute,
-  getCompetitionIdByNameRoute,
+  getCompetitionByNameRoute,
   getCompetitionParticipantRoute,
   getCompetitionStatisticRoute,
   getCompetitionSubmissionRequirementRoute,
@@ -224,7 +224,7 @@ competitionProtectedRouter.openapi(
   },
 );
 
-competitionRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
+competitionRouter.openapi(getCompetitionByNameRoute, async (c) => {
   const { name } = c.req.valid('query');
   const competition = await getCompetitionIdByName(db, name);
   return c.json(competition, 200);

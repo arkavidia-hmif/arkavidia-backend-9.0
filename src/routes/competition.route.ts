@@ -4,7 +4,6 @@ import {
   AnnouncementSchema,
   CompetitionIdParam,
   CompetitionIdQuery,
-  CompetitionIdSchema,
   CompetitionNameQuery,
   CompetitionParticipantSchema,
   CompetitionSchema,
@@ -14,6 +13,7 @@ import {
   FeedbackSubmissionBodySchema,
   GetCompetitionSubmissionQuerySchema,
   GetCompetitionTimeQuerySchema,
+  ListCompetitionSchema,
   PostCompAnnouncementBodySchema,
   StatusSubmissionSchema,
   TeamAndTypeIdParam,
@@ -234,11 +234,11 @@ export const getCompetitionSubmissionRequirementRoute = createRoute({
   },
 });
 
-export const getCompetitionIdByNameRoute = createRoute({
-  operationId: 'getCompetitionIdByName',
+export const getCompetitionByNameRoute = createRoute({
+  operationId: 'getCompetitionByName',
   tags: ['competition'],
   method: 'get',
-  path: '/competition/id',
+  path: '/competition/',
   request: {
     query: CompetitionNameQuery,
   },
@@ -247,7 +247,7 @@ export const getCompetitionIdByNameRoute = createRoute({
       description: 'Successfully fetched competition id',
       content: {
         'application/json': {
-          schema: CompetitionIdSchema,
+          schema: ListCompetitionSchema,
         },
       },
     },
@@ -257,7 +257,7 @@ export const getCompetitionIdByNameRoute = createRoute({
 });
 
 export const getCompetitionByIdRoute = createRoute({
-  operationId: 'getCompetitionNameById',
+  operationId: 'getCompetitionById',
   tags: ['competition'],
   method: 'get',
   path: '/competition/{competitionId}',

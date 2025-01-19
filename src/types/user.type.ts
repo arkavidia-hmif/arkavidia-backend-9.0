@@ -2,8 +2,15 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { user, userDocument } from '~/db/schema';
 
-export const UserDocumentSchema =
-  createSelectSchema(userDocument).openapi('UserDocument');
+import { MediaSchema } from './media.type';
+
+export const UserDocumentSchema = createSelectSchema(userDocument)
+  .merge(
+    z.object({
+      media: MediaSchema,
+    }),
+  )
+  .openapi('UserDocument');
 export const UpdateUserDocumentSchema =
   createInsertSchema(userDocument).partial();
 export const CreateUserDocumentSchema = createInsertSchema(userDocument).omit({

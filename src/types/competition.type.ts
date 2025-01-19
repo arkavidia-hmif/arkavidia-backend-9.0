@@ -11,6 +11,8 @@ import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 export const CompetitionSchema =
   createSelectSchema(competition).openapi('Competition');
 
+export const ListCompetitionSchema = z.array(CompetitionSchema);
+
 export const GetCompetitionSubmissionQuerySchema = z.object({
   page: z
     .string()
@@ -133,6 +135,7 @@ export const CompetitionNameQuery = z.object({
       },
     }),
 });
+
 
 export const CompetitionIdSchema = z.object({
   name: z.string(),

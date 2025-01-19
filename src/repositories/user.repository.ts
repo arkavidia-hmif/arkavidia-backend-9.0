@@ -94,6 +94,7 @@ export const getUser = async (
     where: eq(user.id, id),
     with: {
       document: options?.document ? { with: { media: true } } : undefined,
+      // document: { with: { media: true } },
     },
   });
 };
