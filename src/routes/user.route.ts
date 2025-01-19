@@ -1,7 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import {
-  UpdateUserBodyRoute,
-  UserIdCardUrlBodySchema,
+  UpdateUserBodySchema,
+  UpdateUserDocumentRouteSchema,
   UserSchema,
 } from '~/types/user.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
@@ -34,7 +34,7 @@ export const updateUserRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: UpdateUserBodyRoute,
+          schema: UpdateUserBodySchema,
         },
       },
     },
@@ -53,23 +53,23 @@ export const updateUserRoute = createRoute({
   },
 });
 
-export const uploadUserIdCardRoute = createRoute({
-  operationId: 'uploadUserIdCard',
+export const updateUserDocumentRoute = createRoute({
+  operationId: 'updateUserDocument',
   tags: ['user'],
   method: 'put',
-  path: '/user/upload',
+  path: '/user/document',
   request: {
     body: {
       content: {
         'application/json': {
-          schema: UserIdCardUrlBodySchema,
+          schema: UpdateUserDocumentRouteSchema,
         },
       },
     },
   },
   responses: {
     200: {
-      description: 'Upload user id card',
+      description: 'Updated user documents',
       content: {
         'application/json': {
           schema: UserSchema,

@@ -363,28 +363,33 @@ authRouter.openapi(forgotPasswordRoute, async (c) => {
 });
 
 authRouter.openapi(resetPasswordRoute, async (c) => {
-  const { userId, token, password } = c.req.valid('json');
+  try {
+    const { userId, token, password } = c.req.valid('json');
 
-  const user = await findUserIdentityById(db, userId);
-  if (!user) {
-    return c.json({ message: 'User not found' }, 400);
-  }
-  if (!user.passwordRecoveryToken || !user.passwordRecoveryTokenExpiration) {
-    return c.json({ message: 'No token found' }, 400);
-  }
-  if (user.passwordRecoveryToken !== token) {
-    return c.json({ message: 'Wrong token' }, 400);
-  }
-  if (new Date() > new Date(user.passwordRecoveryTokenExpiration)) {
-    return c.json({ message: 'Token has expired' }, 400);
-  }
+    const user = await findUserIdentityById(db, userId);
+    if (!user) {
+      return c.json({ message: 'User not found' }, 400);
+    }
+    if (!user.passwordRecoveryToken || !user.passwordRecoveryTokenExpiration) {
+      return c.json({ message: 'No token found' }, 400);
+    }
+    if (user.passwordRecoveryToken !== token) {
+      return c.json({ message: 'Wrong token' }, 400);
+    }
+    if (new Date() > new Date(user.passwordRecoveryTokenExpiration)) {
+      return c.json({ message: 'Token has expired' }, 400);
+    }
 
-  const passwordHash = await argon2.hash(password);
-  await updateUserIdentity(db, user.id, {
-    hash: passwordHash,
-    passwordRecoveryToken: null,
-    passwordRecoveryTokenExpiration: null,
-  });
+    const passwordHash = await argon2.hash(password);
+    await updateUserIdentity(db, user.id, {
+      hash: passwordHash,
+      passwordRecoveryToken: null,
+      passwordRecoveryTokenExpiration: null,
+    });
 
-  return c.json({ message: 'Successfuly reset your password!' }, 204);
+    return c.json({ message: 'Successfuly reset your password!' }, 200);
+  } catch (error) {
+    console.log(error);
+    return c.json({ message: 'Something went wrong' }, 500);
+  }
 });

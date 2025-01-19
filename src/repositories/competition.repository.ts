@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
+import { aliasedTable, and, count, eq, gt, isNull, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -395,4 +395,113 @@ export const updateSubmissionStatus = async (
       ),
     )
     .returning();
+};
+
+export const getCompetitionStageByTeamId = async (
+  db: Database,
+  teamId: string,
+) => {
+  const teamResult = await db.query.team.findFirst({
+    where: eq(team.id, teamId),
+    columns: {
+      competitionId: true,
+    },
+  });
+
+  if (!teamResult) {
+    throw new Error('Team not found');
+  }
+
+  const comp_submission =
+    await db.query.competitionSubmissionRequirement.findFirst({
+      where: and(
+        eq(
+          competitionSubmissionRequirement.competitionId,
+          teamResult.competitionId,
+        ),
+        gt(competitionSubmissionRequirement.startDate, new Date()),
+      ),
+      columns: {
+        stage: true,
+      },
+      orderBy: (requirement, { desc }) => [desc(requirement.startDate)],
+    });
+
+  if (!comp_submission) {
+    throw new Error('Stage in Competition not found');
+  }
+
+  return comp_submission.stage;
+};
+
+export const getCompetitionStatistic = async (
+  db: Database,
+  competitionId?: string,
+) => {
+  const where = competitionId ? eq(competition.id, competitionId) : undefined;
+  const submission = await db
+    .select({
+      competitionId: competitionSubmissionRequirement.competitionId,
+      typeId: competitionSubmissionRequirement.typeId,
+      typeName: competitionSubmissionRequirement.typeName,
+      deadline: competitionSubmissionRequirement.deadline,
+      submitedTeams: count(competitionSubmission.teamId),
+    })
+    .from(competitionSubmissionRequirement)
+    .leftJoin(
+      competitionSubmission,
+      eq(competitionSubmissionRequirement.typeId, competitionSubmission.typeId),
+    )
+    .where(where)
+    .groupBy(
+      competitionSubmissionRequirement.competitionId,
+      competitionSubmissionRequirement.typeId,
+    );
+
+  const parsedSubmission: {
+    competitionId: string;
+    submissions: {
+      typeId: string;
+      typeName: string;
+      submitedTeams: number;
+      deadline: Date | null;
+    }[];
+  }[] = [];
+
+  submission.forEach(
+    (element: {
+      competitionId: string;
+      typeId: string;
+      typeName: string;
+      deadline: Date | null;
+      submitedTeams: number;
+    }) => {
+      const existing = parsedSubmission.find(
+        (item) => item.competitionId === element.competitionId,
+      );
+
+      if (existing) {
+        existing.submissions.push({
+          typeId: element.typeId,
+          typeName: element.typeName,
+          submitedTeams: element.submitedTeams,
+          deadline: element.deadline,
+        });
+      } else {
+        parsedSubmission.push({
+          competitionId: element.competitionId,
+          submissions: [
+            {
+              typeId: element.typeId,
+              typeName: element.typeName,
+              submitedTeams: element.submitedTeams,
+              deadline: element.deadline,
+            },
+          ],
+        });
+      }
+    },
+  );
+
+  return parsedSubmission;
 };

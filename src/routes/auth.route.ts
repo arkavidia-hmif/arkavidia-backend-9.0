@@ -236,7 +236,7 @@ export const forgotPasswordRoute = createRoute({
     },
   },
   responses: {
-    204: {
+    200: {
       description: 'Forgot password email sent',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
@@ -260,7 +260,7 @@ export const resetPasswordRoute = createRoute({
     },
   },
   responses: {
-    204: {
+    200: {
       description: 'Password reset successful',
     },
     400: createErrorResponse('UNION', 'Bad request error'),

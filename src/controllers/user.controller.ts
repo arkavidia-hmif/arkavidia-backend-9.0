@@ -1,10 +1,14 @@
 import { db } from '~/db/drizzle';
-import { insertMediaFromUrl } from '~/repositories/media.repository';
-import { findUserById, updateUser } from '~/repositories/user.repository';
+import {
+  getUser,
+  updateKartuUser,
+  updateNisnUser,
+  updateUser,
+} from '~/repositories/user.repository';
 import {
   getUserRoute,
+  updateUserDocumentRoute,
   updateUserRoute,
-  uploadUserIdCardRoute,
 } from '~/routes/user.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -12,14 +16,14 @@ export const userProtectedRouter = createAuthRouter();
 
 userProtectedRouter.openapi(getUserRoute, async (c) => {
   const user = c.var.user;
-  const findUser = await findUserById(db, user.id);
+  const findUser = await getUser(db, user.id, { document: true });
   if (!findUser) return c.json({ message: 'User not found!' }, 400);
   return c.json(findUser, 200);
 });
 
 userProtectedRouter.openapi(updateUserRoute, async (c) => {
   const body = c.req.valid('json');
-  const user = await findUserById(db, c.var.user.id);
+  const user = await getUser(db, c.var.user.id);
 
   if (!user) return c.json({ message: 'User not found!' }, 400);
   // Kalau udah 'isRegistrationComplete' consent gak boleh diubah
@@ -38,19 +42,13 @@ userProtectedRouter.openapi(updateUserRoute, async (c) => {
   return c.json(updatedUser, 200);
 });
 
-userProtectedRouter.openapi(uploadUserIdCardRoute, async (c) => {
+userProtectedRouter.openapi(updateUserDocumentRoute, async (c) => {
   const userId = c.var.user.id;
-  const { userIdCardUrl } = c.req.valid('json');
+  const { nisnMediaId, kartuMediaId } = c.req.valid('json');
 
-  const mediaIdentityCardId = await insertMediaFromUrl(
-    db,
-    userId,
-    userIdCardUrl,
-  );
+  if (nisnMediaId) await updateNisnUser(db, userId, nisnMediaId);
+  if (kartuMediaId) await updateKartuUser(db, userId, kartuMediaId);
 
-  const updatedUser = await updateUser(db, userId, {
-    mediaIdentityCardId: mediaIdentityCardId[0].id,
-  });
-
+  const updatedUser = await getUser(db, userId, { document: true });
   return c.json(updatedUser, 200);
 });

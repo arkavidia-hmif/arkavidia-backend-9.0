@@ -5,6 +5,7 @@ import {
   getCompetition,
   getCompetitionIdByName,
   getCompetitionParticipant,
+  getCompetitionStatistic,
   getCompetitionSubmissionById,
   // getCompetitionSubmissionByTeamId,
   getCompetitionSubmissionRequirementByTeamId,
@@ -16,8 +17,10 @@ import {
 } from '~/repositories/competition.repository';
 import {
   getAdminCompAnnouncementRoute,
+  getCompetitionByIdRoute,
   getCompetitionIdByNameRoute,
   getCompetitionParticipantRoute,
+  getCompetitionStatisticRoute,
   getCompetitionSubmissionRequirementRoute,
   getCompetitionSubmissionRoute,
   getCompetitionSubmissionTeamRoute,
@@ -27,9 +30,10 @@ import {
   updateSubmissionFeedbackRoute,
   updateSubmissionStatusRoute,
 } from '~/routes/competition.route';
-import { createAuthRouter } from '~/utils/router-factory';
+import { createAuthRouter, createRouter } from '~/utils/router-factory';
 
 export const competitionProtectedRouter = createAuthRouter();
+export const competitionRouter = createRouter();
 
 competitionProtectedRouter.get(
   getCompetitionSubmissionRoute.getRoutingPath(),
@@ -151,14 +155,14 @@ competitionProtectedRouter.openapi(
   },
 );
 
-competitionProtectedRouter.openapi(getCompetitionTimelineRoute, async (c) => {
+competitionRouter.openapi(getCompetitionTimelineRoute, async (c) => {
   const user = c.get('user');
   const userId = user.id;
   const timelines = await getCompetitionTimelines(db, userId);
   return c.json(timelines, 200);
 });
 
-competitionProtectedRouter.openapi(
+competitionRouter.openapi(
   getCompetitionTimeLineByCompetitionIdRoute,
   async (c) => {
     const { competitionId } = c.req.valid('param');
@@ -220,7 +224,7 @@ competitionProtectedRouter.openapi(
   },
 );
 
-competitionProtectedRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
+competitionRouter.openapi(getCompetitionIdByNameRoute, async (c) => {
   const { name } = c.req.valid('query');
   const competition = await getCompetitionIdByName(db, name);
   return c.json(competition, 200);
@@ -233,4 +237,21 @@ competitionProtectedRouter.openapi(updateSubmissionStatusRoute, async (c) => {
   const statusUpdate = await updateSubmissionStatus(db, teamId, typeId, status);
 
   return c.json(statusUpdate, 200);
+});
+
+competitionProtectedRouter.openapi(getCompetitionByIdRoute, async (c) => {
+  const { competitionId } = c.req.valid('param');
+  const competition = await getCompetition(db, competitionId);
+  return c.json(competition, 200);
+});
+
+competitionProtectedRouter.get(
+  getCompetitionStatisticRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+
+competitionProtectedRouter.openapi(getCompetitionStatisticRoute, async (c) => {
+  const { competitionId } = c.req.valid('query');
+  const competition = await getCompetitionStatistic(db, competitionId);
+  return c.json(competition, 200);
 });

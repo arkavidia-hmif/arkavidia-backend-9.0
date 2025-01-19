@@ -16,7 +16,7 @@ export const GetPresignedLinkQuerySchema = z.object({
     },
   }),
   bucket: z.enum(mediaBucketEnum.enumValues).openapi({
-    example: 'competition-registration',
+    example: 'twibbon',
     param: {
       in: 'query',
       required: true,
@@ -27,6 +27,7 @@ export const GetPresignedLinkQuerySchema = z.object({
 export const PresignedUrlSchema = z
   .object({
     presignedUrl: z.string().url(),
+    mediaId: z.string(),
     mediaUrl: z.string().url(),
     expiresIn: z.number().openapi({
       example: 3600,

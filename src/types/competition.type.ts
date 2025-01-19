@@ -134,7 +134,7 @@ export const CompetitionNameQuery = z.object({
     }),
 });
 
-export const CompetitionIdShema = z.object({
+export const CompetitionIdSchema = z.object({
   name: z.string(),
   id: z.string(),
 });
@@ -144,4 +144,28 @@ export const StatusSubmissionSchema = z.object({
     description: 'The current status of the submission',
     example: 'pending',
   }),
+});
+
+export const CompetitionIdQuery = z.object({
+  competitionId: z
+    .string()
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+});
+
+export const CompetitionStatisticSchema = z.object({
+  competitionId: z.string(),
+  submissions: z.array(
+    z.object({
+      typeId: z.string(),
+      typeName: z.string(),
+      submitedTeams: z.number(),
+      deadline: z.union([z.string(), z.date()]),
+    }),
+  ),
 });
