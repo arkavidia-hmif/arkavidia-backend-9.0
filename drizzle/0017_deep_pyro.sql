@@ -1,2 +1,0 @@
-DROP TYPE "public"."media_bucket_enum";--> statement-breakpoint
-CREATE TYPE "public"."media_bucket_enum" AS ENUM('twibbon', 'poster', 'kartu-identitas', 'bukti-pembayaran', 'submission-cp', 'submission-ctf', 'submission-uxvidia', 'submission-arkalogica', 'submission-hackvidia', 'submission-datavidia');

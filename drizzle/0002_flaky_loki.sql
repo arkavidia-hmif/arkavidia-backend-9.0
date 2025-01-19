@@ -1,1 +1,0 @@
-ALTER TABLE "user" ADD COLUMN "is_registration_complete" boolean DEFAULT false NOT NULL;

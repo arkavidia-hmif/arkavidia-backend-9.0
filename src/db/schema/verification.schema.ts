@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import {
   boolean,
+  foreignKey,
   pgEnum,
   pgTable,
   primaryKey,
@@ -57,9 +58,8 @@ export const teamMemberDocumentTypeEnum = pgEnum(
 export const teamMemberDocument = pgTable(
   'team_member_document',
   {
-    teamMemberId: text('team_member_id')
-      .notNull()
-      .references(() => teamMember.id),
+    teamId: text('team_id').notNull(),
+    userId: text('user_id').notNull(),
     type: teamMemberDocumentTypeEnum('type').notNull(),
     mediaId: text('media_id')
       .notNull()
@@ -68,16 +68,20 @@ export const teamMemberDocument = pgTable(
     verificationError: text('verification_error'),
   },
   (t) => ({
-    pk: primaryKey(t.teamMemberId, t.type),
+    pk: primaryKey(t.teamId, t.userId, t.type),
+    fk: foreignKey({
+      columns: [t.teamId, t.userId],
+      foreignColumns: [teamMember.teamId, teamMember.userId],
+    }),
   }),
 );
 
 export const teamMemberDocumentRelations = relations(
   teamMemberDocument,
   ({ one }) => ({
-    teamMember: one(user, {
-      fields: [teamMemberDocument.teamMemberId],
-      references: [user.id],
+    teamMember: one(teamMember, {
+      fields: [teamMemberDocument.teamId, teamMemberDocument.userId],
+      references: [teamMember.teamId, teamMember.userId],
     }),
     media: one(media, {
       fields: [teamMemberDocument.mediaId],
@@ -85,6 +89,9 @@ export const teamMemberDocumentRelations = relations(
     }),
   }),
 );
+
+export type TeamMemberDocumentTypeEnum =
+  (typeof teamMemberDocumentTypeEnum.enumValues)[number];
 
 export const teamDocumentTypeEnum = pgEnum('team_document_type_enum', [
   'bukti-pembayaran',

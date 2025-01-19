@@ -1,2 +1,0 @@
-ALTER TABLE "competition_submission_requirement" ADD COLUMN "stage" "phase_enum" DEFAULT 'pre-eliminary' NOT NULL;--> statement-breakpoint
-ALTER TABLE "competition_submission_requirement" DROP COLUMN IF EXISTS "phase";
