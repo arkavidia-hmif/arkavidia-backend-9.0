@@ -5,13 +5,21 @@ import {
   competitionSubmission,
   competitionSubmissionRequirement,
   team,
+  teamDocument,
 } from '~/db/schema';
 
 import { MediaSchema } from './media.type';
 import { TeamMemberSchema } from './team-member.type';
 
-export const PostTeamDocumentBodySchema = createInsertSchema(team).pick({
-  paymentProofMediaId: true,
+export const TeamDocumentSchema =
+  createSelectSchema(teamDocument).openapi('TeamDocument');
+export const UpdateTeamDocumentSchema = createInsertSchema(teamDocument)
+  .partial()
+  .omit({ teamId: true, type: true });
+export const CreateTeamDocumentSchema = createInsertSchema(teamDocument);
+
+export const PostTeamDocumentBodySchema = z.object({
+  paymentProofMediaId: z.string(),
 });
 
 export const TeamSchema = createSelectSchema(team, {

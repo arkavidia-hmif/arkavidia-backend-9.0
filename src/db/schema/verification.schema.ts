@@ -125,3 +125,6 @@ export const teamDocumentRelations = relations(teamDocument, ({ one }) => ({
     references: [media.id],
   }),
 }));
+
+export type TeamDocumentTypeEnum =
+  (typeof teamDocumentTypeEnum.enumValues)[number];

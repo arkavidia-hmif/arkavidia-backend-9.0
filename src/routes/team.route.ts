@@ -140,7 +140,7 @@ export const postQuitTeamRoute = createRoute({
 export const postTeamDocumentRoute = createRoute({
   operationId: 'postTeamDocument',
   tags: ['team'],
-  method: 'put', // change method to put: method (post) and path intersect with other feature (team member document submit)
+  method: 'put',
   path: '/team/{teamId}/upload',
   request: {
     params: TeamIdParam,
