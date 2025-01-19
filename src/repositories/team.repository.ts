@@ -1,11 +1,17 @@
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
-import { team, teamMember } from '~/db/schema';
+import {
+  TeamDocumentTypeEnum,
+  team,
+  teamDocument,
+  teamMember,
+} from '~/db/schema';
 import type {
-  PostTeamDocumentBodySchema,
-  PostTeamVerificationBodySchema,
+  CreateTeamDocumentSchema,
+  // PostTeamVerificationBodySchema,
+  UpdateTeamDocumentSchema,
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 
@@ -13,16 +19,44 @@ import {
   getCompetitionById,
   getCompetitionParticipantNumber,
 } from './competition.repository';
-import { insertMediaFromUrl } from './media.repository';
 import {
   type TeamMemberRelationOption,
   getTeamMemberCount,
 } from './team-member.repository';
 
+export const getTeamDocument = async (
+  db: Database,
+  teamId: string,
+  type: TeamDocumentTypeEnum,
+) => {
+  return db.query.userDocument.findFirst({
+    where: and(eq(teamDocument.teamId, teamId), eq(teamDocument.type, type)),
+  });
+};
+
+export const createTeamDocument = async (
+  db: Database,
+  values: z.infer<typeof CreateTeamDocumentSchema>,
+) => {
+  return db.insert(teamDocument).values(values).returning();
+};
+
+export const updateTeamDocument = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateTeamDocumentSchema>,
+) => {
+  return db
+    .update(teamDocument)
+    .set(values)
+    .where(eq(teamDocument.teamId, teamId))
+    .returning();
+};
+
 interface TeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
   competition?: boolean;
-  paymentProof?: boolean;
+  document?: boolean;
 }
 
 export const getTeamByCode = async (
@@ -75,29 +109,26 @@ export const getTeamById = async (
               },
             },
       competition: options?.competition ? true : undefined,
-      paymentProof: options?.paymentProof ? true : undefined,
+      document: options?.document ? { with: { media: true } } : undefined,
     },
   });
 };
 
-export const updateTeamDocument = async (
+export const updatePaymentProofTeam = async (
   db: Database,
   teamId: string,
-  userId: string,
-  data: z.infer<typeof PostTeamDocumentBodySchema>,
+  paymentProofMediaId: string,
 ) => {
-  const insert = {
-    paymentProofMediaId: data.paymentProofMediaId
-      ? (await insertMediaFromUrl(db, userId, data.paymentProofMediaId))[0].id
-      : undefined,
-  };
-
-  return await db
-    .update(team)
-    .set(insert)
-    .where(eq(team.id, teamId))
-    .returning()
-    .then(first);
+  const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+  if (kartu) {
+    await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
+  } else {
+    await createTeamDocument(db, {
+      teamId,
+      mediaId: paymentProofMediaId,
+      type: 'bukti-pembayaran',
+    });
+  }
 };
 
 export const changeTeamName = async (
@@ -222,65 +253,65 @@ export const insertUserToTeam = async (
   });
 };
 
-export const updateTeamVerification = async (
-  db: Database,
-  teamId: string,
-  data: z.infer<typeof PostTeamVerificationBodySchema>,
-) => {
-  return await db
-    .update(team)
-    .set(data)
-    .where(eq(team.id, teamId))
-    .returning()
-    .then(first);
-};
+// export const updateTeamVerification = async (
+//   db: Database,
+//   teamId: string,
+//   data: z.infer<typeof PostTeamVerificationBodySchema>,
+// ) => {
+//   return await db
+//     .update(team)
+//     .set(data)
+//     .where(eq(team.id, teamId))
+//     .returning()
+//     .then(first);
+// };
 
-export const getTeamStatistic = async (db: Database) => {
-  const allTeam = await db
-    .select({
-      totalTeam: count(),
-    })
-    .from(team)
-    .groupBy(team.isVerified)
-    .then(first);
+// export const getTeamStatistic = async (db: Database) => {
+//   const allTeam = await db
+//     .select({
+//       totalTeam: count(),
+//     })
+//     .from(team)
+//     .groupBy(team.isVerified)
+//     .then(first);
 
-  const allVerifiedTeam = await db
-    .select({
-      totalVerifiedTeam: count(),
-    })
-    .from(team)
-    .where(eq(team.isVerified, true))
-    .then(first);
+//   const allVerifiedTeam = await db
+//     .select({
+//       totalVerifiedTeam: count(),
+//     })
+//     .from(team)
+//     .where(eq(team.isVerified, true))
+//     .then(first);
 
-  const compeTeams: {
-    competitionId: string;
-    totalTeam: number;
-    totalVerifiedTeam?: number;
-  }[] = await db
-    .select({
-      competitionId: team.competitionId,
-      totalTeam: count(),
-    })
-    .from(team)
-    .groupBy(team.competitionId, team.isVerified)
-    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
+//   const compeTeams: {
+//     competitionId: string;
+//     totalTeam: number;
+//     totalVerifiedTeam?: number;
+//   }[] = await db
+//     .select({
+//       competitionId: team.competitionId,
+//       totalTeam: count(),
+//     })
+//     .from(team)
+//     .groupBy(team.competitionId, team.isVerified)
+//     .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
 
-  const compeTeamsVerified = await db
-    .select({
-      competitionId: team.competitionId,
-      totalVerifiedTeam: count(),
-    })
-    .from(team)
-    .where(eq(team.isVerified, true))
-    .groupBy(team.competitionId)
-    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
+//   const compeTeamsVerified = await db
+//     .select({
+//       competitionId: team.competitionId,
+//       totalVerifiedTeam: count(),
+//     })
+//     .from(team)
+//     .where(eq(team.isVerified, true))
+//     .groupBy(team.competitionId)
+//     .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
 
-  compeTeams.forEach((team) => {
-    const verifiedTeam = compeTeamsVerified.find(
-      (vTeam) => vTeam.competitionId === team.competitionId,
-    );
-    team.totalVerifiedTeam = verifiedTeam?.totalVerifiedTeam || 0;
-  });
+//   compeTeams.forEach((team) => {
+//     const verifiedTeam = compeTeamsVerified.find(
+//       (vTeam) => vTeam.competitionId === team.competitionId,
+//     );
+//     team.totalVerifiedTeam = verifiedTeam?.totalVerifiedTeam || 0;
+//   });
 
-  return { ...allTeam, ...allVerifiedTeam, result: compeTeams };
-};
+//   return { ...allTeam, ...allVerifiedTeam, result: compeTeams };
+// };

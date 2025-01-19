@@ -1,9 +1,9 @@
 CREATE TYPE "public"."user_identity_provider_enum" AS ENUM('google', 'basic');--> statement-breakpoint
 CREATE TYPE "public"."user_identity_role_enum" AS ENUM('admin', 'user');--> statement-breakpoint
-CREATE TYPE "public"."phase_enum" AS ENUM('pre-eliminary', 'final', 'verification');--> statement-breakpoint
-CREATE TYPE "public"."media_bucket_enum" AS ENUM('twibbon', 'poster', 'kartu-identitas', 'bukti-pembayaran', 'submission-cp', 'submission-ctf', 'submission-uxvidia', 'submission-arkalogica', 'submission-hackvidia', 'submission-datavidia');--> statement-breakpoint
-CREATE TYPE "public"."team_member_role_renum" AS ENUM('leader', 'member');--> statement-breakpoint
+CREATE TYPE "public"."team_member_role_enum" AS ENUM('leader', 'member');--> statement-breakpoint
 CREATE TYPE "public"."user_education_enum" AS ENUM('s1', 's2', 'sma');--> statement-breakpoint
+CREATE TYPE "public"."media_bucket_enum" AS ENUM('twibbon', 'poster', 'kartu-identitas', 'bukti-pembayaran', 'submission-cp', 'submission-ctf', 'submission-uxvidia', 'submission-arkalogica', 'submission-hackvidia', 'submission-datavidia');--> statement-breakpoint
+CREATE TYPE "public"."phase_enum" AS ENUM('pre-eliminary', 'final', 'verification');--> statement-breakpoint
 CREATE TYPE "public"."team_document_type_enum" AS ENUM('bukti-pembayaran');--> statement-breakpoint
 CREATE TYPE "public"."team_member_document_type_enum" AS ENUM('poster', 'twibbon');--> statement-breakpoint
 CREATE TYPE "public"."user_document_type_enum" AS ENUM('nisn', 'kartu-identitas');--> statement-breakpoint
@@ -22,6 +22,32 @@ CREATE TABLE IF NOT EXISTS "user_identity" (
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
 	CONSTRAINT "user_identity_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "team_member" (
+	"user_id" text NOT NULL,
+	"team_id" text NOT NULL,
+	"role" "team_member_role_enum" NOT NULL,
+	CONSTRAINT "team_member_user_id_team_id_pk" PRIMARY KEY("user_id","team_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user" (
+	"id" text PRIMARY KEY NOT NULL,
+	"email" text NOT NULL,
+	"full_name" text,
+	"birth_date" date,
+	"education" "user_education_enum",
+	"entry_source" text,
+	"instance" text,
+	"phone_number" text,
+	"id_line" text,
+	"id_discord" text,
+	"id_instagram" text,
+	"consent" boolean DEFAULT false NOT NULL,
+	"is_registration_complete" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp,
+	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "competition" (
@@ -84,49 +110,14 @@ CREATE TABLE IF NOT EXISTS "media" (
 	CONSTRAINT "media_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "team_member" (
-	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
-	"team_id" text NOT NULL,
-	"role" "team_member_role_renum" NOT NULL,
-	"nisn_media_id" text,
-	"kartu_media_id" text,
-	"poster_media_id" text,
-	"twibbon_media_id" text,
-	"is_verified" boolean DEFAULT false NOT NULL,
-	"verification_error" text
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "team" (
 	"id" text PRIMARY KEY NOT NULL,
 	"competition_id" text NOT NULL,
 	"team_name" text NOT NULL,
 	"team_code" text NOT NULL,
-	"payment_proof_media_id" text,
-	"is_verified" boolean DEFAULT false NOT NULL,
-	"verification_error" text,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
 	CONSTRAINT "team_team_code_unique" UNIQUE("team_code")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "user" (
-	"id" text PRIMARY KEY NOT NULL,
-	"email" text NOT NULL,
-	"full_name" text,
-	"birth_date" date,
-	"education" "user_education_enum",
-	"entry_source" text,
-	"instance" text,
-	"phone_number" text,
-	"id_line" text,
-	"id_discord" text,
-	"id_instagram" text,
-	"consent" boolean DEFAULT false NOT NULL,
-	"is_registration_complete" boolean DEFAULT false NOT NULL,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp,
-	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "team_document" (
@@ -139,12 +130,13 @@ CREATE TABLE IF NOT EXISTS "team_document" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "team_member_document" (
-	"team_member_id" text NOT NULL,
+	"team_id" text NOT NULL,
+	"user_id" text NOT NULL,
 	"type" "team_member_document_type_enum" NOT NULL,
 	"media_id" text NOT NULL,
 	"is_verified" boolean DEFAULT false NOT NULL,
 	"verification_error" text,
-	CONSTRAINT "team_member_document_team_member_id_type_pk" PRIMARY KEY("team_member_id","type")
+	CONSTRAINT "team_member_document_team_id_user_id_type_pk" PRIMARY KEY("team_id","user_id","type")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_document" (
@@ -155,6 +147,24 @@ CREATE TABLE IF NOT EXISTS "user_document" (
 	"verification_error" text,
 	CONSTRAINT "user_document_user_id_type_pk" PRIMARY KEY("user_id","type")
 );
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "team_member" ADD CONSTRAINT "team_member_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "team_member" ADD CONSTRAINT "team_member_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user" ADD CONSTRAINT "user_id_user_identity_id_fk" FOREIGN KEY ("id") REFERENCES "public"."user_identity"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "competition_announcement" ADD CONSTRAINT "competition_announcement_competition_id_competition_id_fk" FOREIGN KEY ("competition_id") REFERENCES "public"."competition"("id") ON DELETE no action ON UPDATE no action;
@@ -205,55 +215,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_member" ADD CONSTRAINT "team_member_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "team_member" ADD CONSTRAINT "team_member_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "team_member" ADD CONSTRAINT "team_member_nisn_media_id_media_id_fk" FOREIGN KEY ("nisn_media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "team_member" ADD CONSTRAINT "team_member_kartu_media_id_media_id_fk" FOREIGN KEY ("kartu_media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "team_member" ADD CONSTRAINT "team_member_poster_media_id_media_id_fk" FOREIGN KEY ("poster_media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "team_member" ADD CONSTRAINT "team_member_twibbon_media_id_media_id_fk" FOREIGN KEY ("twibbon_media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "team" ADD CONSTRAINT "team_competition_id_competition_id_fk" FOREIGN KEY ("competition_id") REFERENCES "public"."competition"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "team" ADD CONSTRAINT "team_payment_proof_media_id_media_id_fk" FOREIGN KEY ("payment_proof_media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "user" ADD CONSTRAINT "user_id_user_identity_id_fk" FOREIGN KEY ("id") REFERENCES "public"."user_identity"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -271,13 +233,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_member_document" ADD CONSTRAINT "team_member_document_team_member_id_team_member_id_fk" FOREIGN KEY ("team_member_id") REFERENCES "public"."team_member"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "team_member_document" ADD CONSTRAINT "team_member_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_member_document" ADD CONSTRAINT "team_member_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "team_member_document" ADD CONSTRAINT "team_member_document_team_id_user_id_team_member_team_id_user_id_fk" FOREIGN KEY ("team_id","user_id") REFERENCES "public"."team_member"("team_id","user_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

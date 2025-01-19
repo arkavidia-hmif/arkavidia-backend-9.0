@@ -1,5 +1,5 @@
 {
-  "id": "430073e8-285a-40cc-b6e1-de16afe14b0f",
+  "id": "5d306d82-3e4f-47dc-a4c8-e3594d3ad38f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -782,25 +782,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "payment_proof_media_id": {
-          "name": "payment_proof_media_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_verified": {
-          "name": "is_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "verification_error": {
-          "name": "verification_error",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -823,19 +804,6 @@
           "tableTo": "competition",
           "columnsFrom": [
             "competition_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "team_payment_proof_media_id_media_id_fk": {
-          "name": "team_payment_proof_media_id_media_id_fk",
-          "tableFrom": "team",
-          "tableTo": "media",
-          "columnsFrom": [
-            "payment_proof_media_id"
           ],
           "columnsTo": [
             "id"
