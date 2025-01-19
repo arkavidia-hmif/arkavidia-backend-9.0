@@ -35,12 +35,13 @@ async function seedUsers() {
     if (userInput.toLowerCase() === 'yes') {
       // Ask user for confirmation
       const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
         process.stdin.resume();
         process.stdin.setEncoding('utf8');
         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', (data) => {
-          resolve(data.toString().trim());
-        });
+        process.stdin.on('data', onData);
       });
 
       if (confirmInput.toLowerCase() === 'yes') {
@@ -144,6 +145,10 @@ async function seedUsers() {
 
     // eslint-disable-next-line
     const res = await Promise.all(data);
+
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
     // console.log(res);
     console.log('✅ Users seeding success!');
   } catch (err) {
@@ -169,12 +174,13 @@ async function seedCompetitions() {
     if (userInput.toLowerCase() === 'yes') {
       // Ask user for confirmation
       const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
         process.stdin.resume();
         process.stdin.setEncoding('utf8');
         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', (data) => {
-          resolve(data.toString().trim());
-        });
+        process.stdin.on('data', onData);
       });
 
       if (confirmInput.toLowerCase() === 'yes') {
@@ -190,7 +196,7 @@ async function seedCompetitions() {
     const competitions = lines.map(async (line) => {
       const [title, description, max_participants, max_team_member] = line
         .replace('\r', '')
-        .split(',');
+        .split(';');
 
       const existingCompetition = await db
         .select()
@@ -219,6 +225,9 @@ async function seedCompetitions() {
     // eslint-disable-next-line
     const res = await Promise.all(competitions);
 
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
     // console.log(res);
     console.log('✅ Competitions seeding success!');
   } catch (err) {
@@ -242,12 +251,13 @@ async function seedMedias() {
     if (userInput.toLowerCase() === 'yes') {
       // Ask user for confirmation
       const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
         process.stdin.resume();
         process.stdin.setEncoding('utf8');
         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', (data) => {
-          resolve(data.toString().trim());
-        });
+        process.stdin.on('data', onData);
       });
 
       if (confirmInput.toLowerCase() === 'yes') {
@@ -289,6 +299,9 @@ async function seedMedias() {
     // eslint-disable-next-line
     const res = await Promise.all(medias);
 
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
     // console.log(res);
     console.log('✅ Medias seeding success!');
   } catch (err) {
@@ -312,12 +325,13 @@ async function seedTeams() {
     if (userInput.toLowerCase() === 'yes') {
       // Ask user for confirmation
       const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
         process.stdin.resume();
         process.stdin.setEncoding('utf8');
         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', (data) => {
-          resolve(data.toString().trim());
-        });
+        process.stdin.on('data', onData);
       });
 
       if (confirmInput.toLowerCase() === 'yes') {
@@ -396,6 +410,9 @@ async function seedTeams() {
     // eslint-disable-next-line
     const res = await Promise.all(teams);
 
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
     // console.log(res);
     console.log('✅ Teams seeding success!');
   } catch (err) {
@@ -420,12 +437,13 @@ async function seedTimelines() {
     if (userInput.toLowerCase() === 'yes') {
       // Ask user for confirmation
       const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
         process.stdin.resume();
         process.stdin.setEncoding('utf8');
         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', (data) => {
-          resolve(data.toString().trim());
-        });
+        process.stdin.on('data', onData);
       });
 
       if (confirmInput.toLowerCase() === 'yes') {
@@ -471,6 +489,9 @@ async function seedTimelines() {
     // eslint-disable-next-line
     const res = await Promise.all(timelines);
 
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
     // console.log(res);
     console.log('✅ Competition Timeline seeding success!');
   } catch (err) {
@@ -495,12 +516,13 @@ async function seedSubmissionRequirement() {
     if (userInput.toLowerCase() === 'yes') {
       // Ask user for confirmation
       const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
         process.stdin.resume();
         process.stdin.setEncoding('utf8');
         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', (data) => {
-          resolve(data.toString().trim());
-        });
+        process.stdin.on('data', onData);
       });
 
       if (confirmInput.toLowerCase() === 'yes') {
@@ -548,6 +570,9 @@ async function seedSubmissionRequirement() {
 
     // eslint-disable-next-line
     const res = await Promise.all(timelines);
+
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
 
     // console.log(res);
     console.log('✅ Competition Submission Requirement seeding success!');
