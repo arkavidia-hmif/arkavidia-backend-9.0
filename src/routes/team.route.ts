@@ -141,7 +141,7 @@ export const postTeamDocumentRoute = createRoute({
   operationId: 'postTeamDocument',
   tags: ['team'],
   method: 'put',
-  path: '/team/{teamId}/upload',
+  path: '/team/{teamId}/document',
   request: {
     params: TeamIdParam,
     body: {
