@@ -160,7 +160,7 @@ competitionProtectedRouter.openapi(getCompetitionTimelineRoute, async (c) => {
   return c.json(timelines, 200);
 });
 
-competitionProtectedRouter.openapi(
+competitionRouter.openapi(
   getCompetitionTimeLineByCompetitionIdRoute,
   async (c) => {
     const { competitionId } = c.req.valid('param');
