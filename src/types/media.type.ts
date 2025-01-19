@@ -27,6 +27,7 @@ export const GetPresignedLinkQuerySchema = z.object({
 export const PresignedUrlSchema = z
   .object({
     presignedUrl: z.string().url(),
+    mediaId: z.string(),
     mediaUrl: z.string().url(),
     expiresIn: z.number().openapi({
       example: 3600,

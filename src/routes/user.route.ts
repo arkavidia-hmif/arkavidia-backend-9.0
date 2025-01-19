@@ -53,11 +53,11 @@ export const updateUserRoute = createRoute({
   },
 });
 
-export const uploadUserIdCardRoute = createRoute({
-  operationId: 'uploadUserIdCard',
+export const updateUserDocumentRoute = createRoute({
+  operationId: 'updateUserDocument',
   tags: ['user'],
   method: 'put',
-  path: '/user/upload',
+  path: '/user/document',
   request: {
     body: {
       content: {
@@ -69,7 +69,7 @@ export const uploadUserIdCardRoute = createRoute({
   },
   responses: {
     200: {
-      description: 'Upload user id card',
+      description: 'Updated user documents',
       content: {
         'application/json': {
           schema: UserSchema,
