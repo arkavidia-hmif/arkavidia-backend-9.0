@@ -1,10 +1,10 @@
 import { db } from '~/db/drizzle';
-import { insertMediaFromUrl } from '~/repositories/media.repository';
+// import { insertMediaFromUrl } from '~/repositories/media.repository';
 import { findUserById, updateUser } from '~/repositories/user.repository';
 import {
   getUserRoute,
   updateUserRoute,
-  uploadUserIdCardRoute,
+  // uploadUserIdCardRoute,
 } from '~/routes/user.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -38,19 +38,19 @@ userProtectedRouter.openapi(updateUserRoute, async (c) => {
   return c.json(updatedUser, 200);
 });
 
-userProtectedRouter.openapi(uploadUserIdCardRoute, async (c) => {
-  const userId = c.var.user.id;
-  const { userIdCardUrl } = c.req.valid('json');
+// userProtectedRouter.openapi(uploadUserIdCardRoute, async (c) => {
+//   const userId = c.var.user.id;
+//   const { userIdCardUrl } = c.req.valid('json');
 
-  const mediaIdentityCardId = await insertMediaFromUrl(
-    db,
-    userId,
-    userIdCardUrl,
-  );
+//   const mediaIdentityCardId = await insertMediaFromUrl(
+//     db,
+//     userId,
+//     userIdCardUrl,
+//   );
 
-  const updatedUser = await updateUser(db, userId, {
-    mediaIdentityCardId: mediaIdentityCardId[0].id,
-  });
+//   const updatedUser = await updateUser(db, userId, {
+//     mediaIdentityCardId: mediaIdentityCardId[0].id,
+//   });
 
-  return c.json(updatedUser, 200);
-});
+//   return c.json(updatedUser, 200);
+// });
