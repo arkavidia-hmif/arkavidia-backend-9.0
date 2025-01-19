@@ -1,5 +1,11 @@
 import { relations } from 'drizzle-orm';
-import { pgEnum, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+} from 'drizzle-orm/pg-core';
 
 import { media } from './media.schema';
 import { teamMember } from './team-member.schema';
@@ -21,6 +27,8 @@ export const userDocument = pgTable(
     mediaId: text('media_id')
       .notNull()
       .references(() => media.id),
+    isVerified: boolean('is_verified').notNull().default(false),
+    verificationError: text('verification_error'),
   },
   (t) => ({
     pk: primaryKey(t.userId, t.type),
@@ -38,6 +46,9 @@ export const userDocumentRelations = relations(userDocument, ({ one }) => ({
   }),
 }));
 
+export type UserDocumentTypeEnum =
+  (typeof userDocumentTypeEnum.enumValues)[number];
+
 export const teamMemberDocumentTypeEnum = pgEnum(
   'team_member_document_type_enum',
   ['poster', 'twibbon'],
@@ -53,6 +64,8 @@ export const teamMemberDocument = pgTable(
     mediaId: text('media_id')
       .notNull()
       .references(() => media.id),
+    isVerified: boolean('is_verified').notNull().default(false),
+    verificationError: text('verification_error'),
   },
   (t) => ({
     pk: primaryKey(t.teamMemberId, t.type),
@@ -87,6 +100,8 @@ export const teamDocument = pgTable(
     mediaId: text('media_id')
       .notNull()
       .references(() => media.id),
+    isVerified: boolean('is_verified').notNull().default(false),
+    verificationError: text('verification_error'),
   },
   (t) => ({
     pk: primaryKey(t.teamId, t.type),

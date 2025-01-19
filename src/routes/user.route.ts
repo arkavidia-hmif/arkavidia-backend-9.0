@@ -1,7 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import {
-  UpdateUserBodyRoute,
-  UserIdCardUrlBodySchema,
+  UpdateUserBodySchema,
+  UpdateUserDocumentRouteSchema,
   UserSchema,
 } from '~/types/user.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
@@ -34,7 +34,7 @@ export const updateUserRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: UpdateUserBodyRoute,
+          schema: UpdateUserBodySchema,
         },
       },
     },
@@ -62,7 +62,7 @@ export const updateUserDocumentRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: UserIdCardUrlBodySchema,
+          schema: UpdateUserDocumentRouteSchema,
         },
       },
     },
