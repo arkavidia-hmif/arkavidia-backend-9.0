@@ -33,6 +33,7 @@ export const user = pgTable('user', {
   idLine: text('id_line'),
   idDiscord: text('id_discord'),
   idInstagram: text('id_instagram'),
+  nisn: text('nisn'),
   consent: boolean('consent').notNull().default(false),
   isRegistrationComplete: boolean('is_registration_complete')
     .notNull()
