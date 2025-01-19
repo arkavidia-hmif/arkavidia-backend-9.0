@@ -1,1 +1,0 @@
-ALTER TABLE "competition_timeline" ALTER COLUMN "date" DROP NOT NULL;
