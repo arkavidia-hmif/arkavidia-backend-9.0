@@ -27,6 +27,8 @@ export const TeamSchema = createSelectSchema(team, {
 })
   .extend({
     competition: createSelectSchema(competition).optional(),
+    teamMembers: z.array(TeamMemberSchema).optional(),
+    document: z.array(TeamDocumentSchema).optional(),
   })
   .openapi('Team');
 

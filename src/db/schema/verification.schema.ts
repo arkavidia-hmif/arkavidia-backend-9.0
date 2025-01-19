@@ -116,9 +116,9 @@ export const teamDocument = pgTable(
 );
 
 export const teamDocumentRelations = relations(teamDocument, ({ one }) => ({
-  team: one(user, {
+  team: one(team, {
     fields: [teamDocument.teamId],
-    references: [user.id],
+    references: [team.id],
   }),
   media: one(media, {
     fields: [teamDocument.mediaId],

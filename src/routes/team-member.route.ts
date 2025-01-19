@@ -31,7 +31,7 @@ export const getTeamMembersRoute = createRoute({
 });
 
 export const getTeamMemberByIdRoute = createRoute({
-  operationId: 'getTeamMembers',
+  operationId: 'getTeamMemberById',
   tags: ['team-member'],
   method: 'get',
   path: '/team/{teamId}/member/{userId}',

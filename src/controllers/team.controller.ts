@@ -17,7 +17,7 @@ import {
   deleteTeamMember,
   getTeamByCode,
   getTeamById,
-  // getTeamStatistic,
+  getTeamStatistic,
   getUserTeams,
   insertUserToTeam,
   updatePaymentProofTeam,
@@ -281,7 +281,7 @@ teamProtectedRouter.get(
   roleMiddleware('admin'),
 );
 
-// teamProtectedRouter.openapi(getTeamStatisticRoute, async (c) => {
-//   const team = await getTeamStatistic(db);
-//   return c.json(team, 200);
-// });
+teamProtectedRouter.openapi(getTeamStatisticRoute, async (c) => {
+  const team = await getTeamStatistic(db);
+  return c.json(team, 200);
+});
