@@ -10,6 +10,7 @@ const EnvSchema = z.object({
     .pipe(z.array(z.string().url())),
   ACCESS_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_EXPIRATION: z.coerce.number(),
+  ARKAV_SERVICE_KEY: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_EXPIRATION: z.coerce.number(),
   RESET_PASSWORD_TOKEN_SECRET: z.string(),

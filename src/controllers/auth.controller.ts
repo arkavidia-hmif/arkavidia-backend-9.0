@@ -301,7 +301,10 @@ authProtectedRouter.openapi(selfRoute, async (c) => {
 
 /** BYPASS AUTHENTICATION ROUTES (Email & Password) */
 authRouter.openapi(bypassRegisterRoute, async (c) => {
-  const { email, password, role } = c.req.valid('json');
+  const { email, password, role, serviceKey } = c.req.valid('json');
+
+  if (serviceKey !== env.ARKAV_SERVICE_KEY)
+    return c.json({ message: 'Ngapain disini bro?' }, 403);
 
   const passwordHash = await argon2.hash(password);
 

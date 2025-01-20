@@ -35,6 +35,7 @@ export const BypassRegisterBodySchema = z
     password: z.string().min(8, 'Password must have minimum length of 8'),
     confirmPassword: z.string(),
     role: z.enum(['admin', 'user']).default('user'),
+    serviceKey: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
