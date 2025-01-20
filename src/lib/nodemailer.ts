@@ -20,9 +20,6 @@ export const generateEmailTemplate = async (data: {
   message: string;
   link: string;
 }) => {
-  console.log('Generating email template with data:', data);
-  const cwd = process.cwd();
-  console.log('Current working directory:', cwd);
   const source = fs.readFileSync('src/lib/email.html', 'utf8');
   const template = handlebars.compile(source);
   return template({ ...data, fe_url: env.FE_URL });
