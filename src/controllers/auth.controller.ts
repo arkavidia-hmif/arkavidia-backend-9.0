@@ -15,7 +15,11 @@ import {
   updateUserIdentity,
   updateUserVerification,
 } from '~/repositories/auth.repository';
-import { findUserByEmail, updateUser } from '~/repositories/user.repository';
+import {
+  findUserByEmail,
+  getUser,
+  updateUser,
+} from '~/repositories/user.repository';
 import {
   basicLoginRoute,
   basicRegisterRoute,
@@ -29,7 +33,11 @@ import {
   resetPasswordRoute,
   selfRoute,
 } from '~/routes/auth.route';
-import { GoogleTokenDataSchema, GoogleUserSchema } from '~/types/auth.type';
+import {
+  GoogleTokenDataSchema,
+  GoogleUserSchema,
+  JWTPayloadSchema,
+} from '~/types/auth.type';
 
 import { createAuthRouter, createRouter } from '../utils/router-factory';
 
@@ -281,7 +289,14 @@ authProtectedRouter.openapi(logoutRoute, async (c) => {
 });
 
 authProtectedRouter.openapi(selfRoute, async (c) => {
-  return c.json(c.var.user, 200);
+  const findUser = await getUser(db, c.var.user.id, { userIdentity: true });
+  const jwtPayload = JWTPayloadSchema.parse({
+    ...findUser,
+    role: findUser?.userIdentity.role,
+    provider: findUser?.userIdentity.provider,
+  });
+
+  return c.json(jwtPayload, 200);
 });
 
 /** BYPASS AUTHENTICATION ROUTES (Email & Password) */

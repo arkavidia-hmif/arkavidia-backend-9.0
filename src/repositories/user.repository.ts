@@ -70,6 +70,7 @@ export const isUserDocumentsVerified = async (db: Database, userId: string) => {
 
 export interface UserRelationOption {
   document?: boolean;
+  userIdentity?: boolean;
 }
 
 export const findUserByEmail = async (
@@ -81,6 +82,7 @@ export const findUserByEmail = async (
     where: eq(user.email, email),
     with: {
       document: options?.document ? { with: { media: true } } : undefined,
+      userIdentity: options?.userIdentity ? true : undefined,
     },
   });
 };
@@ -94,7 +96,7 @@ export const getUser = async (
     where: eq(user.id, id),
     with: {
       document: options?.document ? { with: { media: true } } : undefined,
-      // document: { with: { media: true } },
+      userIdentity: options?.userIdentity ? true : undefined,
     },
   });
 };
