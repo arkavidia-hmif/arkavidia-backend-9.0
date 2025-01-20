@@ -1,4 +1,4 @@
-import argon2 from 'argon2';
+// import argon2 from 'argon2';
 import { eq, inArray } from 'drizzle-orm';
 import fs from 'fs';
 import { exit } from 'process';
@@ -20,6 +20,7 @@ import {
 
 const VERIFICATION_TOKEN_EXPIRATION_TIME = 360000; // TTL 1 hour
 
+// eslint-disable-next-line
 async function seedUsers() {
   try {
     // Ask if the user wants to delete the table
@@ -194,9 +195,13 @@ async function seedCompetitions() {
     const lines = file.split('\n');
     lines.shift();
     const competitions = lines.map(async (line) => {
-      const [title, description, max_participants, max_team_member] = line
-        .replace('\r', '')
-        .split(';');
+      const [
+        title,
+        description,
+        max_participants,
+        max_team_member,
+        guide_book_url,
+      ] = line.replace('\r', '').split(';');
 
       const existingCompetition = await db
         .select()
@@ -216,6 +221,7 @@ async function seedCompetitions() {
           description,
           maxParticipants: parseInt(max_participants),
           maxTeamMember: parseInt(max_team_member),
+          guidebookUrl: guide_book_url,
         })
         .returning()
         .then(first);
@@ -236,6 +242,7 @@ async function seedCompetitions() {
   }
 }
 
+// eslint-disable-next-line
 async function seedMedias() {
   try {
     // Ask if the user wants to delete the table
@@ -310,6 +317,7 @@ async function seedMedias() {
   }
 }
 
+// eslint-disable-next-line
 async function seedTeams() {
   try {
     // Ask if the user wants to delete the table
@@ -499,6 +507,7 @@ async function seedTimelines() {
   }
 }
 
+// eslint-disable-next-line
 async function seedSubmissionRequirement() {
   try {
     // Ask if the user wants to delete the table
@@ -583,12 +592,12 @@ async function seedSubmissionRequirement() {
 }
 
 async function main() {
-  await seedUsers();
+  // await seedUsers();
   await seedCompetitions();
-  await seedMedias();
-  await seedTeams();
+  // await seedMedias();
+  // await seedTeams();
   await seedTimelines();
-  await seedSubmissionRequirement();
+  // await seedSubmissionRequirement();
 }
 
 if (require.main === module) {
