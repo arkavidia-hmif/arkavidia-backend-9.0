@@ -2,7 +2,11 @@ import { relations } from 'drizzle-orm';
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { createId, getNow } from '../../utils/drizzle-schema-util';
-import { competition, competitionSubmission } from './competition.schema';
+import {
+  competition,
+  competitionSubmission,
+  stageEnum,
+} from './competition.schema';
 import { teamMember } from './team-member.schema';
 import { teamDocument } from './verification.schema';
 
@@ -12,6 +16,7 @@ export const team = pgTable('team', {
     .notNull()
     .references(() => competition.id, { onDelete: 'cascade' }), // Add reference to competition
   name: text('team_name').notNull(),
+  stage: stageEnum('stage').notNull().default('pre-eliminary'),
   joinCode: text('team_code').notNull().$defaultFn(createId).unique(), // Add unique constraint
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').$onUpdate(getNow),
