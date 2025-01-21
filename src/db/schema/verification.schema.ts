@@ -23,11 +23,11 @@ export const userDocument = pgTable(
   {
     userId: text('user_id')
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: 'cascade' }),
     type: userDocumentTypeEnum('type').notNull(),
     mediaId: text('media_id')
       .notNull()
-      .references(() => media.id),
+      .references(() => media.id, { onDelete: 'cascade' }),
     isVerified: boolean('is_verified').notNull().default(false),
     verificationError: text('verification_error'),
   },
@@ -63,7 +63,7 @@ export const teamMemberDocument = pgTable(
     type: teamMemberDocumentTypeEnum('type').notNull(),
     mediaId: text('media_id')
       .notNull()
-      .references(() => media.id),
+      .references(() => media.id, { onDelete: 'cascade' }),
     isVerified: boolean('is_verified').notNull().default(false),
     verificationError: text('verification_error'),
   },
@@ -102,11 +102,11 @@ export const teamDocument = pgTable(
   {
     teamId: text('team_id')
       .notNull()
-      .references(() => team.id),
+      .references(() => team.id, { onDelete: 'cascade' }),
     type: teamDocumentTypeEnum('type').notNull(),
     mediaId: text('media_id')
       .notNull()
-      .references(() => media.id),
+      .references(() => media.id, { onDelete: 'cascade' }),
     isVerified: boolean('is_verified').notNull().default(false),
     verificationError: text('verification_error'),
   },
