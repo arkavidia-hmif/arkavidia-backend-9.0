@@ -103,7 +103,21 @@ export const getTeamById = async (
             : undefined
           : {
               with: {
-                user: options?.teamMember?.user ? true : undefined,
+                user:
+                  typeof options?.teamMember?.user === 'boolean'
+                    ? options?.teamMember?.user
+                      ? true
+                      : undefined
+                    : {
+                        with: {
+                          document: options?.teamMember?.user?.document
+                            ? { with: { media: true } }
+                            : undefined,
+                          userIdentity: options?.teamMember?.user?.userIdentity
+                            ? true
+                            : undefined,
+                        },
+                      },
                 document: options?.teamMember?.document
                   ? { with: { media: true } }
                   : undefined,

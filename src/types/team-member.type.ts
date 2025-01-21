@@ -3,10 +3,16 @@ import { z } from 'zod';
 import { teamMemberDocument } from '~/db/schema';
 import { teamMember } from '~/db/schema/team-member.schema';
 
+import { MediaSchema } from './media.type';
 import { UserSchema } from './user.type';
 
-export const TeamMemberDocumentSchema =
-  createSelectSchema(teamMemberDocument).openapi('TeamMemberDocument');
+export const TeamMemberDocumentSchema = createSelectSchema(teamMemberDocument)
+  .merge(
+    z.object({
+      media: MediaSchema,
+    }),
+  )
+  .openapi('TeamMemberDocument');
 export const InsertTeamMemberDocumentSchema =
   createInsertSchema(teamMemberDocument);
 export const UpdateTeamMemberDocumentSchema =
@@ -34,8 +40,8 @@ export const TeamAndUserIdParam = z.object({
 export const TeamMemberSchema = createSelectSchema(teamMember)
   .merge(
     z.object({
-      user: UserSchema,
-      document: TeamMemberDocumentSchema,
+      user: UserSchema.optional(),
+      document: TeamMemberDocumentSchema.optional(),
     }),
   )
   .openapi('TeamMember');

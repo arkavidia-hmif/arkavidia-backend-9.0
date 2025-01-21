@@ -11,8 +11,13 @@ import {
 import { MediaSchema } from './media.type';
 import { TeamMemberSchema } from './team-member.type';
 
-export const TeamDocumentSchema =
-  createSelectSchema(teamDocument).openapi('TeamDocument');
+export const TeamDocumentSchema = createSelectSchema(teamDocument)
+  .merge(
+    z.object({
+      media: MediaSchema,
+    }),
+  )
+  .openapi('TeamDocument');
 export const UpdateTeamDocumentSchema = createInsertSchema(teamDocument)
   .partial()
   .omit({ teamId: true, type: true });
