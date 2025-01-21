@@ -131,6 +131,11 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
     const { competitionId, name } = await c.req.json();
     const userId = c.var.user.id;
 
+    const competition = await getCompetitionById(db, competitionId);
+
+    if (competition?.title === 'Arkalogica' && c.var.user.education !== 'sma')
+      return c.json({ error: 'You must be in SMA to join Arkalogica' }, 403);
+
     const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
     if (isInOtherTeam) {
       throw new Error('User is already in another team for the competition!');
@@ -263,7 +268,8 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   // Ensure team is not full
   const { teamMemberCount } = await getTeamMemberCount(db, team.id);
-  const { maxParticipants } = await getCompetitionById(db, team.competitionId);
+  const maxParticipants = (await getCompetitionById(db, team.competitionId))
+    ?.maxParticipants;
   if (teamMemberCount >= (maxParticipants ?? 0)) {
     return c.json({ error: 'Team is already full!' }, 400);
   }

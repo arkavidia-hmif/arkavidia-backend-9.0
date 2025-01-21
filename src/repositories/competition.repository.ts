@@ -74,7 +74,7 @@ export const getCompetitionById = async (
     where: eq(competition.id, competitionId),
   });
 
-  return { maxParticipants: result?.maxParticipants };
+  return result;
 };
 
 //

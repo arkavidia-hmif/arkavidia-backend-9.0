@@ -174,7 +174,8 @@ export const createTeam = async (
       db,
       competitionId,
     );
-    const { maxParticipants } = await getCompetitionById(db, competitionId);
+    const maxParticipants = (await getCompetitionById(db, competitionId))
+      ?.maxParticipants;
 
     if (!maxParticipants) {
       throw new Error('There is no such competition');
@@ -218,10 +219,8 @@ export const insertUserToTeam = async (
     }
 
     const { teamMemberCount } = await getTeamMemberCount(db, teamId);
-    const { maxParticipants } = await getCompetitionById(
-      db,
-      team.competitionId,
-    );
+    const maxParticipants = (await getCompetitionById(db, team.competitionId))
+      ?.maxParticipants;
 
     if (!maxParticipants) {
       throw new Error('There is no such competition');

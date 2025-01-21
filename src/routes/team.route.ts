@@ -111,6 +111,7 @@ export const postCreateTeamRoute = createRoute({
       description: 'Successfully created a team',
     },
     400: createErrorResponse('UNION', 'Bad Request Error'),
+    403: createErrorResponse('UNION', 'Forbidden'),
     500: createErrorResponse('GENERIC', 'Internal Server Error'),
   },
 });
