@@ -23,6 +23,7 @@ import {
   updatePaymentProofTeam,
   // updateTeamVerification,
 } from '~/repositories/team.repository';
+import { getUser } from '~/repositories/user.repository';
 import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
@@ -131,9 +132,10 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
     const { competitionId, name } = await c.req.json();
     const userId = c.var.user.id;
 
+    const user = await getUser(db, userId);
     const competition = await getCompetitionById(db, competitionId);
 
-    if (competition?.title === 'Arkalogica' && c.var.user.education !== 'sma')
+    if (competition?.title === 'Arkalogica' && user?.education !== 'sma')
       return c.json({ error: 'You must be in SMA to join Arkalogica' }, 403);
 
     const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
