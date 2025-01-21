@@ -94,10 +94,12 @@ export const competitionSubmission = pgTable(
   {
     teamId: text('team_id')
       .notNull()
-      .references(() => team.id),
+      .references(() => team.id, { onDelete: 'cascade' }),
     typeId: text('type_id')
       .notNull()
-      .references(() => competitionSubmissionRequirement.typeId),
+      .references(() => competitionSubmissionRequirement.typeId, {
+        onDelete: 'cascade',
+      }),
     mediaId: text('media_id').references(() => media.id, {
       onDelete: 'set null',
     }),
