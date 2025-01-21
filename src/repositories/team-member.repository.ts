@@ -94,7 +94,7 @@ export const getTeamMemberDocument = async (
   return db.query.teamMemberDocument.findFirst({
     where: and(
       eq(teamMemberDocument.userId, userId),
-      eq(teamMemberDocument.userId, teamId),
+      eq(teamMemberDocument.teamId, teamId),
       eq(teamMemberDocument.type, type),
     ),
   });
@@ -111,13 +111,35 @@ export const updateTeamMemberDocument = async (
   db: Database,
   userId: string,
   teamId: string,
+  type: TeamMemberDocumentTypeEnum,
   values: z.infer<typeof UpdateTeamMemberDocumentSchema>,
 ) => {
   return await db
     .update(teamMemberDocument)
     .set(values)
-    .where(and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)))
+    .where(
+      and(
+        eq(teamMemberDocument.teamId, teamId),
+        eq(teamMemberDocument.userId, userId),
+        eq(teamMemberDocument.type, type),
+      ),
+    )
     .returning();
+};
+
+export const deleteAllTeamMemberDocument = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+) => {
+  await db
+    .delete(teamMemberDocument)
+    .where(
+      and(
+        eq(teamMemberDocument.teamId, teamId),
+        eq(teamMemberDocument.userId, userId),
+      ),
+    );
 };
 
 export const updatePosterTeamMember = async (
@@ -128,7 +150,7 @@ export const updatePosterTeamMember = async (
 ) => {
   const poster = await getTeamMemberDocument(db, userId, teamId, 'poster');
   if (poster) {
-    await updateTeamMemberDocument(db, userId, teamId, {
+    await updateTeamMemberDocument(db, userId, teamId, 'poster', {
       mediaId: posterMediaId,
     });
   } else {
@@ -149,7 +171,7 @@ export const updateTwibbonTeamMember = async (
 ) => {
   const twibbon = await getTeamMemberDocument(db, userId, teamId, 'twibbon');
   if (twibbon) {
-    await updateTeamMemberDocument(db, userId, teamId, {
+    await updateTeamMemberDocument(db, userId, teamId, 'twibbon', {
       mediaId: twibbonMediaId,
     });
   } else {
