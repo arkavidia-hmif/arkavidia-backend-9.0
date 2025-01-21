@@ -21,6 +21,7 @@ import {
 } from './competition.repository';
 import {
   type TeamMemberRelationOption,
+  deleteAllTeamMemberDocument,
   getTeamMemberCount,
 } from './team-member.repository';
 
@@ -149,6 +150,8 @@ export const deleteTeamMember = async (
   teamId: string,
   userId: string,
 ) => {
+  await deleteAllTeamMemberDocument(db, userId, teamId);
+
   const where = and(
     eq(teamMember.teamId, teamId),
     eq(teamMember.userId, userId),
@@ -157,6 +160,12 @@ export const deleteTeamMember = async (
 };
 
 export const deleteTeam = async (db: Database, teamId: string) => {
+  const foundTeam = await getTeamById(db, teamId, { teamMember: true });
+  if (!foundTeam) return;
+
+  for (const tm of foundTeam.teamMembers) {
+    await deleteAllTeamMemberDocument(db, tm.userId, teamId);
+  }
   return await db
     .delete(team)
     .where(eq(team.id, teamId))
