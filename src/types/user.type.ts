@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { user, userDocument } from '~/db/schema';
+import { user, userDocument, userIdentityRoleEnum } from '~/db/schema';
 
 import { MediaSchema } from './media.type';
 
@@ -24,6 +24,7 @@ export const UserSchema = createSelectSchema(user, {
   .merge(
     z.object({
       document: z.array(UserDocumentSchema).optional(),
+      role: z.enum(userIdentityRoleEnum.enumValues).optional(),
     }),
   )
   .openapi('User');

@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { findUserIdentityById } from '~/repositories/auth.repository';
 import {
   getUser,
   updateKartuUser,
@@ -17,8 +18,9 @@ export const userProtectedRouter = createAuthRouter();
 userProtectedRouter.openapi(getUserRoute, async (c) => {
   const user = c.var.user;
   const findUser = await getUser(db, user.id, { document: true });
+  const userIdentity = await findUserIdentityById(db, user.id);
   if (!findUser) return c.json({ message: 'User not found!' }, 400);
-  return c.json(findUser, 200);
+  return c.json({ ...findUser, role: userIdentity?.role }, 200);
 });
 
 userProtectedRouter.openapi(updateUserRoute, async (c) => {
