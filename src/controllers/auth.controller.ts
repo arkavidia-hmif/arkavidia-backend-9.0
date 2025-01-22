@@ -81,6 +81,8 @@ authRouter.openapi(basicRegisterRoute, async (c) => {
         verificationToken: verifyToken,
         verificationTokenExpiration: verifyTokenExpiration,
       });
+      await sendVerificationEmail(email, verifyToken, user.id);
+      return c.json({}, 204);
     } else return c.json({ message: 'User already exist' }, 400);
   }
 
