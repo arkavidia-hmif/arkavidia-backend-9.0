@@ -136,8 +136,31 @@ authRouter.openapi(basicLoginRoute, async (c) => {
     return c.json({ message: 'Email not found' }, 400);
   if (!(await argon2.verify(userIdentity.hash, password)))
     return c.json({ message: 'Wrong password' }, 400);
-  if (!userIdentity.isVerified)
+  if (!userIdentity.isVerified) {
+    if (
+      !userIdentity.isVerified &&
+      new Date() > new Date(userIdentity.verificationTokenExpiration)
+    ) {
+      // If email already exists and old token expired, regenerate token
+      // TODO: Maybe add penalty if regenerate token? wait 1 min, 2 min, 10 min, 60 min
+      const verifyTokenExpiration = new Date(
+        new Date().getTime() + VERIFICATION_TOKEN_EXPIRATION_TIME,
+      );
+      const verifyToken = await argon2.hash(
+        `${email}${new Date()}${verifyTokenExpiration.toISOString()}`,
+      );
+      await updateUserIdentity(db, user.id, {
+        verificationToken: verifyToken,
+        verificationTokenExpiration: verifyTokenExpiration,
+      });
+      await sendVerificationEmail(email, verifyToken, user.id);
+      return c.json(
+        { message: "User isn't verified. Verification email has ben sent!" },
+        400,
+      );
+    }
     return c.json({ message: "User isn't verified" }, 400);
+  }
 
   const accessToken = await generateAccessToken(user, userIdentity);
   return c.json(
