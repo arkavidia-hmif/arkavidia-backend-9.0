@@ -1,6 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import {
-  OptionalServiceKeyParamSchema,
+  CompetitionStatisticSchema,
   UserStatisticSchema,
 } from '~/types/analytics.type';
 
@@ -11,9 +11,6 @@ export const getUserStatisticRoute = createRoute({
   tags: ['analytics'],
   method: 'get',
   path: '/analytics/user',
-  request: {
-    params: OptionalServiceKeyParamSchema,
-  },
   responses: {
     200: {
       content: {
@@ -22,6 +19,25 @@ export const getUserStatisticRoute = createRoute({
         },
       },
       description: 'Get user statistics',
+    },
+    403: createErrorResponse('UNION', 'Forbidden'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getCompetitionStatisticRoute = createRoute({
+  operationId: 'getCompetitionStatistic',
+  tags: ['analytics'],
+  method: 'get',
+  path: '/analytics/competition',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: CompetitionStatisticSchema,
+        },
+      },
+      description: 'Get competition statistics',
     },
     403: createErrorResponse('UNION', 'Forbidden'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

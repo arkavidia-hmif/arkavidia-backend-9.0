@@ -1,17 +1,5 @@
 import { z } from 'zod';
 
-export const OptionalServiceKeyParamSchema = z.object({
-  key: z
-    .string()
-    .optional()
-    .openapi({
-      param: {
-        in: 'path',
-        required: true,
-      },
-    }),
-});
-
 const SingleUserStatisticSchema = z.object({
   totalCount: z.number(),
   totalRegisteredCount: z.number(),
@@ -27,3 +15,27 @@ export const UserStatisticSchema = z
     }),
   })
   .merge(SingleUserStatisticSchema);
+
+const StageCompetitionStatisticSchema = z.object({
+  // verification: z.number(),
+  preeliminary: z.number(),
+  final: z.number(),
+});
+
+const SingleCompetitionStatisticSchema = z.object({
+  count: z.number(),
+  stage: StageCompetitionStatisticSchema,
+});
+
+export const CompetitionStatisticSchema = z
+  .object({
+    competition: z.object({
+      competitiveProgramming: SingleCompetitionStatisticSchema,
+      captureTheFlag: SingleCompetitionStatisticSchema,
+      arkalogica: SingleCompetitionStatisticSchema,
+      datavidia: SingleCompetitionStatisticSchema,
+      hackvidia: SingleCompetitionStatisticSchema,
+      uxvidia: SingleCompetitionStatisticSchema,
+    }),
+  })
+  .merge(SingleCompetitionStatisticSchema);
