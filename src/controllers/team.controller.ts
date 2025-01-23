@@ -215,7 +215,10 @@ teamProtectedRouter.get(
 teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
   try {
     const { teamId } = c.req.valid('param');
-    const team = await getTeamById(db, teamId, { teamMember: true });
+    const team = await getTeamById(db, teamId, {
+      teamMember: { document: true, user: { document: true } },
+      document: true,
+    });
     if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
     const competitionStage = await getCompetitionStageByTeamId(db, teamId);
     return c.json(
