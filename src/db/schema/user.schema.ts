@@ -53,3 +53,4 @@ export const userRelations = relations(user, ({ one, many }) => ({
 }));
 
 export type User = InferSelectModel<typeof user>;
+export type UserEducationEnum = (typeof userEducationEnum.enumValues)[number];
