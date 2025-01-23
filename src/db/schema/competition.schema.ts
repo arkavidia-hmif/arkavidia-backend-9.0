@@ -159,3 +159,5 @@ export const competitionTimelineRelations = relations(
     }),
   }),
 );
+
+export type CompetitionStageEnum = (typeof stageEnum.enumValues)[number];
