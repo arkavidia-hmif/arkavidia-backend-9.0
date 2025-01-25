@@ -124,42 +124,48 @@ adminCompetitionProtectedRouter.openapi(
     const { competitionId, teamId } = c.req.valid('param');
     const { buktiPembayaran, teamMember } = c.req.valid('json');
 
-    const team = await getTeamById(db, teamId, { competition: true });
+    const team = await getTeamById(db, teamId, {
+      competition: true,
+      teamMember: true,
+    });
     if (!team || team.competition.id !== competitionId)
       return c.json({ error: "Team doesn't exist!" }, 400);
 
-    await updateTeamDocument(db, teamId, buktiPembayaran);
-    for (const member of teamMember) {
-      if (member.poster)
-        await updateTeamMemberDocument(
-          db,
-          member.userId,
-          teamId,
-          'poster',
-          member.poster,
-        );
+    if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
 
-      if (member.twibbon)
-        await updateTeamMemberDocument(
-          db,
-          member.userId,
-          teamId,
-          'twibbon',
-          member.twibbon,
-        );
+    if (teamMember) {
+      for (const member of teamMember) {
+        if (member && member.poster)
+          await updateTeamMemberDocument(
+            db,
+            member.userId,
+            teamId,
+            'poster',
+            member.poster,
+          );
 
-      if (member.kartuIdentitas)
-        await updateUserDocument(db, member.userId, {
-          ...member.kartuIdentitas,
-          type: 'kartu-identitas',
-        });
+        if (member && member.twibbon)
+          await updateTeamMemberDocument(
+            db,
+            member.userId,
+            teamId,
+            'twibbon',
+            member.twibbon,
+          );
+
+        if (member && member.kartuIdentitas)
+          await updateUserDocument(db, member.userId, {
+            ...member.kartuIdentitas,
+            type: 'kartu-identitas',
+          });
+      }
     }
 
     let verdict: boolean = true;
 
     verdict =
       verdict && !(await isTeamDocumentsVerified(db, teamId)) ? false : verdict;
-    for (const member of teamMember) {
+    for (const member of team.teamMembers) {
       verdict =
         verdict && !(await isUserDocumentsVerified(db, member.userId))
           ? false
