@@ -11,6 +11,7 @@ import { mediaRouter } from './media.controller';
 import { teamMemberProtectedRouter } from './team-member.controller';
 import { teamProtectedRouter } from './team.controller';
 import { userProtectedRouter } from './user.controller';
+import { adminCompetitionProtectedRouter } from './admin-competition.controller';
 
 const unprotectedApiRouter = new OpenAPIHono();
 unprotectedApiRouter.route('/', healthRouter);
@@ -26,6 +27,7 @@ protectedApiRouter.route('/', teamProtectedRouter);
 protectedApiRouter.route('/', userProtectedRouter);
 protectedApiRouter.route('/', competitionProtectedRouter);
 protectedApiRouter.route('/', analyticsProtectedRouter);
+protectedApiRouter.route('/', adminCompetitionProtectedRouter)
 
 export const apiRouter = new OpenAPIHono();
 apiRouter.route('/', unprotectedApiRouter);
