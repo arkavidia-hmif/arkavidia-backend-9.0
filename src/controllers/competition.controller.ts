@@ -35,11 +35,9 @@ competitionProtectedRouter.get(
   getCompetitionSubmissionRoute.getRoutingPath(),
   roleMiddleware('admin'),
 );
-
 competitionProtectedRouter.openapi(getCompetitionSubmissionRoute, async (c) => {
   const { page, limit } = c.req.valid('query');
   const { competitionId } = c.req.valid('param');
-
   const competitionSubmission = await getCompetitionSubmissionById(
     db,
     competitionId,

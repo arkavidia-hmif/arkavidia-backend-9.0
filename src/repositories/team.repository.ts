@@ -1,4 +1,4 @@
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
@@ -15,10 +15,7 @@ import type {
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 
-import {
-  getCompetitionById,
-  getCompetitionParticipantNumber,
-} from './competition.repository';
+import { getCompetitionById } from './competition.repository';
 import {
   type TeamMemberRelationOption,
   deleteAllTeamMemberDocument,
@@ -193,23 +190,6 @@ export const createTeam = async (
   name: string,
 ) => {
   return await db.transaction(async (tx) => {
-    const { participantCount } = await getCompetitionParticipantNumber(
-      db,
-      competitionId,
-    );
-    const maxParticipants = (await getCompetitionById(db, competitionId))
-      ?.maxParticipants;
-
-    if (!maxParticipants) {
-      throw new Error('There is no such competition');
-    }
-
-    if (maxParticipants <= participantCount) {
-      throw new Error(
-        'Maximum number of participants reached for this competition.',
-      );
-    }
-
     const existingTeam = await db.query.team.findFirst({
       where: eq(team.name, name),
     });
@@ -287,54 +267,3 @@ export const insertUserToTeam = async (
 //     .returning()
 //     .then(first);
 // };
-
-export const getTeamStatistic = async (db: Database) => {
-  const allTeam = await db
-    .select({
-      totalTeam: count(),
-    })
-    .from(team)
-    .then(first);
-
-  const allVerifiedTeam = await db
-    .select({
-      totalVerifiedTeam: count(),
-    })
-    .from(team)
-    .innerJoin(teamDocument, eq(team.id, teamDocument.teamId))
-    .where(eq(teamDocument.isVerified, true))
-    .then(first);
-
-  const compeTeams: {
-    competitionId: string;
-    totalTeam: number;
-    totalVerifiedTeam?: number;
-  }[] = await db
-    .select({
-      competitionId: team.competitionId,
-      totalTeam: count(),
-    })
-    .from(team)
-    .groupBy(team.competitionId)
-    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
-
-  const compeTeamsVerified = await db
-    .select({
-      competitionId: team.competitionId,
-      totalVerifiedTeam: count(),
-    })
-    .from(team)
-    .innerJoin(teamDocument, eq(team.id, teamDocument.teamId))
-    .where(eq(teamDocument.isVerified, true))
-    .groupBy(team.competitionId)
-    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
-
-  compeTeams.forEach((team) => {
-    const verifiedTeam = compeTeamsVerified.find(
-      (vTeam) => vTeam.competitionId === team.competitionId,
-    );
-    team.totalVerifiedTeam = verifiedTeam?.totalVerifiedTeam || 0;
-  });
-
-  return { ...allTeam, ...allVerifiedTeam, result: compeTeams };
-};

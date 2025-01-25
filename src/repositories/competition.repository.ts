@@ -274,26 +274,6 @@ export const postAnnouncement = async (
     .then(first);
 };
 
-export const initializelCompetitionSubmissions = async (
-  db: Database,
-  teamId: string,
-  competitionId: string,
-) => {
-  const requirementList = await getCompetitionRequirementById(
-    db,
-    competitionId,
-  );
-
-  const submissionResult = [];
-  for (const requirement of requirementList) {
-    // do the insertion
-    const res = await postCompetitionSubmission(db, teamId, requirement.typeId);
-    submissionResult.push(res);
-  }
-
-  return submissionResult;
-};
-
 export const getCompetitionRequirementById = async (
   db: Database,
   competitionId: string,
