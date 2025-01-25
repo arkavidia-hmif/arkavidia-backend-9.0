@@ -300,6 +300,21 @@ export const updatePaymentProofTeam = async (
   }
 };
 
+export const isTeamDocumentsVerified = async (
+  db: Database,
+  teamId: string,
+): Promise<boolean> => {
+  const documents = await db.query.teamDocument.findMany({
+    where: eq(teamDocument.teamId, teamId),
+  });
+
+  const buktiPembayaranDocument = documents.find(
+    (d) => d.type === 'bukti-pembayaran',
+  );
+
+  return !!buktiPembayaranDocument?.isVerified;
+};
+
 /** Team Submissions */
 
 interface CompetitionTeamSubmissionRelationOption {

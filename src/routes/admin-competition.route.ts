@@ -126,7 +126,7 @@ export const putAdminCompetitionTeamVerificationRoute = createRoute({
   description:
     "Updates team's verification status. Automatically handles team final status (DENIED/VERIFIED) and sends team verification email.",
   tags: ['admin-competition'],
-  method: 'get',
+  method: 'put',
   middleware: [roleMiddleware('admin_competition')] as const,
   path: '/admin/competition/{competitionId}/team/{teamId}/submission',
   request: {

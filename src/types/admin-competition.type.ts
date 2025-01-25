@@ -55,14 +55,16 @@ const SingleVerificationSchema = z.object({
 });
 
 export const PutTeamVerificationBodySchema = z.object({
-  buktiPembayaran: SingleVerificationSchema,
+  buktiPembayaran: SingleVerificationSchema.optional(),
   teamMember: z.array(
-    z.object({
-      userId: z.string(),
-      kartuIdentitas: SingleVerificationSchema,
-      poster: SingleVerificationSchema,
-      twibbon: SingleVerificationSchema,
-    }),
+    z
+      .object({
+        userId: z.string(),
+        kartuIdentitas: SingleVerificationSchema.optional(),
+        poster: SingleVerificationSchema.optional(),
+        twibbon: SingleVerificationSchema.optional(),
+      })
+      .optional(),
   ),
 });
 

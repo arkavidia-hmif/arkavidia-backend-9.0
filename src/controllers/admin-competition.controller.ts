@@ -6,14 +6,21 @@ import {
   getCompetitionIdByName as getCompetitionByName,
   getCompetitionSubmissionRequirement,
 } from '~/repositories/competition.repository';
-import { updateTeamMemberDocument } from '~/repositories/team-member.repository';
+import {
+  isTeamMemberDocumentsVerified,
+  updateTeamMemberDocument,
+} from '~/repositories/team-member.repository';
 import {
   getAllTeamsPaginated,
   getTeamById,
+  isTeamDocumentsVerified,
   updateTeam,
   updateTeamDocument,
 } from '~/repositories/team.repository';
-import { updateUserDocument } from '~/repositories/user.repository';
+import {
+  isUserDocumentsVerified,
+  updateUserDocument,
+} from '~/repositories/user.repository';
 import {
   getAdminAllCompetitionTeamsRoute,
   getAdminCompetitionTeamInformationRoute,
@@ -81,10 +88,11 @@ adminCompetitionProtectedRouter.openapi(
     const team = await getTeamById(db, teamId, {
       submission: true,
       teamMember: true,
+      competition: true,
     });
 
     if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-    if (team?.competition.id !== competitionId)
+    if (team.competition.id !== competitionId)
       return c.json({ error: "Team isn't in competition!" }, 400);
 
     const requirements = await getCompetitionSubmissionRequirement(
@@ -120,46 +128,48 @@ adminCompetitionProtectedRouter.openapi(
     if (!team || team.competition.id !== competitionId)
       return c.json({ error: "Team doesn't exist!" }, 400);
 
-    let verdict: boolean = true;
-    verdict =
-      verdict &&
-      !(await updateTeamDocument(db, teamId, buktiPembayaran))[0].isVerified
-        ? false
-        : verdict;
+    await updateTeamDocument(db, teamId, buktiPembayaran);
     for (const member of teamMember) {
       if (member.poster)
-        verdict =
-          verdict &&
-          !(
-            await updateTeamMemberDocument(
-              db,
-              member.userId,
-              teamId,
-              'poster',
-              member.poster,
-            )
-          )[0].isVerified;
+        await updateTeamMemberDocument(
+          db,
+          member.userId,
+          teamId,
+          'poster',
+          member.poster,
+        );
+
       if (member.twibbon)
-        verdict =
-          verdict &&
-          !(
-            await updateTeamMemberDocument(
-              db,
-              member.userId,
-              teamId,
-              'twibbon',
-              member.twibbon,
-            )
-          )[0].isVerified;
+        await updateTeamMemberDocument(
+          db,
+          member.userId,
+          teamId,
+          'twibbon',
+          member.twibbon,
+        );
+
       if (member.kartuIdentitas)
-        verdict =
-          verdict &&
-          !(
-            await updateUserDocument(db, member.userId, {
-              ...member.kartuIdentitas,
-              type: 'kartu-identitas',
-            })
-          )[0].isVerified;
+        await updateUserDocument(db, member.userId, {
+          ...member.kartuIdentitas,
+          type: 'kartu-identitas',
+        });
+    }
+
+    let verdict: boolean = true;
+
+    verdict =
+      verdict && !(await isTeamDocumentsVerified(db, teamId)) ? false : verdict;
+    for (const member of teamMember) {
+      verdict =
+        verdict && !(await isUserDocumentsVerified(db, member.userId))
+          ? false
+          : verdict;
+      verdict =
+        verdict &&
+        !(await isTeamMemberDocumentsVerified(db, teamId, member.userId))
+          ? false
+          : verdict;
+      if (!verdict) break;
     }
 
     const verificationStatus: TeamVerificationStatusEnum = verdict

@@ -268,3 +268,21 @@ export const updateTwibbonTeamMember = async (
     });
   }
 };
+
+export const isTeamMemberDocumentsVerified = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+): Promise<boolean> => {
+  const documents = await db.query.teamMemberDocument.findMany({
+    where: and(
+      eq(teamMemberDocument.teamId, teamId),
+      eq(teamMemberDocument.userId, userId),
+    ),
+  });
+
+  const twibbonDocument = documents.find((d) => d.type === 'twibbon');
+  const posterDocument = documents.find((d) => d.type === 'poster');
+
+  return !!twibbonDocument?.isVerified && !!posterDocument?.isVerified;
+};
