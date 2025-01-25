@@ -1,4 +1,4 @@
-// import argon2 from 'argon2';
+import argon2 from 'argon2';
 import { eq, inArray } from 'drizzle-orm';
 import fs from 'fs';
 import { exit } from 'process';
@@ -548,8 +548,15 @@ async function seedSubmissionRequirement() {
     const lines = file.split('\n');
     lines.shift();
     const timelines = lines.map(async (line) => {
-      const [competition_name, name, description, start_date, deadline, stage] =
-        line.replace('\r', '').split(',');
+      const [
+        competition_name,
+        name,
+        description,
+        start_date,
+        deadline,
+        stage,
+        order,
+      ] = line.replace('\r', '').split(',');
 
       const competition_id = await db
         .select()
@@ -560,6 +567,7 @@ async function seedSubmissionRequirement() {
       const startDate = start_date ? new Date(start_date) : new Date();
       const endDate = deadline ? new Date(deadline) : new Date();
       const stage_ = stage as 'pre-eliminary' | 'final' | 'verification';
+      const order_ = Number(order);
 
       const res = await db
         .insert(competitionSubmissionRequirement)
@@ -570,6 +578,7 @@ async function seedSubmissionRequirement() {
           description,
           deadline: endDate,
           stage: stage_,
+          order: order_,
         })
         .returning()
         .then(first);
