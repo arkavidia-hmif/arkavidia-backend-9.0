@@ -5,6 +5,7 @@ import {
   getCompetitionById,
   getCompetitionStageByTeamId,
   getCompetitionSubmissionRequirement,
+  getCompetitionSubmissionRequirementById,
 } from '~/repositories/competition.repository';
 import {
   deleteTeamMember,
@@ -304,12 +305,19 @@ teamProtectedRouter.openapi(getTeamSubmissionRoute, async (c) => {
 
 teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
   const { teamId } = c.req.valid('param');
-  const { mediaId } = c.req.valid('json');
+  const { typeId, mediaId } = c.req.valid('json');
 
   if (!mediaId) return c.json({ error: 'Media ID must be supplied!' }, 400);
 
   const team = await getTeamById(db, teamId, { teamMember: true });
   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+
+  const requirement = await getCompetitionSubmissionRequirementById(db, typeId);
+  if (requirement?.stage !== team.stage)
+    return c.json(
+      { error: `Your team isn't in ${requirement?.stage} stage!` },
+      403,
+    );
 
   const teamMember = team.teamMembers.find((el) => el.userId === c.var.user.id);
   if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);

@@ -15,6 +15,7 @@ import {
   teamMember,
 } from '../db/schema';
 
+
 export const getAllCompetitions = async (db: Database) => {
   const competitions = await db.query.competition.findMany();
   return competitions.map((competition) => competition.id);
@@ -276,16 +277,24 @@ export const postAnnouncement = async (
 export const getCompetitionSubmissionRequirement = async (
   db: Database,
   competitionId: string,
+  // stage?: 
 ) => {
-  const result = await db.query.competitionSubmissionRequirement.findMany({
+  return await db.query.competitionSubmissionRequirement.findMany({
     where: eq(competitionSubmissionRequirement.competitionId, competitionId),
     orderBy: (competitionSubmissionRequirement, { asc }) => [
       asc(competitionSubmissionRequirement.order),
     ],
   });
-
-  return result;
 };
+
+export const getCompetitionSubmissionRequirementById = async (
+  db: Database,
+  typeId: string,
+) => {
+  return await db.query.competitionSubmissionRequirement.findFirst({
+    where: eq(competitionSubmissionRequirement.typeId, typeId),
+  });
+}
 
 export const postCompetitionSubmission = async (
   db: Database,
