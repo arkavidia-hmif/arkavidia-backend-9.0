@@ -5,23 +5,25 @@ import {
   getCompetitionStageByTeamId,
 } from '~/repositories/competition.repository';
 import {
+  deleteTeamMember,
   getTeamMemberCount,
   isUserInOtherTeam,
   isUserInTeam,
+  updateTeamMemberDocument,
 } from '~/repositories/team-member.repository';
 import {
   changeTeamName,
   createTeam,
   deleteTeam,
-  deleteTeamMember,
   getTeamByCode,
   getTeamById,
   getUserTeams,
   insertUserToTeam,
   updatePaymentProofTeam,
+  updateTeamDocument,
   // updateTeamVerification,
 } from '~/repositories/team.repository';
-import { getUser } from '~/repositories/user.repository';
+import { getUser, updateUserDocument } from '~/repositories/user.repository';
 import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
@@ -31,6 +33,7 @@ import {
   postCreateTeamRoute,
   postQuitTeamRoute,
   postTeamDocumentRoute,
+  postTeamVerificationRoute,
   // postTeamVerificationRoute,
   putChangeTeamNameRoute,
 } from '~/routes/team.route';
@@ -184,6 +187,53 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
   return c.json(updatedTeam, 200);
 });
 
+teamProtectedRouter.post(
+  postTeamVerificationRoute.getRoutingPath(),
+  roleMiddleware('admin'),
+);
+teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
+  const { competitionId, teamId } = c.req.valid('param');
+  const { buktiPembayaran, teamMember } = c.req.valid('json');
+
+  const team = await getTeamById(db, teamId, { competition: true });
+  if (!team || team.competition.id !== competitionId)
+    return c.json({ error: "Team doesn't exist!" }, 400);
+
+  await updateTeamDocument(db, teamId, buktiPembayaran);
+  for (const member of teamMember) {
+    if (member.poster)
+      await updateTeamMemberDocument(
+        db,
+        member.userId,
+        teamId,
+        'poster',
+        member.poster,
+      );
+    if (member.twibbon)
+      await updateTeamMemberDocument(
+        db,
+        member.userId,
+        teamId,
+        'twibbon',
+        member.twibbon,
+      );
+    if (member.kartuIdentitas)
+      await updateUserDocument(db, member.userId, {
+        ...member.kartuIdentitas,
+        type: 'kartu-identitas',
+      });
+  }
+
+  const updatedTeam = getTeamById(db, teamId, {
+    document: true,
+    teamMember: { user: { document: true }, document: true },
+  });
+
+  // TODO: Send email to team if not verified / verified
+
+  return c.json(updatedTeam, 200);
+});
+
 teamProtectedRouter.get(
   getTeamDetailRoute.getRoutingPath(),
   roleMiddleware('admin'),
@@ -258,23 +308,3 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   return c.json(newTeamMember, 200);
 });
-
-// teamProtectedRouter.post(
-//   postTeamVerificationRoute.getRoutingPath(),
-//   roleMiddleware('admin'),
-// );
-// teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
-//   const { competitionId, teamId } = c.req.valid('param');
-
-//   const team = await getTeamById(db, teamId, { competition: true });
-//   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-
-//   if (team.competition.id !== competitionId)
-//     return c.json({ error: "Team and competition don't match!" }, 400);
-
-//   const body = c.req.valid('json');
-
-//   await updateTeamVerification(db, teamId, body);
-
-//   return c.json({ message: 'Successfully updated team verification!' }, 200);
-// });

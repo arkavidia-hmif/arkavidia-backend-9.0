@@ -76,9 +76,21 @@ export const CompetitionAndTeamIdParam = z.object({
   }),
 });
 
-export const PostTeamVerificationBodySchema = z.object({
+const SingleVerificationSchema = z.object({
   isVerified: z.boolean(),
   verificationError: z.string().optional(),
+});
+
+export const PostTeamVerificationBodySchema = z.object({
+  buktiPembayaran: SingleVerificationSchema,
+  teamMember: z.array(
+    z.object({
+      userId: z.string(),
+      kartuIdentitas: SingleVerificationSchema,
+      poster: SingleVerificationSchema,
+      twibbon: SingleVerificationSchema,
+    }),
+  ),
 });
 
 export const PostTeamBodySchema = createInsertSchema(team).pick({

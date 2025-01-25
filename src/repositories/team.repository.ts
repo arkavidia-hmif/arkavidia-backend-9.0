@@ -22,50 +22,11 @@ import {
   getTeamMemberCount,
 } from './team-member.repository';
 
-export const getTeamDocument = async (
-  db: Database,
-  teamId: string,
-  type: TeamDocumentTypeEnum,
-) => {
-  return db.query.teamDocument.findFirst({
-    where: and(eq(teamDocument.teamId, teamId), eq(teamDocument.type, type)),
-  });
-};
-
-export const createTeamDocument = async (
-  db: Database,
-  values: z.infer<typeof CreateTeamDocumentSchema>,
-) => {
-  return db.insert(teamDocument).values(values).returning();
-};
-
-export const updateTeamDocument = async (
-  db: Database,
-  teamId: string,
-  values: z.infer<typeof UpdateTeamDocumentSchema>,
-) => {
-  return db
-    .update(teamDocument)
-    .set(values)
-    .where(eq(teamDocument.teamId, teamId))
-    .returning();
-};
-
 interface TeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
   competition?: boolean;
   document?: boolean;
 }
-
-export const getTeamByCode = async (
-  db: Database,
-  teamCode: string,
-  // options?: TeamRelationOption,
-) => {
-  return await db.query.team.findFirst({
-    where: eq(team.joinCode, teamCode),
-  });
-};
 
 export const getUserTeams = async (db: Database, userId: string) => {
   const userTeams = (
@@ -82,6 +43,16 @@ export const getUserTeams = async (db: Database, userId: string) => {
     with: {
       competition: true,
     },
+  });
+};
+
+export const getTeamByCode = async (
+  db: Database,
+  teamCode: string,
+  // options?: TeamRelationOption,
+) => {
+  return await db.query.team.findFirst({
+    where: eq(team.joinCode, teamCode),
   });
 };
 
@@ -124,64 +95,6 @@ export const getTeamById = async (
       document: options?.document ? { with: { media: true } } : undefined,
     },
   });
-};
-
-export const updatePaymentProofTeam = async (
-  db: Database,
-  teamId: string,
-  paymentProofMediaId: string,
-) => {
-  const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
-  if (kartu) {
-    await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
-  } else {
-    await createTeamDocument(db, {
-      teamId,
-      mediaId: paymentProofMediaId,
-      type: 'bukti-pembayaran',
-    });
-  }
-};
-
-export const changeTeamName = async (
-  db: Database,
-  teamId: string,
-  body: z.infer<typeof putChangeTeamNameBodySchema>,
-) => {
-  return await db
-    .update(team)
-    .set({ name: body.name })
-    .where(eq(team.id, teamId))
-    .returning()
-    .then(first);
-};
-
-export const deleteTeamMember = async (
-  db: Database,
-  teamId: string,
-  userId: string,
-) => {
-  await deleteAllTeamMemberDocument(db, userId, teamId);
-
-  const where = and(
-    eq(teamMember.teamId, teamId),
-    eq(teamMember.userId, userId),
-  );
-  return await db.delete(teamMember).where(where).returning().then(first);
-};
-
-export const deleteTeam = async (db: Database, teamId: string) => {
-  const foundTeam = await getTeamById(db, teamId, { teamMember: true });
-  if (!foundTeam) return;
-
-  for (const tm of foundTeam.teamMembers) {
-    await deleteAllTeamMemberDocument(db, tm.userId, teamId);
-  }
-  return await db
-    .delete(team)
-    .where(eq(team.id, teamId))
-    .returning()
-    .then(first);
 };
 
 export const createTeam = async (
@@ -255,15 +168,77 @@ export const insertUserToTeam = async (
   });
 };
 
-// export const updateTeamVerification = async (
-//   db: Database,
-//   teamId: string,
-//   data: z.infer<typeof PostTeamVerificationBodySchema>,
-// ) => {
-//   return await db
-//     .update(team)
-//     .set(data)
-//     .where(eq(team.id, teamId))
-//     .returning()
-//     .then(first);
-// };
+export const changeTeamName = async (
+  db: Database,
+  teamId: string,
+  body: z.infer<typeof putChangeTeamNameBodySchema>,
+) => {
+  return await db
+    .update(team)
+    .set({ name: body.name })
+    .where(eq(team.id, teamId))
+    .returning()
+    .then(first);
+};
+
+export const deleteTeam = async (db: Database, teamId: string) => {
+  const foundTeam = await getTeamById(db, teamId, { teamMember: true });
+  if (!foundTeam) return;
+
+  for (const tm of foundTeam.teamMembers) {
+    await deleteAllTeamMemberDocument(db, tm.userId, teamId);
+  }
+  return await db
+    .delete(team)
+    .where(eq(team.id, teamId))
+    .returning()
+    .then(first);
+};
+
+/** Team Verification Documents */
+
+export const getTeamDocument = async (
+  db: Database,
+  teamId: string,
+  type: TeamDocumentTypeEnum,
+) => {
+  return db.query.teamDocument.findFirst({
+    where: and(eq(teamDocument.teamId, teamId), eq(teamDocument.type, type)),
+  });
+};
+
+export const createTeamDocument = async (
+  db: Database,
+  values: z.infer<typeof CreateTeamDocumentSchema>,
+) => {
+  return db.insert(teamDocument).values(values).returning();
+};
+
+export const updateTeamDocument = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateTeamDocumentSchema>,
+) => {
+  return db
+    .update(teamDocument)
+    .set(values)
+    .where(eq(teamDocument.teamId, teamId))
+    .returning();
+};
+
+export const updatePaymentProofTeam = async (
+  db: Database,
+  teamId: string,
+  paymentProofMediaId: string,
+) => {
+  const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+  if (kartu) {
+    await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
+  } else {
+    await createTeamDocument(db, {
+      teamId,
+      mediaId: paymentProofMediaId,
+      type: 'bukti-pembayaran',
+    });
+  }
+};
