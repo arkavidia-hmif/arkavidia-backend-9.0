@@ -10,10 +10,10 @@ import {
 import { teamMember } from './team-member.schema';
 import { teamDocument } from './verification.schema';
 
-
-export const teamVerificationStatusEnum = pgEnum('team_verification_status_enum', [
-  'VERIFIED', 'DENIED', 'WAITING', 'CHANGED'
-])
+export const teamVerificationStatusEnum = pgEnum(
+  'team_verification_status_enum',
+  ['VERIFIED', 'DENIED', 'WAITING', 'CHANGED'],
+);
 
 export const team = pgTable('team', {
   id: text('id').primaryKey().$defaultFn(createId),
@@ -37,3 +37,6 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   document: many(teamDocument),
   submission: many(competitionSubmission),
 }));
+
+export type TeamVerificationStatusEnum =
+  (typeof teamVerificationStatusEnum.enumValues)[number];

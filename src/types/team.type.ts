@@ -37,6 +37,16 @@ export const TeamSchema = createSelectSchema(team, {
   })
   .openapi('Team');
 
+export const UpdateTeamSchema = createInsertSchema(team)
+  .omit({
+    updatedAt: true,
+    createdAt: true,
+    id: true,
+    competitionId: true,
+    joinCode: true,
+  })
+  .partial();
+
 export const TeamIdParam = z.object({ teamId: z.string() });
 
 export const StageQuery = z.object({

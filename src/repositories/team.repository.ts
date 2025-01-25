@@ -1,7 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
+import { first, firstSure } from '~/db/helper';
 import {
   TeamDocumentTypeEnum,
   team,
@@ -12,6 +12,7 @@ import type {
   CreateTeamDocumentSchema,
   // PostTeamVerificationBodySchema,
   UpdateTeamDocumentSchema,
+  UpdateTeamSchema,
   putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 
@@ -121,6 +122,19 @@ export const createTeam = async (
 
     return insertedTeam;
   });
+};
+
+export const updateTeam = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateTeamSchema>,
+) => {
+  return await db
+    .update(team)
+    .set(values)
+    .where(eq(team.id, teamId))
+    .returning()
+    .then(firstSure);
 };
 
 export const insertUserToTeam = async (

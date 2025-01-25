@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { TeamVerificationStatusEnum } from '~/db/schema';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   getCompetitionById,
@@ -20,6 +21,7 @@ import {
   getUserTeams,
   insertUserToTeam,
   updatePaymentProofTeam,
+  updateTeam,
   updateTeamDocument,
   // updateTeamVerification,
 } from '~/repositories/team.repository';
@@ -33,7 +35,7 @@ import {
   postCreateTeamRoute,
   postQuitTeamRoute,
   postTeamDocumentRoute,
-  postTeamVerificationRoute,
+  postTeamVerificationFeedbackRoute,
   // postTeamVerificationRoute,
   putChangeTeamNameRoute,
 } from '~/routes/team.route';
@@ -174,10 +176,20 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
   // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+  if (team.verificationStatus === 'VERIFIED')
+    return c.json({ error: 'Your team is already verified!' }, 403);
   if (!(await isUserInTeam(db, teamId, userId)))
     return c.json({ error: 'You are not a member of this team!' }, 403);
 
   await updatePaymentProofTeam(db, teamId, paymentProofMediaId);
+
+  const verificationStatus: TeamVerificationStatusEnum =
+    team.verificationStatus === 'DENIED' ||
+    team.verificationStatus === 'CHANGED'
+      ? 'CHANGED'
+      : 'WAITING';
+
+  await updateTeam(db, teamId, { verificationStatus });
 
   const updatedTeam = await getTeamById(db, teamId, {
     document: true,
@@ -188,10 +200,10 @@ teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
 });
 
 teamProtectedRouter.post(
-  postTeamVerificationRoute.getRoutingPath(),
+  postTeamVerificationFeedbackRoute.getRoutingPath(),
   roleMiddleware('admin'),
 );
-teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
+teamProtectedRouter.openapi(postTeamVerificationFeedbackRoute, async (c) => {
   const { competitionId, teamId } = c.req.valid('param');
   const { buktiPembayaran, teamMember } = c.req.valid('json');
 
@@ -199,35 +211,52 @@ teamProtectedRouter.openapi(postTeamVerificationRoute, async (c) => {
   if (!team || team.competition.id !== competitionId)
     return c.json({ error: "Team doesn't exist!" }, 400);
 
-  await updateTeamDocument(db, teamId, buktiPembayaran);
+  let verdict: boolean = true;
+  verdict =
+    verdict &&
+    !(await updateTeamDocument(db, teamId, buktiPembayaran))[0].isVerified
+      ? false
+      : verdict;
   for (const member of teamMember) {
     if (member.poster)
-      await updateTeamMemberDocument(
-        db,
-        member.userId,
-        teamId,
-        'poster',
-        member.poster,
-      );
+      verdict =
+        verdict &&
+        !(
+          await updateTeamMemberDocument(
+            db,
+            member.userId,
+            teamId,
+            'poster',
+            member.poster,
+          )
+        )[0].isVerified;
     if (member.twibbon)
-      await updateTeamMemberDocument(
-        db,
-        member.userId,
-        teamId,
-        'twibbon',
-        member.twibbon,
-      );
+      verdict =
+        verdict &&
+        !(
+          await updateTeamMemberDocument(
+            db,
+            member.userId,
+            teamId,
+            'twibbon',
+            member.twibbon,
+          )
+        )[0].isVerified;
     if (member.kartuIdentitas)
-      await updateUserDocument(db, member.userId, {
-        ...member.kartuIdentitas,
-        type: 'kartu-identitas',
-      });
+      verdict =
+        verdict &&
+        !(
+          await updateUserDocument(db, member.userId, {
+            ...member.kartuIdentitas,
+            type: 'kartu-identitas',
+          })
+        )[0].isVerified;
   }
 
-  const updatedTeam = getTeamById(db, teamId, {
-    document: true,
-    teamMember: { user: { document: true }, document: true },
-  });
+  const verificationStatus: TeamVerificationStatusEnum = verdict
+    ? 'VERIFIED'
+    : 'DENIED';
+  const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
 
   // TODO: Send email to team if not verified / verified
 

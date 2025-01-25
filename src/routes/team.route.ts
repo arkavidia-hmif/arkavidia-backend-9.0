@@ -5,7 +5,7 @@ import {
   ListUserTeamSchema,
   PostTeamBodySchema,
   PostTeamDocumentBodySchema,
-  PostTeamVerificationBodySchema,
+  PostTeamVerificationBodySchema as PostTeamVerificationFeedbackBodySchema,
   TeamCodeBody,
   TeamCompetitionDetailSchema,
   TeamIdParam,
@@ -227,8 +227,8 @@ export const deleteTeamMemberRoute = createRoute({
   },
 });
 
-export const postTeamVerificationRoute = createRoute({
-  operationId: 'postTeamVerification',
+export const postTeamVerificationFeedbackRoute = createRoute({
+  operationId: 'postTeamVerificationFeedback',
   tags: ['team', 'admin'],
   method: 'post',
   path: '/admin/competition/{competitionId}/team/{teamId}',
@@ -237,7 +237,7 @@ export const postTeamVerificationRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: PostTeamVerificationBodySchema,
+          schema: PostTeamVerificationFeedbackBodySchema,
         },
       },
     },
