@@ -1,0 +1,5 @@
+ALTER TABLE "competition_submission_requirement" ADD COLUMN "order" integer DEFAULT -1 NOT NULL;--> statement-breakpoint
+ALTER TABLE "public"."user_identity" ALTER COLUMN "role" SET DATA TYPE text;--> statement-breakpoint
+DROP TYPE "public"."user_identity_role_enum";--> statement-breakpoint
+CREATE TYPE "public"."user_identity_role_enum" AS ENUM('superadmin', 'admin_competition', 'admin_competition_cp', 'admin_competition_ctf', 'admin_competition_arkalogica', 'admin_competition_datavidia', 'admin_competition_hackvidia', 'admin_competition_uxvidia', 'admin_event', 'admin_event_academya_softeng', 'admin_event_academya_datsci', 'admin_event_academya_uiux', 'admin_event_academya_pm', 'user');--> statement-breakpoint
+ALTER TABLE "public"."user_identity" ALTER COLUMN "role" SET DATA TYPE "public"."user_identity_role_enum" USING "role"::"public"."user_identity_role_enum";
