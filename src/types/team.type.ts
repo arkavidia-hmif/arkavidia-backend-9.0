@@ -33,7 +33,8 @@ export const TeamSubmissionSchema = createSelectSchema(
   media: MediaSchema,
 });
 export const InsertTeamSubmissionSchema = createInsertSchema(
-  competitionSubmission,
+  competitionSubmission, {
+  }
 ).omit({
   createdAt: true,
   updatedAt: true,

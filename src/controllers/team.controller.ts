@@ -212,10 +212,20 @@ teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
   const { teamId } = c.req.valid('param');
   const { typeId, mediaId } = c.req.valid('json');
 
-  if (!mediaId) return c.json({ error: 'Media ID must be supplied!' }, 400);
+  if (!mediaId || !typeId)
+    return c.json({ error: 'Type ID and Media ID must be supplied!' }, 400);
 
-  const team = await getTeamById(db, teamId, { teamMember: true });
+  const team = await getTeamById(db, teamId, {
+    teamMember: true,
+    competition: true,
+  });
   const requirement = await getCompetitionSubmissionRequirementById(db, typeId);
+
+  if (requirement?.competitionId !== team?.competition.id)
+    return c.json(
+      { error: "Requirement type ID isn't for your team competition!" },
+      403,
+    );
   if (requirement?.stage !== team?.stage)
     return c.json(
       { error: `Your team isn't in ${requirement?.stage} stage!` },
