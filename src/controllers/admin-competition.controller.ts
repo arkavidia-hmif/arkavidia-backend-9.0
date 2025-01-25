@@ -58,12 +58,17 @@ adminCompetitionProtectedRouter.openapi(
 adminCompetitionProtectedRouter.openapi(
   getAdminCompetitionTeamInformationRoute,
   async (c) => {
-    const { teamId } = c.req.valid('param');
+    const { teamId, competitionId } = c.req.valid('param');
+
     const team = await getTeamById(db, teamId, {
       document: true,
       teamMember: { document: true, user: { document: true } },
       competition: true,
     });
+
+    if (team?.competition.id !== competitionId)
+      return c.json({ error: "Team isn't in competition!" }, 400);
+
     return c.json(team, 200);
   },
 );
@@ -71,7 +76,7 @@ adminCompetitionProtectedRouter.openapi(
 adminCompetitionProtectedRouter.openapi(
   getAdminCompetitionTeamSubmissionsRoute,
   async (c) => {
-    const { teamId } = c.req.valid('param');
+    const { teamId, competitionId } = c.req.valid('param');
 
     const team = await getTeamById(db, teamId, {
       submission: true,
@@ -79,6 +84,8 @@ adminCompetitionProtectedRouter.openapi(
     });
 
     if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+    if (team?.competition.id !== competitionId)
+      return c.json({ error: "Team isn't in competition!" }, 400);
 
     const requirements = await getCompetitionSubmissionRequirement(
       db,
