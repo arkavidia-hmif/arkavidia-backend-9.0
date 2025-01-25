@@ -32,6 +32,15 @@ export const TeamSubmissionSchema = createSelectSchema(
 ).extend({
   media: MediaSchema,
 });
+export const InsertTeamSubmissionSchema = createInsertSchema(
+  competitionSubmission,
+).omit({
+  createdAt: true,
+  updatedAt: true,
+  teamId: true,
+  judgeResponse: true,
+});
+export const ListTeamSubmissionSchema = z.array(TeamSubmissionSchema);
 
 export const TeamSchema = createSelectSchema(team, {
   createdAt: z.union([z.string(), z.date()]),
@@ -122,7 +131,7 @@ export const SubmissionRequirementSchema = createSelectSchema(
 export const ListSubmissionRequirementSchema = z.array(
   z.object({
     requirement: SubmissionRequirementSchema,
-    submission: TeamSubmissionSchema.nullable(),
+    submission: TeamSubmissionSchema.optional(),
   }),
 );
 
@@ -141,15 +150,3 @@ export const TeamCompetitionDetailSchema = TeamSchema.extend({
 });
 
 export const ListUserTeamSchema = z.array(TeamSchema);
-
-export const CompetitionTeamStatisticSchema = z.object({
-  competitionId: z.string(),
-  totalTeam: z.number(),
-  totalVerifiedTeam: z.number(),
-});
-
-export const TeamStatisticSchema = z.object({
-  totalTeam: z.number(),
-  totalVerifiedTeam: z.number(),
-  result: z.array(CompetitionTeamStatisticSchema),
-});

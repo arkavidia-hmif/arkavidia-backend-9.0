@@ -2,17 +2,19 @@ import { createRoute } from '@hono/zod-openapi';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
   CompetitionAndTeamIdParam,
+  InsertTeamSubmissionSchema,
   ListSubmissionRequirementSchema,
   ListUserTeamSchema,
   PostTeamBodySchema,
-  PostTeamDocumentBodySchema,
   PostTeamVerificationBodySchema as PostTeamVerificationFeedbackBodySchema,
   PutChangeTeamNameBodySchema,
+  PostTeamDocumentBodySchema as PutTeamDocumentBodySchema,
   TeamCodeBody,
   TeamCompetitionDetailSchema,
   TeamIdParam,
   TeamMemberIdSchema,
   TeamSchema,
+  TeamSubmissionSchema,
 } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
@@ -198,7 +200,7 @@ export const postQuitTeamRoute = createRoute({
   },
 });
 
-export const postTeamDocumentRoute = createRoute({
+export const putTeamDocumentRoute = createRoute({
   operationId: 'postTeamDocument',
   tags: ['team'],
   method: 'put',
@@ -208,7 +210,7 @@ export const postTeamDocumentRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: PostTeamDocumentBodySchema,
+          schema: PutTeamDocumentBodySchema,
         },
       },
       required: true,
@@ -228,7 +230,7 @@ export const postTeamDocumentRoute = createRoute({
   },
 });
 
-export const getTeamSubmission = createRoute({
+export const getTeamSubmissionRoute = createRoute({
   operationId: 'getTeamSubmission',
   tags: ['team'],
   method: 'get',
@@ -243,6 +245,35 @@ export const getTeamSubmission = createRoute({
       content: {
         'application/json': {
           schema: ListSubmissionRequirementSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const putTeamSubmissionRoute = createRoute({
+  operationId: 'putTeamSubmission',
+  tags: ['team'],
+  method: 'put',
+  path: '/team/{teamId}/submission',
+  request: {
+    params: TeamIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: InsertTeamSubmissionSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Successfully uploaded submission',
+      content: {
+        'application/json': {
+          schema: TeamSubmissionSchema,
         },
       },
     },

@@ -4,12 +4,14 @@ import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
 import {
   TeamDocumentTypeEnum,
+  competitionSubmission,
   team,
   teamDocument,
   teamMember,
 } from '~/db/schema';
 import type {
   CreateTeamDocumentSchema,
+  InsertTeamSubmissionSchema,
   PutChangeTeamNameBodySchema,
   // PostTeamVerificationBodySchema,
   UpdateTeamDocumentSchema,
@@ -23,7 +25,7 @@ import {
   getTeamMemberCount,
 } from './team-member.repository';
 
-interface TeamRelationOption {
+interface CompetitionTeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
   competition?: boolean;
   document?: boolean;
@@ -61,7 +63,7 @@ export const getTeamByCode = async (
 export const getTeamById = async (
   db: Database,
   teamId: string,
-  options?: TeamRelationOption,
+  options?: CompetitionTeamRelationOption,
 ) => {
   return await db.query.team.findFirst({
     where: eq(team.id, teamId),
@@ -257,4 +259,38 @@ export const updatePaymentProofTeam = async (
       type: 'bukti-pembayaran',
     });
   }
+};
+
+/** Team Submissions */
+
+interface CompetitionTeamSubmissionRelationOption {
+  team?: boolean;
+  requirement?: boolean;
+}
+
+export const getTeamSubmission = async (
+  db: Database,
+  teamId: string,
+  options?: CompetitionTeamSubmissionRelationOption,
+) => {
+  return db.query.competitionSubmission.findMany({
+    where: eq(competitionSubmission.teamId, teamId),
+    with: {
+      media: true,
+      team: options?.team ? true : undefined,
+      requirement: options?.requirement ? true : undefined,
+    },
+  });
+};
+
+export const createTeamSubmission = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof InsertTeamSubmissionSchema>,
+) => {
+  return db
+    .insert(competitionSubmission)
+    .values({ teamId, ...values })
+    .returning()
+    .then(firstSure);
 };

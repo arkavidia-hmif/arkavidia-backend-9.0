@@ -16,6 +16,7 @@ import {
 import {
   changeTeamName,
   createTeam,
+  createTeamSubmission,
   deleteTeam,
   getTeamByCode,
   getTeamById,
@@ -31,15 +32,16 @@ import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
   getTeamDetailRoute,
-  getTeamSubmission,
+  getTeamSubmissionRoute,
   getTeamsRoute,
   joinTeamByCodeRoute,
   postCreateTeamRoute,
   postQuitTeamRoute,
-  postTeamDocumentRoute,
   postTeamVerificationFeedbackRoute,
   // postTeamVerificationRoute,
   putChangeTeamNameRoute,
+  putTeamDocumentRoute,
+  putTeamSubmissionRoute,
 } from '~/routes/team.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -170,7 +172,7 @@ teamProtectedRouter.openapi(postQuitTeamRoute, async (c) => {
   return c.json(res, 200);
 });
 
-teamProtectedRouter.openapi(postTeamDocumentRoute, async (c) => {
+teamProtectedRouter.openapi(putTeamDocumentRoute, async (c) => {
   const { teamId } = c.req.valid('param');
   const userId = c.var.user.id;
   const { paymentProofMediaId } = c.req.valid('json');
@@ -265,12 +267,12 @@ teamProtectedRouter.openapi(postTeamVerificationFeedbackRoute, async (c) => {
   return c.json(updatedTeam, 200);
 });
 
-teamProtectedRouter.openapi(getTeamSubmission, async (c) => {
+teamProtectedRouter.openapi(getTeamSubmissionRoute, async (c) => {
   const { teamId } = c.req.valid('param');
 
   const team = await getTeamById(db, teamId, {
     submission: true,
-    document: true,
+    teamMember: true,
   });
 
   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
@@ -298,6 +300,27 @@ teamProtectedRouter.openapi(getTeamSubmission, async (c) => {
       : result;
 
   return c.json(filteredResult, 200);
+});
+
+teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
+  const { teamId } = c.req.valid('param');
+  const { mediaId } = c.req.valid('json');
+
+  if (!mediaId) return c.json({ error: 'Media ID must be supplied!' }, 400);
+
+  const team = await getTeamById(db, teamId, { teamMember: true });
+  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+
+  const teamMember = team.teamMembers.find((el) => el.userId === c.var.user.id);
+  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+
+  const teamSubmission = await createTeamSubmission(
+    db,
+    teamId,
+    c.req.valid('json'),
+  );
+
+  return c.json(teamSubmission, 200);
 });
 
 teamProtectedRouter.get(
