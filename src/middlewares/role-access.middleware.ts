@@ -55,13 +55,13 @@ export const transformNameToRole = (
 export const roleMiddleware = (requestedRole: UserIdentityRolesEnum) => {
   return factory.createMiddleware(async (c, next) => {
     const role = (await findUserIdentityById(db, c.var.user.id))?.role;
-    const body = await c.req.json();
+    const param = c.req.param();
 
     if (role === 'superadmin') await next();
 
     let authorized: boolean = true;
-    if (body.competitionId) {
-      const competition = await getCompetition(db, body.competitionId);
+    if (param.competitionId) {
+      const competition = await getCompetition(db, param.competitionId);
       if (
         role !== 'admin_competition' &&
         role !== transformNameToRole(competition?.title as string)
