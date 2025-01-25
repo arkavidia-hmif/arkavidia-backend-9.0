@@ -4,6 +4,7 @@ import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   getCompetitionById,
   getCompetitionStageByTeamId,
+  getCompetitionSubmissionRequirement,
 } from '~/repositories/competition.repository';
 import {
   deleteTeamMember,
@@ -30,6 +31,7 @@ import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
   getTeamDetailRoute,
+  getTeamSubmission,
   getTeamsRoute,
   joinTeamByCodeRoute,
   postCreateTeamRoute,
@@ -261,6 +263,41 @@ teamProtectedRouter.openapi(postTeamVerificationFeedbackRoute, async (c) => {
   // TODO: Send email to team if not verified / verified
 
   return c.json(updatedTeam, 200);
+});
+
+teamProtectedRouter.openapi(getTeamSubmission, async (c) => {
+  const { teamId } = c.req.valid('param');
+
+  const team = await getTeamById(db, teamId, {
+    submission: true,
+    document: true,
+  });
+
+  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+
+  const teamMember = team.teamMembers.find((el) => el.userId === c.var.user.id);
+  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
+
+  const requirements = await getCompetitionSubmissionRequirement(
+    db,
+    team?.competitionId,
+  );
+
+  const result = requirements.map((r) => {
+    const submission = team.submission.find((s) => s.typeId === r.typeId);
+    return {
+      requirement: r,
+      submission,
+    };
+  });
+
+  // Kalo masih preeliminary, keluarin preeliminary aja. Kalo final ya return aja semua
+  const filteredResult =
+    team.stage === 'pre-eliminary'
+      ? result.filter((r) => r.requirement.stage === 'pre-eliminary')
+      : result;
+
+  return c.json(filteredResult, 200);
 });
 
 teamProtectedRouter.get(

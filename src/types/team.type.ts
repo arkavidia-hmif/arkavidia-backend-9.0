@@ -27,6 +27,12 @@ export const PostTeamDocumentBodySchema = z.object({
   paymentProofMediaId: z.string(),
 });
 
+export const TeamSubmissionSchema = createSelectSchema(
+  competitionSubmission,
+).extend({
+  media: MediaSchema,
+});
+
 export const TeamSchema = createSelectSchema(team, {
   createdAt: z.union([z.string(), z.date()]),
 })
@@ -34,6 +40,7 @@ export const TeamSchema = createSelectSchema(team, {
     competition: createSelectSchema(competition).optional(),
     teamMembers: z.array(TeamMemberSchema).optional(),
     document: z.array(TeamDocumentSchema).optional(),
+    submission: z.array(TeamSubmissionSchema).optional(),
   })
   .openapi('Team');
 
@@ -67,7 +74,7 @@ export const TeamCodeBody = z.object({
 
 export const TeamMemberIdSchema = z.object({ userId: z.string() });
 
-export const putChangeTeamNameBodySchema = z.object({
+export const PutChangeTeamNameBodySchema = z.object({
   name: z.string().min(1),
 });
 
@@ -108,7 +115,6 @@ export const PostTeamBodySchema = createInsertSchema(team).pick({
   name: true,
 });
 
-export const TeamSubmissionSchema = createSelectSchema(competitionSubmission);
 export const SubmissionRequirementSchema = createSelectSchema(
   competitionSubmissionRequirement,
 );
@@ -116,8 +122,7 @@ export const SubmissionRequirementSchema = createSelectSchema(
 export const ListSubmissionRequirementSchema = z.array(
   z.object({
     requirement: SubmissionRequirementSchema,
-    competition_submission: TeamSubmissionSchema.nullable(),
-    media: MediaSchema.nullable(),
+    submission: TeamSubmissionSchema.nullable(),
   }),
 );
 

@@ -80,7 +80,6 @@ export const getCompetitionById = async (
   return result;
 };
 
-//
 export const getCompetitionSubmissionByTeamId = async (
   db: Database,
   teamId: string,
@@ -88,7 +87,7 @@ export const getCompetitionSubmissionByTeamId = async (
   const submissions = await db.query.competitionSubmission.findMany({
     where: eq(competitionSubmission.teamId, teamId),
     with: {
-      file: true,
+      media: true,
       requirement: true,
     },
   });
@@ -274,12 +273,15 @@ export const postAnnouncement = async (
     .then(first);
 };
 
-export const getCompetitionRequirementById = async (
+export const getCompetitionSubmissionRequirement = async (
   db: Database,
   competitionId: string,
 ) => {
   const result = await db.query.competitionSubmissionRequirement.findMany({
     where: eq(competitionSubmissionRequirement.competitionId, competitionId),
+    orderBy: (competitionSubmissionRequirement, { asc }) => [
+      asc(competitionSubmissionRequirement.order),
+    ],
   });
 
   return result;

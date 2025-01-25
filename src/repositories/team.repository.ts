@@ -10,10 +10,10 @@ import {
 } from '~/db/schema';
 import type {
   CreateTeamDocumentSchema,
+  PutChangeTeamNameBodySchema,
   // PostTeamVerificationBodySchema,
   UpdateTeamDocumentSchema,
   UpdateTeamSchema,
-  putChangeTeamNameBodySchema,
 } from '~/types/team.type';
 
 import { getCompetitionById } from './competition.repository';
@@ -27,6 +27,7 @@ interface TeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
   competition?: boolean;
   document?: boolean;
+  submission?: boolean;
 }
 
 export const getUserTeams = async (db: Database, userId: string) => {
@@ -94,6 +95,7 @@ export const getTeamById = async (
             },
       competition: options?.competition ? true : undefined,
       document: options?.document ? { with: { media: true } } : undefined,
+      submission: options?.submission ? { with: { media: true } } : undefined,
     },
   });
 };
@@ -185,7 +187,7 @@ export const insertUserToTeam = async (
 export const changeTeamName = async (
   db: Database,
   teamId: string,
-  body: z.infer<typeof putChangeTeamNameBodySchema>,
+  body: z.infer<typeof PutChangeTeamNameBodySchema>,
 ) => {
   return await db
     .update(team)
