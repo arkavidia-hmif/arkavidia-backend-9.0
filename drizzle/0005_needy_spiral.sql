@@ -11,4 +11,4 @@ ALTER TYPE user_identity_role_enum ADD VALUE 'admin_event';--> statement-breakpo
 ALTER TYPE user_identity_role_enum ADD VALUE 'admin_event_academya_softeng';--> statement-breakpoint
 ALTER TYPE user_identity_role_enum ADD VALUE 'admin_event_academya_datsci';--> statement-breakpoint
 ALTER TYPE user_identity_role_enum ADD VALUE 'admin_event_academya_uiux';--> statement-breakpoint
-ALTER TYPE user_identity_role_enum ADD VALUE 'admin_event_academya_pm';--> statement-breakpoint
+ALTER TYPE user_identity_role_enum ADD VALUE 'admin_event_academya_pm';

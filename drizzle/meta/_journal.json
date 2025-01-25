@@ -43,6 +43,13 @@
       "when": 1737824467512,
       "tag": "0005_needy_spiral",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1737828499851,
+      "tag": "0006_smooth_callisto",
+      "breakpoints": true
     }
   ]
 }
