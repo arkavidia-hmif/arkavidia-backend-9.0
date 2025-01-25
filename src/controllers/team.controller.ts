@@ -9,7 +9,6 @@ import {
   deleteTeamMember,
   getTeamMemberCount,
   isUserInOtherTeam,
-  isUserInTeam,
 } from '~/repositories/team-member.repository';
 import {
   changeTeamName,
@@ -117,22 +116,16 @@ teamProtectedRouter.openapi(deleteTeamMemberRoute, async (c) => {
   const { teamId } = c.req.valid('param');
   const { userId } = c.req.valid('json');
 
-  // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-
-  // Check if user is in team
-  const user = c.var.user;
-  const teamMember = team.teamMembers.find((el) => el.userId === user.id);
-  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
-
-  // check if user is the leader
-  if (teamMember.role !== 'leader')
+  const teamMember = team?.teamMembers.find(
+    (el) => el.userId === c.var.user.id,
+  );
+  if (teamMember?.role !== 'leader')
     return c.json({ error: 'You are not the leader of this team!' }, 403);
 
   // check if the deleted team member is in the same team
   const deletedTeamMemberId = c.req.valid('json').userId;
-  const deletedTeamMember = team.teamMembers.find(
+  const deletedTeamMember = team?.teamMembers.find(
     (el) => el.userId === deletedTeamMemberId,
   );
   if (!deletedTeamMember)
@@ -147,16 +140,9 @@ teamProtectedRouter.openapi(postQuitTeamRoute, async (c) => {
   const { teamId } = c.req.valid('param');
   const userId = c.var.user.id;
 
-  // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-
-  // Check if user is in team
-  const teamMember = team.teamMembers.find((el) => el.userId === userId);
-  if (!teamMember)
-    return c.json({ error: "User isn't registered into the team!" }, 404);
-
-  if (teamMember.role === 'leader') {
+  const teamMember = team?.teamMembers.find((el) => el.userId === userId);
+  if (teamMember?.role === 'leader') {
     const res = await deleteTeam(db, teamId);
     return c.json(res, 200);
   }
@@ -167,22 +153,18 @@ teamProtectedRouter.openapi(postQuitTeamRoute, async (c) => {
 
 teamProtectedRouter.openapi(putTeamDocumentRoute, async (c) => {
   const { teamId } = c.req.valid('param');
-  const userId = c.var.user.id;
   const { paymentProofMediaId } = c.req.valid('json');
 
   // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-  if (team.verificationStatus === 'VERIFIED')
+  if (team?.verificationStatus === 'VERIFIED')
     return c.json({ error: 'Your team is already verified!' }, 403);
-  if (!(await isUserInTeam(db, teamId, userId)))
-    return c.json({ error: 'You are not a member of this team!' }, 403);
 
   await updatePaymentProofTeam(db, teamId, paymentProofMediaId);
 
   const verificationStatus: TeamVerificationStatusEnum =
-    team.verificationStatus === 'DENIED' ||
-    team.verificationStatus === 'CHANGED'
+    team?.verificationStatus === 'DENIED' ||
+    team?.verificationStatus === 'CHANGED'
       ? 'CHANGED'
       : 'WAITING';
 
@@ -204,18 +186,13 @@ teamProtectedRouter.openapi(getTeamSubmissionRoute, async (c) => {
     teamMember: true,
   });
 
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-
-  const teamMember = team.teamMembers.find((el) => el.userId === c.var.user.id);
-  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
-
   const requirements = await getCompetitionSubmissionRequirement(
     db,
-    team?.competitionId,
+    team?.competitionId as string,
   );
 
   const result = requirements.map((r) => {
-    const submission = team.submission.find((s) => s.typeId === r.typeId);
+    const submission = team?.submission.find((s) => s.typeId === r.typeId);
     return {
       requirement: r,
       submission,
@@ -224,7 +201,7 @@ teamProtectedRouter.openapi(getTeamSubmissionRoute, async (c) => {
 
   // Kalo masih preeliminary, keluarin preeliminary aja. Kalo final ya return aja semua
   const filteredResult =
-    team.stage === 'pre-eliminary'
+    team?.stage === 'pre-eliminary'
       ? result.filter((r) => r.requirement.stage === 'pre-eliminary')
       : result;
 
@@ -238,18 +215,12 @@ teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
   if (!mediaId) return c.json({ error: 'Media ID must be supplied!' }, 400);
 
   const team = await getTeamById(db, teamId, { teamMember: true });
-  if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-
   const requirement = await getCompetitionSubmissionRequirementById(db, typeId);
-  if (requirement?.stage !== team.stage)
+  if (requirement?.stage !== team?.stage)
     return c.json(
       { error: `Your team isn't in ${requirement?.stage} stage!` },
       403,
     );
-
-  const teamMember = team.teamMembers.find((el) => el.userId === c.var.user.id);
-  if (!teamMember) return c.json({ error: "User isn't inside team!" }, 403);
-
   const teamSubmission = await createTeamSubmission(
     db,
     teamId,

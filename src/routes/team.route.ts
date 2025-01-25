@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { isInTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
   InsertTeamSubmissionSchema,
@@ -19,6 +20,7 @@ export const getTeamByIdRoute = createRoute({
   operationId: 'getTeamById',
   tags: ['team'],
   method: 'get',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -119,6 +121,7 @@ export const putChangeTeamNameRoute = createRoute({
   operationId: 'putChangeTeamName',
   tags: ['team'],
   method: 'put',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -149,6 +152,7 @@ export const deleteTeamMemberRoute = createRoute({
   operationId: 'deleteTeamMember',
   tags: ['team'],
   method: 'delete',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -179,6 +183,7 @@ export const postQuitTeamRoute = createRoute({
   operationId: 'postQuitTeam',
   tags: ['team'],
   method: 'post',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}/quit',
   request: {
     params: TeamIdParam,
@@ -201,6 +206,7 @@ export const putTeamDocumentRoute = createRoute({
   operationId: 'postTeamDocument',
   tags: ['team'],
   method: 'put',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}/document',
   request: {
     params: TeamIdParam,
@@ -231,6 +237,7 @@ export const getTeamSubmissionRoute = createRoute({
   operationId: 'getTeamSubmission',
   tags: ['team'],
   method: 'get',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}/submission',
   request: {
     params: TeamIdParam,
@@ -254,6 +261,7 @@ export const putTeamSubmissionRoute = createRoute({
   operationId: 'putTeamSubmission',
   tags: ['team'],
   method: 'put',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}/submission',
   request: {
     params: TeamIdParam,
