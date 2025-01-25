@@ -1,9 +1,7 @@
 import { db } from '~/db/drizzle';
 import { TeamVerificationStatusEnum } from '~/db/schema';
-import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   getCompetitionById,
-  getCompetitionStageByTeamId,
   getCompetitionSubmissionRequirement,
   getCompetitionSubmissionRequirementById,
 } from '~/repositories/competition.repository';
@@ -12,7 +10,6 @@ import {
   getTeamMemberCount,
   isUserInOtherTeam,
   isUserInTeam,
-  updateTeamMemberDocument,
 } from '~/repositories/team-member.repository';
 import {
   changeTeamName,
@@ -25,21 +22,16 @@ import {
   insertUserToTeam,
   updatePaymentProofTeam,
   updateTeam,
-  updateTeamDocument,
-  // updateTeamVerification,
 } from '~/repositories/team.repository';
-import { getUser, updateUserDocument } from '~/repositories/user.repository';
+import { getUser } from '~/repositories/user.repository';
 import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
-  getTeamDetailRoute,
   getTeamSubmissionRoute,
   getTeamsRoute,
   joinTeamByCodeRoute,
   postCreateTeamRoute,
   postQuitTeamRoute,
-  postTeamVerificationFeedbackRoute,
-  // postTeamVerificationRoute,
   putChangeTeamNameRoute,
   putTeamDocumentRoute,
   putTeamSubmissionRoute,
@@ -204,70 +196,6 @@ teamProtectedRouter.openapi(putTeamDocumentRoute, async (c) => {
   return c.json(updatedTeam, 200);
 });
 
-teamProtectedRouter.post(
-  postTeamVerificationFeedbackRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
-teamProtectedRouter.openapi(postTeamVerificationFeedbackRoute, async (c) => {
-  const { competitionId, teamId } = c.req.valid('param');
-  const { buktiPembayaran, teamMember } = c.req.valid('json');
-
-  const team = await getTeamById(db, teamId, { competition: true });
-  if (!team || team.competition.id !== competitionId)
-    return c.json({ error: "Team doesn't exist!" }, 400);
-
-  let verdict: boolean = true;
-  verdict =
-    verdict &&
-    !(await updateTeamDocument(db, teamId, buktiPembayaran))[0].isVerified
-      ? false
-      : verdict;
-  for (const member of teamMember) {
-    if (member.poster)
-      verdict =
-        verdict &&
-        !(
-          await updateTeamMemberDocument(
-            db,
-            member.userId,
-            teamId,
-            'poster',
-            member.poster,
-          )
-        )[0].isVerified;
-    if (member.twibbon)
-      verdict =
-        verdict &&
-        !(
-          await updateTeamMemberDocument(
-            db,
-            member.userId,
-            teamId,
-            'twibbon',
-            member.twibbon,
-          )
-        )[0].isVerified;
-    if (member.kartuIdentitas)
-      verdict =
-        verdict &&
-        !(
-          await updateUserDocument(db, member.userId, {
-            ...member.kartuIdentitas,
-            type: 'kartu-identitas',
-          })
-        )[0].isVerified;
-  }
-
-  const verificationStatus: TeamVerificationStatusEnum = verdict
-    ? 'VERIFIED'
-    : 'DENIED';
-  const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
-
-  // TODO: Send email to team if not verified / verified
-
-  return c.json(updatedTeam, 200);
-});
-
 teamProtectedRouter.openapi(getTeamSubmissionRoute, async (c) => {
   const { teamId } = c.req.valid('param');
 
@@ -329,45 +257,6 @@ teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
   );
 
   return c.json(teamSubmission, 200);
-});
-
-teamProtectedRouter.get(
-  getTeamDetailRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
-teamProtectedRouter.openapi(getTeamDetailRoute, async (c) => {
-  try {
-    const { teamId } = c.req.valid('param');
-    const team = await getTeamById(db, teamId, {
-      teamMember: { document: true, user: { document: true } },
-      document: true,
-    });
-    if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
-    const competitionStage = await getCompetitionStageByTeamId(db, teamId);
-    return c.json(
-      {
-        ...team,
-        competitionStage,
-      },
-      200,
-    );
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        {
-          error: error.message,
-        },
-        500,
-      );
-    }
-
-    return c.json(
-      {
-        error: 'Unexpected error occurred',
-      },
-      500,
-    );
-  }
 });
 
 teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {

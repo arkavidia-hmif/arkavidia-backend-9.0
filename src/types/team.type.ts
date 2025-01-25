@@ -87,38 +87,6 @@ export const PutChangeTeamNameBodySchema = z.object({
   name: z.string().min(1),
 });
 
-export const CompetitionAndTeamIdParam = z.object({
-  competitionId: z.string().openapi({
-    param: {
-      in: 'path',
-      required: true,
-    },
-  }),
-  teamId: z.string().openapi({
-    param: {
-      in: 'path',
-      required: true,
-    },
-  }),
-});
-
-const SingleVerificationSchema = z.object({
-  isVerified: z.boolean(),
-  verificationError: z.string().optional(),
-});
-
-export const PostTeamVerificationBodySchema = z.object({
-  buktiPembayaran: SingleVerificationSchema,
-  teamMember: z.array(
-    z.object({
-      userId: z.string(),
-      kartuIdentitas: SingleVerificationSchema,
-      poster: SingleVerificationSchema,
-      twibbon: SingleVerificationSchema,
-    }),
-  ),
-});
-
 export const PostTeamBodySchema = createInsertSchema(team).pick({
   competitionId: true,
   name: true,
@@ -149,4 +117,4 @@ export const TeamCompetitionDetailSchema = TeamSchema.extend({
   competitionStage: z.string(),
 });
 
-export const ListUserTeamSchema = z.array(TeamSchema);
+export const ListTeamSchema = z.array(TeamSchema);

@@ -1,16 +1,13 @@
 import { createRoute } from '@hono/zod-openapi';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
-  CompetitionAndTeamIdParam,
   InsertTeamSubmissionSchema,
   ListSubmissionRequirementSchema,
-  ListUserTeamSchema,
+  ListTeamSchema,
   PostTeamBodySchema,
-  PostTeamVerificationBodySchema as PostTeamVerificationFeedbackBodySchema,
   PutChangeTeamNameBodySchema,
   PostTeamDocumentBodySchema as PutTeamDocumentBodySchema,
   TeamCodeBody,
-  TeamCompetitionDetailSchema,
   TeamIdParam,
   TeamMemberIdSchema,
   TeamSchema,
@@ -50,7 +47,7 @@ export const getTeamsRoute = createRoute({
       description: 'Get user teams',
       content: {
         'application/json': {
-          schema: ListUserTeamSchema,
+          schema: ListTeamSchema,
         },
       },
     },
@@ -274,57 +271,6 @@ export const putTeamSubmissionRoute = createRoute({
       content: {
         'application/json': {
           schema: TeamSubmissionSchema,
-        },
-      },
-    },
-    400: createErrorResponse('UNION', 'Bad request error'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
-  },
-});
-
-export const postTeamVerificationFeedbackRoute = createRoute({
-  operationId: 'postTeamVerificationFeedback',
-  tags: ['team', 'admin'],
-  method: 'post',
-  path: '/admin/competition/{competitionId}/team/{teamId}',
-  request: {
-    params: CompetitionAndTeamIdParam,
-    body: {
-      content: {
-        'application/json': {
-          schema: PostTeamVerificationFeedbackBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Succesfully updated team verification',
-      content: {
-        'application/json': {
-          schema: TeamSchema,
-        },
-      },
-    },
-    400: createErrorResponse('UNION', 'Bad request error'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
-  },
-});
-
-export const getTeamDetailRoute = createRoute({
-  operationId: 'getTeamDetail',
-  tags: ['team', 'admin'],
-  method: 'get',
-  path: '/admin/competition/{competitionId}/team/{teamId}',
-  request: {
-    params: CompetitionAndTeamIdParam,
-  },
-  responses: {
-    200: {
-      description: 'Successfully get team detail',
-      content: {
-        'application/json': {
-          schema: TeamCompetitionDetailSchema,
         },
       },
     },

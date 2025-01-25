@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq, gt, isNull, or } from 'drizzle-orm';
+import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -15,8 +15,11 @@ import {
   teamMember,
 } from '../db/schema';
 
-
 export const getAllCompetitions = async (db: Database) => {
+  return await db.query.competition.findMany();
+};
+
+export const getAllCompetitionIds = async (db: Database) => {
   const competitions = await db.query.competition.findMany();
   return competitions.map((competition) => competition.id);
 };
@@ -277,7 +280,7 @@ export const postAnnouncement = async (
 export const getCompetitionSubmissionRequirement = async (
   db: Database,
   competitionId: string,
-  // stage?: 
+  // stage?:
 ) => {
   return await db.query.competitionSubmissionRequirement.findMany({
     where: eq(competitionSubmissionRequirement.competitionId, competitionId),
@@ -294,7 +297,7 @@ export const getCompetitionSubmissionRequirementById = async (
   return await db.query.competitionSubmissionRequirement.findFirst({
     where: eq(competitionSubmissionRequirement.typeId, typeId),
   });
-}
+};
 
 export const postCompetitionSubmission = async (
   db: Database,
@@ -366,41 +369,4 @@ export const getCompetitionIdByName = async (
     where,
   });
   return result;
-};
-
-export const getCompetitionStageByTeamId = async (
-  db: Database,
-  teamId: string,
-) => {
-  const teamResult = await db.query.team.findFirst({
-    where: eq(team.id, teamId),
-    columns: {
-      competitionId: true,
-    },
-  });
-
-  if (!teamResult) {
-    throw new Error('Team not found');
-  }
-
-  const comp_submission =
-    await db.query.competitionSubmissionRequirement.findFirst({
-      where: and(
-        eq(
-          competitionSubmissionRequirement.competitionId,
-          teamResult.competitionId,
-        ),
-        gt(competitionSubmissionRequirement.startDate, new Date()),
-      ),
-      columns: {
-        stage: true,
-      },
-      orderBy: (requirement, { desc }) => [desc(requirement.startDate)],
-    });
-
-  if (!comp_submission) {
-    throw new Error('Stage in Competition not found');
-  }
-
-  return comp_submission.stage;
 };
