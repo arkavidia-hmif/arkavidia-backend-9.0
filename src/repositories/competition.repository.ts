@@ -40,6 +40,9 @@ export const getCompetitionParticipant = async (
 
   const result = await db.query.team.findMany({
     where: eq(team.competitionId, competitionId),
+    with: {
+      document: true,
+    },
     limit,
     offset,
   });
