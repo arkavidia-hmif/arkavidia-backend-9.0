@@ -1,5 +1,5 @@
 import { db } from '~/db/drizzle';
-import { TeamVerificationStatusEnum } from '~/db/schema';
+import { CompetitionTeamVerificationStatusEnum } from '~/db/schema';
 import { transformRoleToName } from '~/middlewares/role-access.middleware';
 import {
   getAllCompetitions,
@@ -175,7 +175,7 @@ adminCompetitionProtectedRouter.openapi(
       if (!verdict) break;
     }
 
-    const verificationStatus: TeamVerificationStatusEnum = verdict
+    const verificationStatus: CompetitionTeamVerificationStatusEnum = verdict
       ? 'VERIFIED'
       : 'DENIED';
     const updatedTeam = await updateTeam(db, teamId, { verificationStatus });

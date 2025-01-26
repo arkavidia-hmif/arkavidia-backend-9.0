@@ -55,5 +55,11 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   submission: many(competitionSubmission),
 }));
 
-export type TeamVerificationStatusEnum =
+export type CompetitionTeamVerificationStatusEnum =
   (typeof teamVerificationStatusEnum.enumValues)[number];
+
+export type CompetitionTeamPreeliminaryStatusEnum =
+  (typeof competitionTeamPreeliminaryStatusEnum.enumValues)[number];
+
+export type CompetitionTeamFinalStatusEnum =
+  (typeof competitionTeamFinalStatusEnum.enumValues)[number];

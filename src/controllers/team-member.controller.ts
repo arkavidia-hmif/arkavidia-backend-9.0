@@ -1,5 +1,5 @@
 import { db } from '~/db/drizzle';
-import { TeamVerificationStatusEnum } from '~/db/schema';
+import { CompetitionTeamVerificationStatusEnum } from '~/db/schema';
 import {
   getAllTeamMembers,
   getTeamMember,
@@ -65,7 +65,7 @@ teamMemberProtectedRouter.openapi(updateTeamMemberDocumentRoute, async (c) => {
   if (twibbonMediaId)
     await updateTwibbonTeamMember(db, userId, teamId, twibbonMediaId);
 
-  const verificationStatus: TeamVerificationStatusEnum =
+  const verificationStatus: CompetitionTeamVerificationStatusEnum =
     team.verificationStatus === 'DENIED' ||
     team.verificationStatus === 'CHANGED'
       ? 'CHANGED'
