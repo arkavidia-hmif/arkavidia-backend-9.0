@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { cutResponseMiddleware } from '~/middlewares/cut-response.middleware';
 import { isInTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
@@ -20,7 +21,10 @@ export const getTeamByIdRoute = createRoute({
   operationId: 'getTeamById',
   tags: ['team'],
   method: 'get',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -43,6 +47,9 @@ export const getTeamsRoute = createRoute({
   operationId: 'getTeams',
   tags: ['team'],
   method: 'get',
+  middleware: [
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team',
   responses: {
     200: {
@@ -62,6 +69,9 @@ export const postCreateTeamRoute = createRoute({
   operationId: 'postCreateTeam',
   tags: ['team'],
   method: 'post',
+  middleware: [
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team',
   request: {
     body: {
@@ -92,6 +102,9 @@ export const joinTeamByCodeRoute = createRoute({
   operationId: 'joinTeamByCode',
   tags: ['team'],
   method: 'post',
+  middleware: [
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/join',
   request: {
     body: {
@@ -121,7 +134,10 @@ export const putChangeTeamNameRoute = createRoute({
   operationId: 'putChangeTeamName',
   tags: ['team'],
   method: 'put',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -152,7 +168,10 @@ export const deleteTeamMemberRoute = createRoute({
   operationId: 'deleteTeamMember',
   tags: ['team'],
   method: 'delete',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -183,7 +202,10 @@ export const postQuitTeamRoute = createRoute({
   operationId: 'postQuitTeam',
   tags: ['team'],
   method: 'post',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}/quit',
   request: {
     params: TeamIdParam,
@@ -206,7 +228,10 @@ export const putTeamDocumentRoute = createRoute({
   operationId: 'postTeamDocument',
   tags: ['team'],
   method: 'put',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}/document',
   request: {
     params: TeamIdParam,
@@ -237,7 +262,10 @@ export const getTeamSubmissionRoute = createRoute({
   operationId: 'getTeamSubmission',
   tags: ['team'],
   method: 'get',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}/submission',
   request: {
     params: TeamIdParam,
@@ -261,7 +289,10 @@ export const putTeamSubmissionRoute = createRoute({
   operationId: 'putTeamSubmission',
   tags: ['team'],
   method: 'put',
-  middleware: [isInTeamMiddleware()] as const,
+  middleware: [
+    isInTeamMiddleware(),
+    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  ] as const,
   path: '/team/{teamId}/submission',
   request: {
     params: TeamIdParam,
