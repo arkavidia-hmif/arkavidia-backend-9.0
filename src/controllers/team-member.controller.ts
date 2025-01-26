@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { TeamVerificationStatusEnum } from '~/db/schema';
 import {
   getAllTeamMembers,
   getTeamMember,
@@ -6,7 +7,7 @@ import {
   updatePosterTeamMember,
   updateTwibbonTeamMember,
 } from '~/repositories/team-member.repository';
-import { getTeamById } from '~/repositories/team.repository';
+import { getTeamById, updateTeam } from '~/repositories/team.repository';
 import {
   getTeamMemberByIdRoute,
   getTeamMembersRoute,
@@ -54,15 +55,23 @@ teamMemberProtectedRouter.openapi(updateTeamMemberDocumentRoute, async (c) => {
   // Check if team exists
   const team = await getTeamById(db, teamId, { teamMember: true });
   if (!team) return c.json({ error: "Team doesn't exist!" }, 400);
+  if (team.verificationStatus === 'VERIFIED')
+    return c.json({ error: 'Your team is already verified!' }, 403);
   if (!(await isUserInTeam(db, teamId, userId)))
     return c.json({ error: 'You are not a member of this team!' });
-
-  console.log(posterMediaId, twibbonMediaId);
 
   if (posterMediaId)
     await updatePosterTeamMember(db, userId, teamId, posterMediaId);
   if (twibbonMediaId)
     await updateTwibbonTeamMember(db, userId, teamId, twibbonMediaId);
+
+  const verificationStatus: TeamVerificationStatusEnum =
+    team.verificationStatus === 'DENIED' ||
+    team.verificationStatus === 'CHANGED'
+      ? 'CHANGED'
+      : 'WAITING';
+
+  await updateTeam(db, teamId, { verificationStatus });
 
   const updatedTeamMember = await getTeamMember(db, teamId, userId, {
     document: true,

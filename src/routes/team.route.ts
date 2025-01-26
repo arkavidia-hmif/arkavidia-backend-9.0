@@ -1,47 +1,41 @@
 import { createRoute } from '@hono/zod-openapi';
+import { isInTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
-  CompetitionAndTeamIdParam,
-  ListUserTeamSchema,
+  InsertTeamSubmissionSchema,
+  ListSubmissionRequirementSchema,
+  ListTeamSchema,
   PostTeamBodySchema,
-  PostTeamDocumentBodySchema,
-  PostTeamVerificationBodySchema,
+  PutChangeTeamNameBodySchema,
+  PostTeamDocumentBodySchema as PutTeamDocumentBodySchema,
   TeamCodeBody,
-  TeamCompetitionDetailSchema,
   TeamIdParam,
   TeamMemberIdSchema,
   TeamSchema,
-  TeamStatisticSchema,
-  putChangeTeamNameBodySchema,
+  TeamSubmissionSchema,
 } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
-export const joinTeamByCodeRoute = createRoute({
-  operationId: 'joinTeamByCode',
+export const getTeamByIdRoute = createRoute({
+  operationId: 'getTeamById',
   tags: ['team'],
-  method: 'post',
-  path: '/team/join',
+  method: 'get',
+  middleware: [isInTeamMiddleware()] as const,
+  path: '/team/{teamId}',
   request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: TeamCodeBody,
-        },
-      },
-      required: true,
-    },
+    params: TeamIdParam,
   },
   responses: {
     200: {
+      description: 'Get team by id',
       content: {
         'application/json': {
           schema: TeamSchema,
         },
       },
-      description: 'Successfully joined a team',
     },
-    400: createErrorResponse('UNION', 'Bad Request Error'),
-    500: createErrorResponse('GENERIC', 'Internal Server Error'),
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
 
@@ -55,29 +49,7 @@ export const getTeamsRoute = createRoute({
       description: 'Get user teams',
       content: {
         'application/json': {
-          schema: ListUserTeamSchema,
-        },
-      },
-    },
-    400: createErrorResponse('UNION', 'Bad request error'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
-  },
-});
-
-export const getTeamByIdRoute = createRoute({
-  operationId: 'getTeamById',
-  tags: ['team'],
-  method: 'get',
-  path: '/team/{teamId}',
-  request: {
-    params: TeamIdParam,
-  },
-  responses: {
-    200: {
-      description: 'Get team by id',
-      content: {
-        'application/json': {
-          schema: TeamSchema,
+          schema: ListTeamSchema,
         },
       },
     },
@@ -116,39 +88,16 @@ export const postCreateTeamRoute = createRoute({
   },
 });
 
-export const postQuitTeamRoute = createRoute({
-  operationId: 'postQuitTeam',
+export const joinTeamByCodeRoute = createRoute({
+  operationId: 'joinTeamByCode',
   tags: ['team'],
   method: 'post',
-  path: '/team/{teamId}/quit',
+  path: '/team/join',
   request: {
-    params: TeamIdParam,
-  },
-  responses: {
-    200: {
-      content: {
-        'application/json': {
-          schema: TeamSchema,
-        },
-      },
-      description: 'Succesfully quit team',
-    },
-    400: createErrorResponse('UNION', 'Bad request error'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
-  },
-});
-
-export const postTeamDocumentRoute = createRoute({
-  operationId: 'postTeamDocument',
-  tags: ['team'],
-  method: 'put',
-  path: '/team/{teamId}/document',
-  request: {
-    params: TeamIdParam,
     body: {
       content: {
         'application/json': {
-          schema: PostTeamDocumentBodySchema,
+          schema: TeamCodeBody,
         },
       },
       required: true,
@@ -161,10 +110,10 @@ export const postTeamDocumentRoute = createRoute({
           schema: TeamSchema,
         },
       },
-      description: 'Succesfully updated team document upload',
+      description: 'Successfully joined a team',
     },
-    400: createErrorResponse('UNION', 'Bad request error'),
-    500: createErrorResponse('GENERIC', 'Internal server error'),
+    400: createErrorResponse('UNION', 'Bad Request Error'),
+    500: createErrorResponse('GENERIC', 'Internal Server Error'),
   },
 });
 
@@ -172,13 +121,14 @@ export const putChangeTeamNameRoute = createRoute({
   operationId: 'putChangeTeamName',
   tags: ['team'],
   method: 'put',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
     body: {
       content: {
         'application/json': {
-          schema: putChangeTeamNameBodySchema,
+          schema: PutChangeTeamNameBodySchema,
         },
       },
       required: true,
@@ -202,6 +152,7 @@ export const deleteTeamMemberRoute = createRoute({
   operationId: 'deleteTeamMember',
   tags: ['team'],
   method: 'delete',
+  middleware: [isInTeamMiddleware()] as const,
   path: '/team/{teamId}',
   request: {
     params: TeamIdParam,
@@ -228,44 +179,76 @@ export const deleteTeamMemberRoute = createRoute({
   },
 });
 
-export const postTeamVerificationRoute = createRoute({
-  operationId: 'postTeamVerification',
-  tags: ['team', 'admin'],
+export const postQuitTeamRoute = createRoute({
+  operationId: 'postQuitTeam',
+  tags: ['team'],
   method: 'post',
-  path: '/admin/{competitionId}/team/{teamId}',
+  middleware: [isInTeamMiddleware()] as const,
+  path: '/team/{teamId}/quit',
   request: {
-    params: CompetitionAndTeamIdParam,
+    params: TeamIdParam,
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TeamSchema,
+        },
+      },
+      description: 'Succesfully quit team',
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const putTeamDocumentRoute = createRoute({
+  operationId: 'postTeamDocument',
+  tags: ['team'],
+  method: 'put',
+  middleware: [isInTeamMiddleware()] as const,
+  path: '/team/{teamId}/document',
+  request: {
+    params: TeamIdParam,
     body: {
       content: {
         'application/json': {
-          schema: PostTeamVerificationBodySchema,
+          schema: PutTeamDocumentBodySchema,
         },
       },
+      required: true,
     },
   },
   responses: {
     200: {
-      description: 'Succesfully updated team verification',
+      content: {
+        'application/json': {
+          schema: TeamSchema,
+        },
+      },
+      description: 'Succesfully updated team document upload',
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });
 
-export const getTeamDetailRoute = createRoute({
-  operationId: 'getTeamDetail',
-  tags: ['team', 'admin'],
+export const getTeamSubmissionRoute = createRoute({
+  operationId: 'getTeamSubmission',
+  tags: ['team'],
   method: 'get',
-  path: '/admin/{competitionId}/team/{teamId}',
+  middleware: [isInTeamMiddleware()] as const,
+  path: '/team/{teamId}/submission',
   request: {
-    params: CompetitionAndTeamIdParam,
+    params: TeamIdParam,
   },
   responses: {
     200: {
-      description: 'Successfully get team detail',
+      description:
+        'Successfully fetched team submitted and unsubmitted submission',
       content: {
         'application/json': {
-          schema: TeamCompetitionDetailSchema,
+          schema: ListSubmissionRequirementSchema,
         },
       },
     },
@@ -274,17 +257,28 @@ export const getTeamDetailRoute = createRoute({
   },
 });
 
-export const getTeamStatisticRoute = createRoute({
-  operationId: 'getTeamStatistic',
-  tags: ['team', 'admin'],
-  method: 'get',
-  path: '/admin/team/statistic',
-  responses: {
-    200: {
-      description: 'Successfully get team statistic',
+export const putTeamSubmissionRoute = createRoute({
+  operationId: 'putTeamSubmission',
+  tags: ['team'],
+  method: 'put',
+  middleware: [isInTeamMiddleware()] as const,
+  path: '/team/{teamId}/submission',
+  request: {
+    params: TeamIdParam,
+    body: {
       content: {
         'application/json': {
-          schema: TeamStatisticSchema,
+          schema: InsertTeamSubmissionSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Successfully uploaded submission',
+      content: {
+        'application/json': {
+          schema: TeamSubmissionSchema,
         },
       },
     },

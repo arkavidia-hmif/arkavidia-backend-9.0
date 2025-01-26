@@ -1,4 +1,4 @@
-import { aliasedTable, and, count, eq, gt, isNull, or } from 'drizzle-orm';
+import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
 import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
@@ -16,6 +16,10 @@ import {
 } from '../db/schema';
 
 export const getAllCompetitions = async (db: Database) => {
+  return await db.query.competition.findMany();
+};
+
+export const getAllCompetitionIds = async (db: Database) => {
   const competitions = await db.query.competition.findMany();
   return competitions.map((competition) => competition.id);
 };
@@ -80,7 +84,6 @@ export const getCompetitionById = async (
   return result;
 };
 
-//
 export const getCompetitionSubmissionByTeamId = async (
   db: Database,
   teamId: string,
@@ -88,7 +91,7 @@ export const getCompetitionSubmissionByTeamId = async (
   const submissions = await db.query.competitionSubmission.findMany({
     where: eq(competitionSubmission.teamId, teamId),
     with: {
-      file: true,
+      media: true,
       requirement: true,
     },
   });
@@ -274,35 +277,26 @@ export const postAnnouncement = async (
     .then(first);
 };
 
-export const initializelCompetitionSubmissions = async (
+export const getCompetitionSubmissionRequirement = async (
   db: Database,
-  teamId: string,
   competitionId: string,
+  // stage?:
 ) => {
-  const requirementList = await getCompetitionRequirementById(
-    db,
-    competitionId,
-  );
-
-  const submissionResult = [];
-  for (const requirement of requirementList) {
-    // do the insertion
-    const res = await postCompetitionSubmission(db, teamId, requirement.typeId);
-    submissionResult.push(res);
-  }
-
-  return submissionResult;
+  return await db.query.competitionSubmissionRequirement.findMany({
+    where: eq(competitionSubmissionRequirement.competitionId, competitionId),
+    orderBy: (competitionSubmissionRequirement, { asc }) => [
+      asc(competitionSubmissionRequirement.order),
+    ],
+  });
 };
 
-export const getCompetitionRequirementById = async (
+export const getCompetitionSubmissionRequirementById = async (
   db: Database,
-  competitionId: string,
+  typeId: string,
 ) => {
-  const result = await db.query.competitionSubmissionRequirement.findMany({
-    where: eq(competitionSubmissionRequirement.competitionId, competitionId),
+  return await db.query.competitionSubmissionRequirement.findFirst({
+    where: eq(competitionSubmissionRequirement.typeId, typeId),
   });
-
-  return result;
 };
 
 export const postCompetitionSubmission = async (
@@ -375,113 +369,4 @@ export const getCompetitionIdByName = async (
     where,
   });
   return result;
-};
-
-export const getCompetitionStageByTeamId = async (
-  db: Database,
-  teamId: string,
-) => {
-  const teamResult = await db.query.team.findFirst({
-    where: eq(team.id, teamId),
-    columns: {
-      competitionId: true,
-    },
-  });
-
-  if (!teamResult) {
-    throw new Error('Team not found');
-  }
-
-  const comp_submission =
-    await db.query.competitionSubmissionRequirement.findFirst({
-      where: and(
-        eq(
-          competitionSubmissionRequirement.competitionId,
-          teamResult.competitionId,
-        ),
-        gt(competitionSubmissionRequirement.startDate, new Date()),
-      ),
-      columns: {
-        stage: true,
-      },
-      orderBy: (requirement, { desc }) => [desc(requirement.startDate)],
-    });
-
-  if (!comp_submission) {
-    throw new Error('Stage in Competition not found');
-  }
-
-  return comp_submission.stage;
-};
-
-export const getCompetitionStatistic = async (
-  db: Database,
-  competitionId?: string,
-) => {
-  const where = competitionId ? eq(competition.id, competitionId) : undefined;
-  const submission = await db
-    .select({
-      competitionId: competitionSubmissionRequirement.competitionId,
-      typeId: competitionSubmissionRequirement.typeId,
-      typeName: competitionSubmissionRequirement.typeName,
-      deadline: competitionSubmissionRequirement.deadline,
-      submitedTeams: count(competitionSubmission.teamId),
-    })
-    .from(competitionSubmissionRequirement)
-    .leftJoin(
-      competitionSubmission,
-      eq(competitionSubmissionRequirement.typeId, competitionSubmission.typeId),
-    )
-    .where(where)
-    .groupBy(
-      competitionSubmissionRequirement.competitionId,
-      competitionSubmissionRequirement.typeId,
-    );
-
-  const parsedSubmission: {
-    competitionId: string;
-    submissions: {
-      typeId: string;
-      typeName: string;
-      submitedTeams: number;
-      deadline: Date | null;
-    }[];
-  }[] = [];
-
-  submission.forEach(
-    (element: {
-      competitionId: string;
-      typeId: string;
-      typeName: string;
-      deadline: Date | null;
-      submitedTeams: number;
-    }) => {
-      const existing = parsedSubmission.find(
-        (item) => item.competitionId === element.competitionId,
-      );
-
-      if (existing) {
-        existing.submissions.push({
-          typeId: element.typeId,
-          typeName: element.typeName,
-          submitedTeams: element.submitedTeams,
-          deadline: element.deadline,
-        });
-      } else {
-        parsedSubmission.push({
-          competitionId: element.competitionId,
-          submissions: [
-            {
-              typeId: element.typeId,
-              typeName: element.typeName,
-              submitedTeams: element.submitedTeams,
-              deadline: element.deadline,
-            },
-          ],
-        });
-      }
-    },
-  );
-
-  return parsedSubmission;
 };

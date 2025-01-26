@@ -76,6 +76,7 @@ export const competitionSubmissionRequirement = pgTable(
       .notNull()
       .references(() => competition.id),
     stage: stageEnum('stage').notNull().default('pre-eliminary'),
+    order: integer('order').notNull().default(-1),
     typeName: text('type_name').notNull(),
     description: text('description').notNull(),
     startDate: timestamp('start_date').notNull(),
@@ -119,7 +120,7 @@ export const competitionSubmissionRelations = relations(
       fields: [competitionSubmission.teamId],
       references: [team.id],
     }),
-    file: one(media, {
+    media: one(media, {
       fields: [competitionSubmission.mediaId],
       references: [media.id],
     }),

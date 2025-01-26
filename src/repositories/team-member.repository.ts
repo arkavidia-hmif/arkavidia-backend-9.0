@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
+import { first } from '~/db/helper';
 import {
   TeamMemberDocumentTypeEnum,
   team,
@@ -20,19 +21,6 @@ export interface TeamMemberRelationOption {
   user?: UserRelationOption;
   document?: boolean;
 }
-
-export const isUserInTeam = async (
-  db: Database,
-  teamId: string,
-  userId: string,
-) => {
-  const x = await db.query.teamMember.findFirst({
-    where: and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)),
-    columns: { userId: true },
-  });
-  if (!x) return false;
-  return true;
-};
 
 export const getTeamMember = async (
   db: Database,
@@ -84,6 +72,103 @@ export const getAllTeamMembers = async (
     },
   });
 };
+
+export const getTeamMemberCount = async (db: Database, teamId: string) => {
+  const result = await db.query.teamMember.findMany({
+    where: eq(teamMember.teamId, teamId),
+    columns: {
+      teamId: true,
+    },
+  });
+
+  return { teamMemberCount: result.length };
+};
+
+export const isUserInTeam = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  const x = await db.query.teamMember.findFirst({
+    where: and(eq(teamMember.teamId, teamId), eq(teamMember.userId, userId)),
+    columns: { userId: true },
+  });
+  if (!x) return false;
+  return true;
+};
+
+export const isUserInOtherTeam = async (
+  db: Database,
+  userId: string,
+  competitionId: string,
+): Promise<boolean> => {
+  const where = and(
+    eq(teamMember.userId, userId),
+    eq(team.competitionId, competitionId),
+  );
+
+  const existingTeamMember = await db
+    .select()
+    .from(teamMember)
+    .innerJoin(team, eq(teamMember.teamId, team.id))
+    .where(where);
+
+  //console.log('existingTeamMember', existingTeamMember);
+
+  // Check if the team is in the same competition
+  return !!existingTeamMember.length;
+};
+
+export const insertUserToTeam = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  return await db.transaction(async (tx) => {
+    const team = await getTeamById(db, teamId);
+    if (!team) {
+      throw new Error("Such team doesn't exist");
+    }
+
+    const { teamMemberCount } = await getTeamMemberCount(db, teamId);
+    const maxParticipants = (await getCompetitionById(db, team.competitionId))
+      ?.maxParticipants;
+
+    if (!maxParticipants) {
+      throw new Error('There is no such competition');
+    }
+    if (maxParticipants <= teamMemberCount) {
+      throw new Error('The team is already full');
+    }
+
+    const [insertedMember] = await tx
+      .insert(teamMember)
+      .values({
+        teamId,
+        userId,
+        role: 'leader',
+      })
+      .returning();
+
+    return insertedMember;
+  });
+};
+
+export const deleteTeamMember = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  await deleteAllTeamMemberDocument(db, userId, teamId);
+
+  const where = and(
+    eq(teamMember.teamId, teamId),
+    eq(teamMember.userId, userId),
+  );
+  return await db.delete(teamMember).where(where).returning().then(first);
+};
+
+/** Team Member Verification Document */
 
 export const getTeamMemberDocument = async (
   db: Database,
@@ -184,70 +269,20 @@ export const updateTwibbonTeamMember = async (
   }
 };
 
-export const getTeamMemberCount = async (db: Database, teamId: string) => {
-  const result = await db.query.teamMember.findMany({
-    where: eq(teamMember.teamId, teamId),
-    columns: {
-      teamId: true,
-    },
-  });
-
-  return { teamMemberCount: result.length };
-};
-
-export const insertUserToTeam = async (
+export const isTeamMemberDocumentsVerified = async (
   db: Database,
   teamId: string,
   userId: string,
-) => {
-  return await db.transaction(async (tx) => {
-    const team = await getTeamById(db, teamId);
-    if (!team) {
-      throw new Error("Such team doesn't exist");
-    }
-
-    const { teamMemberCount } = await getTeamMemberCount(db, teamId);
-    const maxParticipants = (await getCompetitionById(db, team.competitionId))
-      ?.maxParticipants;
-
-    if (!maxParticipants) {
-      throw new Error('There is no such competition');
-    }
-    if (maxParticipants <= teamMemberCount) {
-      throw new Error('The team is already full');
-    }
-
-    const [insertedMember] = await tx
-      .insert(teamMember)
-      .values({
-        teamId,
-        userId,
-        role: 'leader',
-      })
-      .returning();
-
-    return insertedMember;
-  });
-};
-
-export const isUserInOtherTeam = async (
-  db: Database,
-  userId: string,
-  competitionId: string,
 ): Promise<boolean> => {
-  const where = and(
-    eq(teamMember.userId, userId),
-    eq(team.competitionId, competitionId),
-  );
+  const documents = await db.query.teamMemberDocument.findMany({
+    where: and(
+      eq(teamMemberDocument.teamId, teamId),
+      eq(teamMemberDocument.userId, userId),
+    ),
+  });
 
-  const existingTeamMember = await db
-    .select()
-    .from(teamMember)
-    .innerJoin(team, eq(teamMember.teamId, team.id))
-    .where(where);
+  const twibbonDocument = documents.find((d) => d.type === 'twibbon');
+  const posterDocument = documents.find((d) => d.type === 'poster');
 
-  //console.log('existingTeamMember', existingTeamMember);
-
-  // Check if the team is in the same competition
-  return !!existingTeamMember.length;
+  return !!twibbonDocument?.isVerified && !!posterDocument?.isVerified;
 };

@@ -1,6 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { userIdentity } from '~/db/schema/auth.schema';
+import { userIdentity, userIdentityRoleEnum } from '~/db/schema/auth.schema';
 
 import { UserSchema } from './user.type';
 
@@ -34,7 +34,7 @@ export const BypassRegisterBodySchema = z
     email: z.string().email(),
     password: z.string().min(8, 'Password must have minimum length of 8'),
     confirmPassword: z.string(),
-    role: z.enum(['admin', 'user']).default('user'),
+    role: z.enum(userIdentityRoleEnum.enumValues).default('user'),
     serviceKey: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

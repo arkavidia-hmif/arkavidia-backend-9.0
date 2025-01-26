@@ -24,6 +24,7 @@ const StageCompetitionStatisticSchema = z.object({
 
 const SingleCompetitionStatisticSchema = z.object({
   count: z.number(),
+  verifiedCount: z.number(),
   stage: StageCompetitionStatisticSchema,
 });
 
