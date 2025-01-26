@@ -35,10 +35,7 @@ export const adminCompetitionProtectedRouter = createAuthRouter();
 adminCompetitionProtectedRouter.openapi(
   getAdminCompetitionsRoute,
   async (c) => {
-    if (
-      c.var.user.role === 'admin' ||
-      c.var.user.role === 'admin_competition'
-    )
+    if (c.var.user.role === 'admin' || c.var.user.role === 'admin_competition')
       return c.json(await getAllCompetitions(db), 200);
 
     const competitionName = transformRoleToName(c.var.user.role);

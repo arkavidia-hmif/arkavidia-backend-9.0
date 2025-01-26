@@ -1,5 +1,4 @@
 import { db } from '~/db/drizzle';
-import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   getCompetitionStatistics,
   getUserStatistics,
@@ -12,10 +11,6 @@ import { createAuthRouter } from '~/utils/router-factory';
 
 export const analyticsProtectedRouter = createAuthRouter();
 
-analyticsProtectedRouter.get(
-  getUserStatisticRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
 analyticsProtectedRouter.openapi(getUserStatisticRoute, async (c) => {
   return c.json(
     {
@@ -30,10 +25,6 @@ analyticsProtectedRouter.openapi(getUserStatisticRoute, async (c) => {
   );
 });
 
-analyticsProtectedRouter.get(
-  getCompetitionStatisticRoute.getRoutingPath(),
-  roleMiddleware('admin'),
-);
 analyticsProtectedRouter.openapi(getCompetitionStatisticRoute, async (c) => {
   return c.json({
     ...(await getCompetitionStatistics(db)),
