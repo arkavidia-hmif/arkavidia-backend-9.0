@@ -15,6 +15,15 @@ export const teamVerificationStatusEnum = pgEnum(
   ['VERIFIED', 'DENIED', 'WAITING', 'CHANGED'],
 );
 
+export const competitionTeamPreeliminaryStatusEnum = pgEnum(
+  'competition_team_preeliminary_status_enum',
+  ['On Review', 'Pass', 'Not Pass'],
+);
+export const competitionTeamFinalStatusEnum = pgEnum(
+  'competition_team_final_status_enum',
+  ['On Review', 'Not Pass', 'Juara 1', 'Juara 2', 'Juara 3'],
+);
+
 export const team = pgTable('team', {
   id: text('id').primaryKey().$defaultFn(createId),
   competitionId: text('competition_id')
@@ -23,6 +32,14 @@ export const team = pgTable('team', {
   name: text('team_name').notNull(),
   stage: stageEnum('stage').notNull().default('pre-eliminary'),
   verificationStatus: teamVerificationStatusEnum('verification_status'),
+  preeliminaryStatus: competitionTeamPreeliminaryStatusEnum(
+    'preeliminary_status',
+  )
+    .notNull()
+    .default('On Review'),
+  finalStatus: competitionTeamFinalStatusEnum('final_status')
+    .notNull()
+    .default('On Review'),
   joinCode: text('team_code').notNull().$defaultFn(createId).unique(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').$onUpdate(getNow),
