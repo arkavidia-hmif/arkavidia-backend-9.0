@@ -1124,7 +1124,7 @@
       "name": "user_identity_role_enum",
       "schema": "public",
       "values": [
-        "superadmin",
+        "admin",
         "admin_competition",
         "admin_competition_cp",
         "admin_competition_ctf",

@@ -1,5 +1,5 @@
 ALTER TABLE "competition_submission_requirement" ADD COLUMN "order" integer DEFAULT -1 NOT NULL;--> statement-breakpoint
-ALTER TYPE user_identity_role_enum ADD VALUE 'superadmin';--> statement-breakpoint
+ALTER TYPE user_identity_role_enum ADD VALUE 'admin';--> statement-breakpoint
 ALTER TYPE user_identity_role_enum ADD VALUE 'admin_competition';--> statement-breakpoint
 ALTER TYPE user_identity_role_enum ADD VALUE 'admin_competition_cp';--> statement-breakpoint
 ALTER TYPE user_identity_role_enum ADD VALUE 'admin_competition_ctf';--> statement-breakpoint

@@ -36,7 +36,7 @@ adminCompetitionProtectedRouter.openapi(
   getAdminCompetitionsRoute,
   async (c) => {
     if (
-      c.var.user.role === 'superadmin' ||
+      c.var.user.role === 'admin' ||
       c.var.user.role === 'admin_competition'
     )
       return c.json(await getAllCompetitions(db), 200);

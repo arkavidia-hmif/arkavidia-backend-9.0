@@ -14,7 +14,7 @@ export const userIdentityProviderEnum = pgEnum('user_identity_provider_enum', [
 ]);
 
 export const userIdentityRoleEnum = pgEnum('user_identity_role_enum', [
-  'superadmin',
+  'admin',
   'admin_competition',
   'admin_competition_cp',
   'admin_competition_ctf',

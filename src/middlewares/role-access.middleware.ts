@@ -57,7 +57,7 @@ export const roleMiddleware = (requestedRole: UserIdentityRolesEnum) => {
     const role = (await findUserIdentityById(db, c.var.user.id))?.role;
     const param = c.req.param();
 
-    if (role === 'superadmin') await next();
+    if (role === 'admin') await next();
 
     let authorized: boolean = true;
     if (param.competitionId) {
