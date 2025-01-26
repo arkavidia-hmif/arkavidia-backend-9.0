@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   CompetitionStatisticSchema,
   UserStatisticSchema,
@@ -10,6 +11,7 @@ export const getUserStatisticRoute = createRoute({
   operationId: 'getUserStatistic',
   tags: ['analytics'],
   method: 'get',
+  middleware: [roleMiddleware('admin')] as const,
   path: '/analytics/user',
   responses: {
     200: {
@@ -29,6 +31,7 @@ export const getCompetitionStatisticRoute = createRoute({
   operationId: 'getCompetitionStatistic',
   tags: ['analytics'],
   method: 'get',
+  middleware: [roleMiddleware('admin')] as const,
   path: '/analytics/competition',
   responses: {
     200: {

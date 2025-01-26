@@ -29,6 +29,27 @@
       "when": 1737466453453,
       "tag": "0003_unusual_quentin_quire",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1737774650839,
+      "tag": "0004_chemical_silverclaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1737824467512,
+      "tag": "0005_needy_spiral",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1737828499851,
+      "tag": "0006_smooth_callisto",
+      "breakpoints": true
     }
   ]
 }

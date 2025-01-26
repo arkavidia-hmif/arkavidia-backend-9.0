@@ -782,14 +782,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "stage": {
-          "name": "stage",
-          "type": "phase_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pre-eliminary'"
-        },
         "team_code": {
           "name": "team_code",
           "type": "text",

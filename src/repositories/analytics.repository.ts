@@ -80,6 +80,14 @@ export const getCompetitionStatistics = async (
     await db.select({ count: count() }).from(team).where(where).then(firstSure)
   ).count;
 
+  const verifiedCount = (
+    await db
+      .select({ count: count() })
+      .from(team)
+      .where(and(where, eq(team.verificationStatus, 'VERIFIED')))
+      .then(firstSure)
+  ).count;
+
   const stage = {
     preeliminary: (
       await getCompetitionStageStatistics(db, competitionId, 'pre-eliminary')
@@ -91,5 +99,5 @@ export const getCompetitionStatistics = async (
       .count,
   };
 
-  return { count: totalCount, stage };
+  return { count: totalCount, verifiedCount, stage };
 };

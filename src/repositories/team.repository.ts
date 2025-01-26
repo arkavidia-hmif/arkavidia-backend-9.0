@@ -1,73 +1,74 @@
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
+import { first, firstSure } from '~/db/helper';
 import {
   TeamDocumentTypeEnum,
+  competitionSubmission,
   team,
   teamDocument,
   teamMember,
 } from '~/db/schema';
 import type {
   CreateTeamDocumentSchema,
+  InsertTeamSubmissionSchema,
+  PutChangeTeamNameBodySchema,
   // PostTeamVerificationBodySchema,
   UpdateTeamDocumentSchema,
-  putChangeTeamNameBodySchema,
+  UpdateTeamSchema,
 } from '~/types/team.type';
 
-import {
-  getCompetitionById,
-  getCompetitionParticipantNumber,
-} from './competition.repository';
+import { getCompetitionById } from './competition.repository';
 import {
   type TeamMemberRelationOption,
   deleteAllTeamMemberDocument,
   getTeamMemberCount,
 } from './team-member.repository';
 
-export const getTeamDocument = async (
-  db: Database,
-  teamId: string,
-  type: TeamDocumentTypeEnum,
-) => {
-  return db.query.teamDocument.findFirst({
-    where: and(eq(teamDocument.teamId, teamId), eq(teamDocument.type, type)),
-  });
-};
-
-export const createTeamDocument = async (
-  db: Database,
-  values: z.infer<typeof CreateTeamDocumentSchema>,
-) => {
-  return db.insert(teamDocument).values(values).returning();
-};
-
-export const updateTeamDocument = async (
-  db: Database,
-  teamId: string,
-  values: z.infer<typeof UpdateTeamDocumentSchema>,
-) => {
-  return db
-    .update(teamDocument)
-    .set(values)
-    .where(eq(teamDocument.teamId, teamId))
-    .returning();
-};
-
-interface TeamRelationOption {
+interface CompetitionTeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
   competition?: boolean;
   document?: boolean;
+  submission?: boolean;
 }
 
-export const getTeamByCode = async (
+export const getAllTeamsPaginated = async (
   db: Database,
-  teamCode: string,
-  // options?: TeamRelationOption,
+  competitionId: string,
+  pagination: { page: number; limit: number },
 ) => {
-  return await db.query.team.findFirst({
-    where: eq(team.joinCode, teamCode),
+  const { page, limit } = pagination;
+  const offset = (page - 1) * limit;
+
+  const result = await db.query.team.findMany({
+    where: eq(team.competitionId, competitionId),
+    with: {
+      document: true,
+    },
+    limit,
+    offset,
   });
+
+  const totalItems = (
+    await db.query.team.findMany({
+      where: eq(team.competitionId, competitionId),
+    })
+  ).length;
+
+  const totalPages = Math.ceil(totalItems / limit);
+  const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
+  const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
+
+  return {
+    pagination: {
+      currentPage: page,
+      totalItems,
+      totalPages,
+      next,
+      prev,
+    },
+    result,
+  };
 };
 
 export const getUserTeams = async (db: Database, userId: string) => {
@@ -88,10 +89,20 @@ export const getUserTeams = async (db: Database, userId: string) => {
   });
 };
 
+export const getTeamByCode = async (
+  db: Database,
+  teamCode: string,
+  // options?: TeamRelationOption,
+) => {
+  return await db.query.team.findFirst({
+    where: eq(team.joinCode, teamCode),
+  });
+};
+
 export const getTeamById = async (
   db: Database,
   teamId: string,
-  options?: TeamRelationOption,
+  options?: CompetitionTeamRelationOption,
 ) => {
   return await db.query.team.findFirst({
     where: eq(team.id, teamId),
@@ -125,66 +136,9 @@ export const getTeamById = async (
             },
       competition: options?.competition ? true : undefined,
       document: options?.document ? { with: { media: true } } : undefined,
+      submission: options?.submission ? { with: { media: true } } : undefined,
     },
   });
-};
-
-export const updatePaymentProofTeam = async (
-  db: Database,
-  teamId: string,
-  paymentProofMediaId: string,
-) => {
-  const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
-  if (kartu) {
-    await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
-  } else {
-    await createTeamDocument(db, {
-      teamId,
-      mediaId: paymentProofMediaId,
-      type: 'bukti-pembayaran',
-    });
-  }
-};
-
-export const changeTeamName = async (
-  db: Database,
-  teamId: string,
-  body: z.infer<typeof putChangeTeamNameBodySchema>,
-) => {
-  return await db
-    .update(team)
-    .set({ name: body.name })
-    .where(eq(team.id, teamId))
-    .returning()
-    .then(first);
-};
-
-export const deleteTeamMember = async (
-  db: Database,
-  teamId: string,
-  userId: string,
-) => {
-  await deleteAllTeamMemberDocument(db, userId, teamId);
-
-  const where = and(
-    eq(teamMember.teamId, teamId),
-    eq(teamMember.userId, userId),
-  );
-  return await db.delete(teamMember).where(where).returning().then(first);
-};
-
-export const deleteTeam = async (db: Database, teamId: string) => {
-  const foundTeam = await getTeamById(db, teamId, { teamMember: true });
-  if (!foundTeam) return;
-
-  for (const tm of foundTeam.teamMembers) {
-    await deleteAllTeamMemberDocument(db, tm.userId, teamId);
-  }
-  return await db
-    .delete(team)
-    .where(eq(team.id, teamId))
-    .returning()
-    .then(first);
 };
 
 export const createTeam = async (
@@ -193,23 +147,6 @@ export const createTeam = async (
   name: string,
 ) => {
   return await db.transaction(async (tx) => {
-    const { participantCount } = await getCompetitionParticipantNumber(
-      db,
-      competitionId,
-    );
-    const maxParticipants = (await getCompetitionById(db, competitionId))
-      ?.maxParticipants;
-
-    if (!maxParticipants) {
-      throw new Error('There is no such competition');
-    }
-
-    if (maxParticipants <= participantCount) {
-      throw new Error(
-        'Maximum number of participants reached for this competition.',
-      );
-    }
-
     const existingTeam = await db.query.team.findFirst({
       where: eq(team.name, name),
     });
@@ -228,6 +165,19 @@ export const createTeam = async (
 
     return insertedTeam;
   });
+};
+
+export const updateTeam = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateTeamSchema>,
+) => {
+  return await db
+    .update(team)
+    .set(values)
+    .where(eq(team.id, teamId))
+    .returning()
+    .then(firstSure);
 };
 
 export const insertUserToTeam = async (
@@ -275,66 +225,126 @@ export const insertUserToTeam = async (
   });
 };
 
-// export const updateTeamVerification = async (
-//   db: Database,
-//   teamId: string,
-//   data: z.infer<typeof PostTeamVerificationBodySchema>,
-// ) => {
-//   return await db
-//     .update(team)
-//     .set(data)
-//     .where(eq(team.id, teamId))
-//     .returning()
-//     .then(first);
-// };
-
-export const getTeamStatistic = async (db: Database) => {
-  const allTeam = await db
-    .select({
-      totalTeam: count(),
-    })
-    .from(team)
+export const changeTeamName = async (
+  db: Database,
+  teamId: string,
+  body: z.infer<typeof PutChangeTeamNameBodySchema>,
+) => {
+  return await db
+    .update(team)
+    .set({ name: body.name })
+    .where(eq(team.id, teamId))
+    .returning()
     .then(first);
+};
 
-  const allVerifiedTeam = await db
-    .select({
-      totalVerifiedTeam: count(),
-    })
-    .from(team)
-    .innerJoin(teamDocument, eq(team.id, teamDocument.teamId))
-    .where(eq(teamDocument.isVerified, true))
+export const deleteTeam = async (db: Database, teamId: string) => {
+  const foundTeam = await getTeamById(db, teamId, { teamMember: true });
+  if (!foundTeam) return;
+
+  for (const tm of foundTeam.teamMembers) {
+    await deleteAllTeamMemberDocument(db, tm.userId, teamId);
+  }
+  return await db
+    .delete(team)
+    .where(eq(team.id, teamId))
+    .returning()
     .then(first);
+};
 
-  const compeTeams: {
-    competitionId: string;
-    totalTeam: number;
-    totalVerifiedTeam?: number;
-  }[] = await db
-    .select({
-      competitionId: team.competitionId,
-      totalTeam: count(),
-    })
-    .from(team)
-    .groupBy(team.competitionId)
-    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
+/** Team Verification Documents */
 
-  const compeTeamsVerified = await db
-    .select({
-      competitionId: team.competitionId,
-      totalVerifiedTeam: count(),
-    })
-    .from(team)
-    .innerJoin(teamDocument, eq(team.id, teamDocument.teamId))
-    .where(eq(teamDocument.isVerified, true))
-    .groupBy(team.competitionId)
-    .then((res) => res.map((r) => ({ ...r, competitionId: r.competitionId })));
+export const getTeamDocument = async (
+  db: Database,
+  teamId: string,
+  type: TeamDocumentTypeEnum,
+) => {
+  return db.query.teamDocument.findFirst({
+    where: and(eq(teamDocument.teamId, teamId), eq(teamDocument.type, type)),
+  });
+};
 
-  compeTeams.forEach((team) => {
-    const verifiedTeam = compeTeamsVerified.find(
-      (vTeam) => vTeam.competitionId === team.competitionId,
-    );
-    team.totalVerifiedTeam = verifiedTeam?.totalVerifiedTeam || 0;
+export const createTeamDocument = async (
+  db: Database,
+  values: z.infer<typeof CreateTeamDocumentSchema>,
+) => {
+  return db.insert(teamDocument).values(values).returning();
+};
+
+export const updateTeamDocument = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateTeamDocumentSchema>,
+) => {
+  return db
+    .update(teamDocument)
+    .set(values)
+    .where(eq(teamDocument.teamId, teamId))
+    .returning();
+};
+
+export const updatePaymentProofTeam = async (
+  db: Database,
+  teamId: string,
+  paymentProofMediaId: string,
+) => {
+  const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+  if (kartu) {
+    await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
+  } else {
+    await createTeamDocument(db, {
+      teamId,
+      mediaId: paymentProofMediaId,
+      type: 'bukti-pembayaran',
+    });
+  }
+};
+
+export const isTeamDocumentsVerified = async (
+  db: Database,
+  teamId: string,
+): Promise<boolean> => {
+  const documents = await db.query.teamDocument.findMany({
+    where: eq(teamDocument.teamId, teamId),
   });
 
-  return { ...allTeam, ...allVerifiedTeam, result: compeTeams };
+  const buktiPembayaranDocument = documents.find(
+    (d) => d.type === 'bukti-pembayaran',
+  );
+
+  return !!buktiPembayaranDocument?.isVerified;
+};
+
+/** Team Submissions */
+
+interface CompetitionTeamSubmissionRelationOption {
+  team?: boolean;
+  requirement?: boolean;
+}
+
+export const getTeamSubmission = async (
+  db: Database,
+  teamId: string,
+  options?: CompetitionTeamSubmissionRelationOption,
+) => {
+  return db.query.competitionSubmission.findMany({
+    where: eq(competitionSubmission.teamId, teamId),
+    with: {
+      media: true,
+      team: options?.team ? true : undefined,
+      requirement: options?.requirement ? true : undefined,
+    },
+  });
+};
+
+export const createTeamSubmission = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof InsertTeamSubmissionSchema>,
+) => {
+  return db
+    .insert(competitionSubmission)
+    .values({ teamId, ...values })
+    .returning()
+    .then(firstSure);
 };

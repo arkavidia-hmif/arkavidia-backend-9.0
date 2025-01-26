@@ -15,59 +15,6 @@ import type {
 
 /** USER DOCUMENT REPOSITORIES */
 
-export const getUserDocument = async (
-  db: Database,
-  userId: string,
-  type: UserDocumentTypeEnum,
-) => {
-  return db.query.userDocument.findFirst({
-    where: and(eq(userDocument.userId, userId), eq(userDocument.type, type)),
-  });
-};
-
-export const createUserDocument = async (
-  db: Database,
-  userId: string,
-  values: z.infer<typeof CreateUserDocumentSchema>,
-) => {
-  return db
-    .insert(userDocument)
-    .values({ ...values, userId })
-    .returning();
-};
-
-export const updateUserDocument = async (
-  db: Database,
-  userId: string,
-  values: z.infer<typeof UpdateUserDocumentSchema>,
-) => {
-  return db
-    .update(userDocument)
-    .set(values)
-    .where(eq(userDocument.userId, userId))
-    .returning();
-};
-
-export const isUserDocumentsVerified = async (db: Database, userId: string) => {
-  const documents = await db.query.userDocument.findMany({
-    where: eq(userDocument.userId, userId),
-  });
-
-  const verifyTypes = ['kartu-identitas', 'nisn'];
-  const foundTypes: string[] = [];
-
-  if (documents.length !== 2) return false;
-  if (!documents[0].isVerified || !documents[1].isVerified) return false;
-
-  foundTypes.push(documents[0].type);
-  foundTypes.push(documents[1].type);
-
-  const allTypesFound = verifyTypes.every((type) => foundTypes.includes(type));
-  return allTypesFound;
-};
-
-/** USER DOCUMENT REPOSITORIES */
-
 export interface UserRelationOption {
   document?: boolean;
   userIdentity?: boolean;
@@ -144,4 +91,54 @@ export const updateNisnUser = async (
       type: 'nisn',
     });
   }
+};
+
+/** USER DOCUMENT REPOSITORIES */
+
+export const getUserDocument = async (
+  db: Database,
+  userId: string,
+  type: UserDocumentTypeEnum,
+) => {
+  return db.query.userDocument.findFirst({
+    where: and(eq(userDocument.userId, userId), eq(userDocument.type, type)),
+  });
+};
+
+export const createUserDocument = async (
+  db: Database,
+  userId: string,
+  values: z.infer<typeof CreateUserDocumentSchema>,
+) => {
+  return db
+    .insert(userDocument)
+    .values({ ...values, userId })
+    .returning();
+};
+
+export const updateUserDocument = async (
+  db: Database,
+  userId: string,
+  values: z.infer<typeof UpdateUserDocumentSchema>,
+) => {
+  return db
+    .update(userDocument)
+    .set(values)
+    .where(eq(userDocument.userId, userId))
+    .returning();
+};
+
+export const isUserDocumentsVerified = async (
+  db: Database,
+  userId: string,
+): Promise<boolean> => {
+  const documents = await db.query.userDocument.findMany({
+    where: eq(userDocument.userId, userId),
+  });
+
+  const kartuIdentitasDocument = documents.find(
+    (d) => d.type === 'kartu-identitas',
+  );
+
+  return !!kartuIdentitasDocument?.isVerified;
 };
