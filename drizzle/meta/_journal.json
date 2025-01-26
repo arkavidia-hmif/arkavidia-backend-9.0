@@ -50,6 +50,13 @@
       "when": 1737828499851,
       "tag": "0006_smooth_callisto",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1737884903168,
+      "tag": "0007_silky_lester",
+      "breakpoints": true
     }
   ]
 }

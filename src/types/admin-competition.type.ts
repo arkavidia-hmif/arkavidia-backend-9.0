@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  competitionTeamFinalStatusEnum,
+  competitionTeamPreeliminaryStatusEnum,
+} from '~/db/schema';
 
 import { ListSubmissionRequirementSchema, TeamSchema } from './team.type';
 
@@ -71,4 +75,11 @@ export const PutTeamVerificationBodySchema = z.object({
 export const GroupedTeamSubmissionSchmea = z.object({
   'pre-eliminary': ListSubmissionRequirementSchema.optional(),
   final: ListSubmissionRequirementSchema.optional(),
+});
+
+export const PutCompetitionTeamStatusSchema = z.object({
+  preeliminaryStatus: z
+    .enum(competitionTeamPreeliminaryStatusEnum.enumValues)
+    .optional(),
+  finalStatus: z.enum(competitionTeamFinalStatusEnum.enumValues).optional(),
 });

@@ -1,5 +1,5 @@
 import { db } from '~/db/drizzle';
-import { TeamVerificationStatusEnum } from '~/db/schema';
+import { CompetitionTeamVerificationStatusEnum } from '~/db/schema';
 import {
   getCompetitionById,
   getCompetitionSubmissionRequirement,
@@ -136,45 +136,6 @@ teamProtectedRouter.openapi(deleteTeamMemberRoute, async (c) => {
   return c.json(member, 200);
 });
 
-teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
-  try {
-    const { competitionId, name } = await c.req.json();
-    const userId = c.var.user.id;
-
-    const user = await getUser(db, userId);
-    const competition = await getCompetitionById(db, competitionId);
-
-    if (competition?.title === 'Arkalogica' && user?.education !== 'sma')
-      return c.json({ error: 'You must be in SMA to join Arkalogica' }, 403);
-
-    const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
-    if (isInOtherTeam) {
-      throw new Error('User is already in another team for the competition!');
-    }
-
-    const team = await createTeam(db, competitionId, name);
-    await insertUserToTeam(db, team.id, userId);
-    await initializelCompetitionSubmissions(db, team.id, competitionId);
-    return c.json(team, 200);
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        {
-          error: error.message,
-        },
-        500,
-      );
-    }
-
-    return c.json(
-      {
-        error: 'Unexpected error occured',
-      },
-      500,
-    );
-  }
-});
-
 teamProtectedRouter.openapi(postQuitTeamRoute, async (c) => {
   const { teamId } = c.req.valid('param');
   const userId = c.var.user.id;
@@ -201,7 +162,7 @@ teamProtectedRouter.openapi(putTeamDocumentRoute, async (c) => {
 
   await updatePaymentProofTeam(db, teamId, paymentProofMediaId);
 
-  const verificationStatus: TeamVerificationStatusEnum =
+  const verificationStatus: CompetitionTeamVerificationStatusEnum =
     team?.verificationStatus === 'DENIED' ||
     team?.verificationStatus === 'CHANGED'
       ? 'CHANGED'
