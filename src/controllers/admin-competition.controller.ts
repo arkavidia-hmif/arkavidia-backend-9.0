@@ -26,6 +26,7 @@ import {
   getAdminCompetitionTeamInformationRoute,
   getAdminCompetitionTeamSubmissionsRoute,
   getAdminCompetitionsRoute,
+  putAdminCompetitionTeamStatusRoute,
   putAdminCompetitionTeamVerificationRoute,
 } from '~/routes/admin-competition.route';
 import { createAuthRouter } from '~/utils/router-factory';
@@ -181,6 +182,35 @@ adminCompetitionProtectedRouter.openapi(
     const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
 
     // TODO: Send email to team if not verified / verified
+
+    return c.json(updatedTeam, 200);
+  },
+);
+
+adminCompetitionProtectedRouter.openapi(
+  putAdminCompetitionTeamStatusRoute,
+  async (c) => {
+    const { finalStatus, preeliminaryStatus } = c.req.valid('json');
+    const { competitionId, teamId } = c.req.valid('param');
+
+    if (!finalStatus && !preeliminaryStatus)
+      return c.json(
+        { error: 'At least one of the values must be supplied!' },
+        400,
+      );
+
+    const team = await getTeamById(db, teamId, {
+      competition: true,
+      teamMember: true,
+    });
+    if (!team || team.competition.id !== competitionId)
+      return c.json({ error: "Team doesn't exist!" }, 400);
+
+    if (finalStatus) await updateTeam(db, teamId, { finalStatus });
+    if (preeliminaryStatus)
+      await updateTeam(db, teamId, { preeliminaryStatus });
+
+    const updatedTeam = await getTeamById(db, teamId, {});
 
     return c.json(updatedTeam, 200);
   },
