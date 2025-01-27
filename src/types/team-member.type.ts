@@ -41,7 +41,7 @@ export const TeamMemberSchema = createSelectSchema(teamMember)
   .merge(
     z.object({
       user: UserSchema.optional(),
-      document: TeamMemberDocumentSchema.optional(),
+      document: z.array(TeamMemberDocumentSchema).optional(),
     }),
   )
   .openapi('TeamMember');
