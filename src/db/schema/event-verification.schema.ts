@@ -52,7 +52,7 @@ export const eventTeamMemberDocumentRelations = relations(
   }),
 );
 
-export type TeamMemberDocumentTypeEnum =
+export type EventTeamMemberDocumentTypeEnum =
   (typeof eventTeamMemberDocumentTypeEnum.enumValues)[number];
 
 export const eventTeamDocumentTypeEnum = pgEnum(

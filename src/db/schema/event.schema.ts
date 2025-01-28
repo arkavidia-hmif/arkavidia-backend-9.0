@@ -15,7 +15,10 @@ import { media } from './media.schema';
 import { user } from './user.schema';
 
 /** Enum */
-export const eventStageEnum = pgEnum('phase_enum', ['pre-eliminary', 'final']);
+export const eventStageEnum = pgEnum('event_phase_enum', [
+  'pre-eliminary',
+  'final',
+]);
 
 /** Main Compeitition Table */
 export const event = pgTable('event', {
