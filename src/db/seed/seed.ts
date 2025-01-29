@@ -350,7 +350,7 @@ async function seedTeams() {
         competition_title,
         team_name,
         team_code,
-        is_verified,
+        //        is_verified,
         team_member_email,
         team_leader_email,
       ] = line.replace('\r', '').split(',');
@@ -382,7 +382,7 @@ async function seedTeams() {
           competitionId,
           name: team_name,
           joinCode: team_code,
-          isVerified: is_verified === 'TRUE',
+          //  isVerified: is_verified === 'TRUE',
         })
         .returning()
         .then(first);

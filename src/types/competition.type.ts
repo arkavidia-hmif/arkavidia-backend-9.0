@@ -136,7 +136,6 @@ export const CompetitionNameQuery = z.object({
     }),
 });
 
-
 export const CompetitionIdSchema = z.object({
   name: z.string(),
   id: z.string(),
