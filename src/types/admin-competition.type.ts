@@ -21,6 +21,18 @@ export const CompetitionAndTeamIdParam = z.object({
   }),
 });
 
+export const CompetitionAndTeamIdAndSubmissionIdParam =
+  CompetitionAndTeamIdParam.merge(
+    z.object({
+      typeId: z.string().openapi({
+        param: {
+          in: 'path',
+          required: true,
+        },
+      }),
+    }),
+  );
+
 export const PaginationQuerySchema = z.object({
   page: z
     .string()
@@ -82,4 +94,8 @@ export const PutCompetitionTeamStatusSchema = z.object({
     .enum(competitionTeamPreeliminaryStatusEnum.enumValues)
     .optional(),
   finalStatus: z.enum(competitionTeamFinalStatusEnum.enumValues).optional(),
+});
+
+export const PutTeamSubmissionVerdictSchema = z.object({
+  judgeResponse: z.string().min(1, 'Judgement must be at least 1 character.'),
 });

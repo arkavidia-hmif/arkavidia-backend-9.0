@@ -5,6 +5,7 @@ import {
   getAllCompetitions,
   getCompetitionIdByName as getCompetitionByName,
   getCompetitionSubmissionRequirement,
+  updateSubmissionFeedback,
 } from '~/repositories/competition.repository';
 import {
   isTeamMemberDocumentsVerified,
@@ -27,6 +28,7 @@ import {
   getAdminCompetitionTeamSubmissionsRoute,
   getAdminCompetitionsRoute,
   putAdminCompetitionTeamStatusRoute,
+  putAdminCompetitionTeamSubmissionVerdictRoute,
   putAdminCompetitionTeamVerificationRoute,
 } from '~/routes/admin-competition.route';
 import { createAuthRouter } from '~/utils/router-factory';
@@ -213,5 +215,33 @@ adminCompetitionProtectedRouter.openapi(
     const updatedTeam = await getTeamById(db, teamId, {});
 
     return c.json(updatedTeam, 200);
+  },
+);
+
+adminCompetitionProtectedRouter.openapi(
+  putAdminCompetitionTeamSubmissionVerdictRoute,
+  async (c) => {
+    const { competitionId, teamId, typeId } = c.req.valid('param');
+    const { judgeResponse } = c.req.valid('json');
+
+    const team = await getTeamById(db, teamId, {
+      competition: true,
+      submission: true,
+    });
+
+    if (!team || team.competition.id !== competitionId)
+      return c.json({ error: "Team doesn't exist!" }, 400);
+
+    if (!team.submission.find((s) => s.typeId === typeId))
+      return c.json({ error: "Submission doesn't exist!" }, 400);
+
+    const updatedSubmission = await updateSubmissionFeedback(
+      db,
+      teamId,
+      typeId,
+      judgeResponse,
+    );
+
+    return c.json(updatedSubmission, 200);
   },
 );
