@@ -1,10 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
+  CompetitionAndTeamIdAndSubmissionIdParam,
   CompetitionAndTeamIdParam,
   GroupedTeamSubmissionSchmea as GroupedTeamSubmissionSchema,
   PaginationQuerySchema,
   PutCompetitionTeamStatusSchema,
+  PutTeamSubmissionVerdictSchema,
   PutTeamVerificationBodySchema,
   TeamsPaginatedSchema,
 } from '~/types/admin-competition.type';
@@ -16,6 +18,7 @@ import {
 import {
   //   ListTeamSchema,
   TeamSchema,
+  TeamSubmissionSchema,
   //   TeamSubmissionSchema,
 } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
@@ -187,4 +190,34 @@ export const putAdminCompetitionTeamStatusRoute = createRoute({
   },
 });
 
-// export const putAdminCompetitionTeamSubmissionVerdictRoute = createRoute({});
+export const putAdminCompetitionTeamSubmissionVerdictRoute = createRoute({
+  operationId: 'putAdminCompetitionTeamSubmissionVerdict',
+  description: "Updates team's submission verdict.",
+  tags: ['admin-competition'],
+  method: 'put',
+  middleware: [roleMiddleware('admin_competition')] as const,
+  path: '/admin/competition/{competitionId}/team/{teamId}/submission/{submissionId}',
+  request: {
+    params: CompetitionAndTeamIdAndSubmissionIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: PutTeamSubmissionVerdictSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Succesfully updated team's submission verdict.",
+      content: {
+        'application/json': {
+          schema: TeamSubmissionSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    403: createErrorResponse('GENERIC', 'Not authorized for access'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
