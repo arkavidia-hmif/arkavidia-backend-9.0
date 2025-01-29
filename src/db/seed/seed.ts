@@ -1,5 +1,5 @@
 import argon2 from 'argon2';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import { exit } from 'process';
 import { createId } from '~/utils/drizzle-schema-util';
@@ -11,8 +11,6 @@ import {
   competitionSubmissionRequirement,
   competitionTimeline,
   media,
-  team,
-  teamMember,
   user,
   userEducationEnum,
   userIdentity,
@@ -318,115 +316,115 @@ async function seedMedias() {
 }
 
 // eslint-disable-next-line
-async function seedTeams() {
-  try {
-    // Ask if the user wants to delete the table
-    const userInput = await new Promise<string>((resolve) => {
-      process.stdin.resume();
-      process.stdin.setEncoding('utf8');
-      process.stdout.write('Do you want to delete the team table? (yes/no) ');
-      process.stdin.on('data', (data) => {
-        resolve(data.toString().trim());
-      });
-    });
+// async function seedTeams() {
+//   try {
+//     // Ask if the user wants to delete the table
+//     const userInput = await new Promise<string>((resolve) => {
+//       process.stdin.resume();
+//       process.stdin.setEncoding('utf8');
+//       process.stdout.write('Do you want to delete the team table? (yes/no) ');
+//       process.stdin.on('data', (data) => {
+//         resolve(data.toString().trim());
+//       });
+//     });
 
-    if (userInput.toLowerCase() === 'yes') {
-      // Ask user for confirmation
-      const confirmInput = await new Promise<string>((resolve) => {
-        const onData = (data: string) => {
-          resolve(data.toString().trim());
-        };
-        process.stdin.resume();
-        process.stdin.setEncoding('utf8');
-        process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
-        process.stdin.on('data', onData);
-      });
+//     if (userInput.toLowerCase() === 'yes') {
+//       // Ask user for confirmation
+//       const confirmInput = await new Promise<string>((resolve) => {
+//         const onData = (data: string) => {
+//           resolve(data.toString().trim());
+//         };
+//         process.stdin.resume();
+//         process.stdin.setEncoding('utf8');
+//         process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
+//         process.stdin.on('data', onData);
+//       });
 
-      if (confirmInput.toLowerCase() === 'yes') {
-        console.log('Deleting team table...');
-        await db.delete(team);
-        await db.delete(teamMember);
-        console.log('🗑️ Team table deleted!');
-      }
-    }
+//       if (confirmInput.toLowerCase() === 'yes') {
+//         console.log('Deleting team table...');
+//         await db.delete(team);
+//         await db.delete(teamMember);
+//         console.log('🗑️ Team table deleted!');
+//       }
+//     }
 
-    const file = fs.readFileSync('src/db/seed/Seed - Team.csv', 'utf8');
-    const lines = file.split('\n');
-    lines.shift();
-    const teams = lines.map(async (line) => {
-      const [
-        competition_title,
-        team_name,
-        team_code,
-        is_verified,
-        team_member_email,
-        team_leader_email,
-      ] = line.replace('\r', '').split(',');
+//     const file = fs.readFileSync('src/db/seed/Seed - Team.csv', 'utf8');
+//     const lines = file.split('\n');
+//     lines.shift();
+//     const teams = lines.map(async (line) => {
+//       const [
+//         competition_title,
+//         team_name,
+//         team_code,
+//         is_verified,
+//         team_member_email,
+//         team_leader_email,
+//       ] = line.replace('\r', '').split(',');
 
-      const teamMemberData = team_member_email.split('•');
-      const teamMemberId = await db
-        .select()
-        .from(user)
-        .where(inArray(user.email, teamMemberData));
-      const teamLeaderId = await db
-        .select()
-        .from(user)
-        .where(eq(user.email, team_leader_email))
-        .then(first);
+//       const teamMemberData = team_member_email.split('•');
+//       const teamMemberId = await db
+//         .select()
+//         .from(user)
+//         .where(inArray(user.email, teamMemberData));
+//       const teamLeaderId = await db
+//         .select()
+//         .from(user)
+//         .where(eq(user.email, team_leader_email))
+//         .then(first);
 
-      const competitionRes = await db
-        .select()
-        .from(competition)
-        .where(eq(competition.title, competition_title))
-        .then(first);
-      const competitionId = competitionRes?.id ?? '';
+//       const competitionRes = await db
+//         .select()
+//         .from(competition)
+//         .where(eq(competition.title, competition_title))
+//         .then(first);
+//       const competitionId = competitionRes?.id ?? '';
 
-      const teamId = createId();
+//       const teamId = createId();
 
-      const teamRes = await db
-        .insert(team)
-        .values({
-          id: teamId,
-          competitionId,
-          name: team_name,
-          joinCode: team_code,
-          isVerified: is_verified === 'TRUE',
-        })
-        .returning()
-        .then(first);
+//       const teamRes = await db
+//         .insert(team)
+//         .values({
+//           id: teamId,
+//           competitionId,
+//           name: team_name,
+//           joinCode: team_code,
+//           isVerified: is_verified === 'TRUE',
+//         })
+//         .returning()
+//         .then(first);
 
-      const teamLeaderRes = await db
-        .insert(teamMember)
-        .values({ teamId, userId: teamLeaderId?.id ?? '', role: 'leader' })
-        .returning()
-        .then(first);
+//       const teamLeaderRes = await db
+//         .insert(teamMember)
+//         .values({ teamId, userId: teamLeaderId?.id ?? '', role: 'leader' })
+//         .returning()
+//         .then(first);
 
-      const teamMemberRes = teamMemberId.map(async (member) => {
-        const res = await db
-          .insert(teamMember)
-          .values({ teamId, userId: member.id ?? '', role: 'member' })
-          .returning()
-          .then(first);
-        return res;
-      });
+//       const teamMemberRes = teamMemberId.map(async (member) => {
+//         const res = await db
+//           .insert(teamMember)
+//           .values({ teamId, userId: member.id ?? '', role: 'member' })
+//           .returning()
+//           .then(first);
+//         return res;
+//       });
 
-      const teamMembers = await Promise.all(teamMemberRes);
+//       const teamMembers = await Promise.all(teamMemberRes);
 
-      return { teamRes, teamLeaderRes, teamMembers };
-    });
+//       return { teamRes, teamLeaderRes, teamMembers };
+//     });
 
-    // eslint-disable-next-line
-    const res = await Promise.all(teams);
+//     // eslint-disable-next-line
+//     const res = await Promise.all(teams);
 
-    process.stdin.pause();
-    process.stdin.removeAllListeners('data');
+//     process.stdin.pause();
+//     process.stdin.removeAllListeners('data');
 
-    // console.log(res);
-    console.log('✅ Teams seeding success!');
-  } catch (err) {
-    throw '❌ Error seeding teams!';
-  }
-}
+//     // console.log(res);
+//     console.log('✅ Teams seeding success!');
+//   } catch (err) {
+//     throw '❌ Error seeding teams!';
+//   }
+// }
 
 async function seedTimelines() {
   try {
