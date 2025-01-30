@@ -6,6 +6,7 @@ import {
   GroupedTeamSubmissionSchmea as GroupedTeamSubmissionSchema,
   PaginationQuerySchema,
   PutCompetitionTeamStatusSchema,
+  PutTeamSubmissionStatusSchema,
   PutTeamSubmissionVerdictSchema,
   PutTeamVerificationBodySchema,
   TeamsPaginatedSchema,
@@ -217,6 +218,38 @@ export const putAdminCompetitionTeamSubmissionVerdictRoute = createRoute({
       },
     },
     400: createErrorResponse('UNION', 'Bad request error'),
+    403: createErrorResponse('GENERIC', 'Not authorized for access'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const putAdminCompetitionSubmissionStatusRoute = createRoute({
+  operationId: 'putAdminCompetitionSubmissionStatusRoute',
+  description: "Updates team's submission status",
+  tags: ['admin-competition'],
+  method: 'put',
+  middleware: [roleMiddleware('admin_competition')] as const,
+  path: '/admin/competition/{competitionId}/team/{teamId}/submission-status/{typeid}',
+  request: {
+    params: CompetitionAndTeamIdAndSubmissionIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: PutTeamSubmissionStatusSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Succesfully updated team's submission status",
+      content: {
+        'application/json': {
+          schema: TeamSubmissionSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'BAD Request Error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },

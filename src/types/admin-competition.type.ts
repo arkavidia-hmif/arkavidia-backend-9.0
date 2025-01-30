@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   competitionTeamFinalStatusEnum,
   competitionTeamPreeliminaryStatusEnum,
+  submissionStatusEnum,
 } from '~/db/schema';
 
 import { ListSubmissionRequirementSchema, TeamSchema } from './team.type';
@@ -98,4 +99,11 @@ export const PutCompetitionTeamStatusSchema = z.object({
 
 export const PutTeamSubmissionVerdictSchema = z.object({
   judgeResponse: z.string(),
+});
+
+export const PutTeamSubmissionStatusSchema = z.object({
+  status: z.enum(submissionStatusEnum.enumValues).openapi({
+    description: 'The current status of the submission',
+    example: 'pending',
+  }),
 });
