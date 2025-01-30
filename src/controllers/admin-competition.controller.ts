@@ -6,6 +6,7 @@ import {
   getCompetitionIdByName as getCompetitionByName,
   getCompetitionSubmissionRequirement,
   updateSubmissionFeedback,
+  updateSubmissionStatus,
 } from '~/repositories/competition.repository';
 import {
   isTeamMemberDocumentsVerified,
@@ -27,6 +28,7 @@ import {
   getAdminCompetitionTeamInformationRoute,
   getAdminCompetitionTeamSubmissionsRoute,
   getAdminCompetitionsRoute,
+  putAdminCompetitionSubmissionStatusRoute,
   putAdminCompetitionTeamStatusRoute,
   putAdminCompetitionTeamSubmissionVerdictRoute,
   putAdminCompetitionTeamVerificationRoute,
@@ -240,6 +242,34 @@ adminCompetitionProtectedRouter.openapi(
       teamId,
       typeId,
       judgeResponse,
+    );
+
+    return c.json(updatedSubmission, 200);
+  },
+);
+
+adminCompetitionProtectedRouter.openapi(
+  putAdminCompetitionSubmissionStatusRoute,
+  async (c) => {
+    const { competitionId, teamId, typeId } = c.req.valid('param');
+    const { status } = c.req.valid('json');
+
+    const team = await getTeamById(db, teamId, {
+      competition: true,
+      submission: true,
+    });
+
+    if (!team || team.competition.id !== competitionId)
+      return c.json({ error: "Team doesn't exist!" }, 400);
+
+    if (!team.submission.find((s) => s.typeId === typeId))
+      return c.json({ error: "Submission doesn't exist!" }, 400);
+
+    const updatedSubmission = await updateSubmissionStatus(
+      db,
+      teamId,
+      typeId,
+      status,
     );
 
     return c.json(updatedSubmission, 200);

@@ -4,11 +4,14 @@ import {
   competition,
   competitionAnnouncement,
   competitionTimeline,
+  submissionStatusEnum,
 } from '~/db/schema';
 import { TeamSchema, TeamSubmissionSchema } from '~/types/team.type';
 
 export const CompetitionSchema =
   createSelectSchema(competition).openapi('Competition');
+
+export const submissionStatusSchema = z.enum(submissionStatusEnum.enumValues);
 
 export const ListCompetitionSchema = z.array(CompetitionSchema);
 

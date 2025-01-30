@@ -1,7 +1,10 @@
 import { aliasedTable, and, eq, isNull, or } from 'drizzle-orm';
 import { type z } from 'zod';
 import { first } from '~/db/helper';
-import type { PostCompAnnouncementBodySchema } from '~/types/competition.type';
+import type {
+  PostCompAnnouncementBodySchema,
+  submissionStatusSchema,
+} from '~/types/competition.type';
 
 import type { Database } from '../db/drizzle';
 import {
@@ -368,5 +371,24 @@ export const getCompetitionIdByName = async (
   const result = await db.query.competition.findMany({
     where,
   });
+  return result;
+};
+
+export const updateSubmissionStatus = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  status: z.infer<typeof submissionStatusSchema>,
+) => {
+  const result = await db
+    .update(competitionSubmission)
+    .set({ status })
+    .where(
+      and(
+        eq(competitionSubmission.teamId, teamId),
+        eq(competitionSubmission.typeId, typeId),
+      ),
+    );
+
   return result;
 };
