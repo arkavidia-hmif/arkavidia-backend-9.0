@@ -58,25 +58,26 @@ export const roleMiddleware = (requestedRole: UserIdentityRolesEnum) => {
     const param = c.req.param();
 
     if (role === 'admin') await next();
+    else {
+      let authorized: boolean = true;
+      if (param.competitionId) {
+        const competition = await getCompetition(db, param.competitionId);
+        if (
+          role !== 'admin_competition' &&
+          role !== transformNameToRole(competition?.title as string)
+        )
+          authorized = false;
+      } else {
+        authorized = role?.includes(requestedRole) as boolean;
+      }
 
-    let authorized: boolean = true;
-    if (param.competitionId) {
-      const competition = await getCompetition(db, param.competitionId);
-      if (
-        role !== 'admin_competition' &&
-        role !== transformNameToRole(competition?.title as string)
-      )
-        authorized = false;
-    } else {
-      authorized = role?.includes(requestedRole) as boolean;
+      // TODO: Add event roles, too lazy now
+
+      if (!authorized) {
+        return c.json({ message: 'Unauthorized' }, 403);
+      }
+
+      await next();
     }
-
-    // TODO: Add event roles, too lazy now
-
-    if (!authorized) {
-      return c.json({ message: 'Unauthorized' }, 403);
-    }
-
-    await next();
   });
 };
