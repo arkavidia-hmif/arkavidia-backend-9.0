@@ -97,5 +97,5 @@ export const PutCompetitionTeamStatusSchema = z.object({
 });
 
 export const PutTeamSubmissionVerdictSchema = z.object({
-  judgeResponse: z.string().min(1, 'Judgement must be at least 1 character.'),
+  judgeResponse: z.string(),
 });
