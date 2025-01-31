@@ -1,5 +1,5 @@
 {
-  "id": "3ecd8c4d-595e-4b39-8a63-62827e62d1a4",
+  "id": "279d55e2-e78f-4c03-a205-ae312247304d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -268,6 +268,14 @@
           "primaryKey": false,
           "notNull": false
         },
+        "status": {
+          "name": "status",
+          "type": "submission_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -294,7 +302,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "competition_submission_type_id_competition_submission_requirement_type_id_fk": {
@@ -307,7 +315,7 @@
           "columnsTo": [
             "type_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "competition_submission_media_id_media_id_fk": {
@@ -361,6 +369,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'pre-eliminary'"
+        },
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": -1
         },
         "type_name": {
           "name": "type_name",
@@ -647,6 +662,37 @@
           "primaryKey": false,
           "notNull": true
         },
+        "stage": {
+          "name": "stage",
+          "type": "phase_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pre-eliminary'"
+        },
+        "verification_status": {
+          "name": "verification_status",
+          "type": "team_verification_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preeliminary_status": {
+          "name": "preeliminary_status",
+          "type": "competition_team_preeliminary_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'On Review'"
+        },
+        "final_status": {
+          "name": "final_status",
+          "type": "competition_team_final_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'On Review'"
+        },
         "team_code": {
           "name": "team_code",
           "type": "text",
@@ -781,6 +827,13 @@
           "notNull": true,
           "default": false
         },
+        "real_consent": {
+          "name": "real_consent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "is_registration_complete": {
           "name": "is_registration_complete",
           "type": "boolean",
@@ -881,7 +934,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_document_media_id_media_id_fk": {
@@ -894,7 +947,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -967,7 +1020,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_member_document_team_id_user_id_team_member_team_id_user_id_fk": {
@@ -1050,7 +1103,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "user_document_media_id_media_id_fk": {
@@ -1063,7 +1116,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1096,6 +1149,18 @@
       "schema": "public",
       "values": [
         "admin",
+        "admin_competition",
+        "admin_competition_cp",
+        "admin_competition_ctf",
+        "admin_competition_arkalogica",
+        "admin_competition_datavidia",
+        "admin_competition_hackvidia",
+        "admin_competition_uxvidia",
+        "admin_event",
+        "admin_event_academya_softeng",
+        "admin_event_academya_datsci",
+        "admin_event_academya_uiux",
+        "admin_event_academya_pm",
         "user"
       ]
     },
@@ -1106,6 +1171,15 @@
         "pre-eliminary",
         "final",
         "verification"
+      ]
+    },
+    "public.submission_status_enum": {
+      "name": "submission_status_enum",
+      "schema": "public",
+      "values": [
+        "pending",
+        "under_review",
+        "approved"
       ]
     },
     "public.media_bucket_enum": {
@@ -1130,6 +1204,36 @@
       "values": [
         "leader",
         "member"
+      ]
+    },
+    "public.competition_team_final_status_enum": {
+      "name": "competition_team_final_status_enum",
+      "schema": "public",
+      "values": [
+        "On Review",
+        "Not Pass",
+        "Juara 1",
+        "Juara 2",
+        "Juara 3"
+      ]
+    },
+    "public.competition_team_preeliminary_status_enum": {
+      "name": "competition_team_preeliminary_status_enum",
+      "schema": "public",
+      "values": [
+        "On Review",
+        "Pass",
+        "Not Pass"
+      ]
+    },
+    "public.team_verification_status_enum": {
+      "name": "team_verification_status_enum",
+      "schema": "public",
+      "values": [
+        "VERIFIED",
+        "DENIED",
+        "WAITING",
+        "CHANGED"
       ]
     },
     "public.user_education_enum": {

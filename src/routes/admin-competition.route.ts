@@ -229,7 +229,7 @@ export const putAdminCompetitionSubmissionStatusRoute = createRoute({
   tags: ['admin-competition'],
   method: 'put',
   middleware: [roleMiddleware('admin_competition')] as const,
-  path: '/admin/competition/{competitionId}/team/{teamId}/submission-status/{typeid}',
+  path: '/admin/competition/{competitionId}/team/{teamId}/submission-status/{typeId}',
   request: {
     params: CompetitionAndTeamIdAndSubmissionIdParam,
     body: {

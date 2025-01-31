@@ -1,8 +1,12 @@
 CREATE TYPE "public"."user_identity_provider_enum" AS ENUM('google', 'basic');--> statement-breakpoint
-CREATE TYPE "public"."user_identity_role_enum" AS ENUM('admin', 'user');--> statement-breakpoint
+CREATE TYPE "public"."user_identity_role_enum" AS ENUM('admin', 'admin_competition', 'admin_competition_cp', 'admin_competition_ctf', 'admin_competition_arkalogica', 'admin_competition_datavidia', 'admin_competition_hackvidia', 'admin_competition_uxvidia', 'admin_event', 'admin_event_academya_softeng', 'admin_event_academya_datsci', 'admin_event_academya_uiux', 'admin_event_academya_pm', 'user');--> statement-breakpoint
 CREATE TYPE "public"."phase_enum" AS ENUM('pre-eliminary', 'final', 'verification');--> statement-breakpoint
+CREATE TYPE "public"."submission_status_enum" AS ENUM('pending', 'under_review', 'approved');--> statement-breakpoint
 CREATE TYPE "public"."media_bucket_enum" AS ENUM('twibbon', 'poster', 'kartu-identitas', 'bukti-pembayaran', 'submission-cp', 'submission-ctf', 'submission-uxvidia', 'submission-arkalogica', 'submission-hackvidia', 'submission-datavidia');--> statement-breakpoint
 CREATE TYPE "public"."team_member_role_enum" AS ENUM('leader', 'member');--> statement-breakpoint
+CREATE TYPE "public"."competition_team_final_status_enum" AS ENUM('On Review', 'Not Pass', 'Juara 1', 'Juara 2', 'Juara 3');--> statement-breakpoint
+CREATE TYPE "public"."competition_team_preeliminary_status_enum" AS ENUM('On Review', 'Pass', 'Not Pass');--> statement-breakpoint
+CREATE TYPE "public"."team_verification_status_enum" AS ENUM('VERIFIED', 'DENIED', 'WAITING', 'CHANGED');--> statement-breakpoint
 CREATE TYPE "public"."user_education_enum" AS ENUM('s1', 's2', 'sma');--> statement-breakpoint
 CREATE TYPE "public"."team_document_type_enum" AS ENUM('bukti-pembayaran');--> statement-breakpoint
 CREATE TYPE "public"."team_member_document_type_enum" AS ENUM('poster', 'twibbon');--> statement-breakpoint
@@ -48,6 +52,7 @@ CREATE TABLE IF NOT EXISTS "competition_submission" (
 	"type_id" text NOT NULL,
 	"media_id" text,
 	"judge_response" text,
+	"status" "submission_status_enum" DEFAULT 'pending' NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
 	CONSTRAINT "competition_submission_team_id_type_id_pk" PRIMARY KEY("team_id","type_id")
@@ -57,6 +62,7 @@ CREATE TABLE IF NOT EXISTS "competition_submission_requirement" (
 	"type_id" text PRIMARY KEY NOT NULL,
 	"competition_id" text NOT NULL,
 	"stage" "phase_enum" DEFAULT 'pre-eliminary' NOT NULL,
+	"order" integer DEFAULT -1 NOT NULL,
 	"type_name" text NOT NULL,
 	"description" text NOT NULL,
 	"start_date" timestamp NOT NULL,
@@ -95,6 +101,10 @@ CREATE TABLE IF NOT EXISTS "team" (
 	"id" text PRIMARY KEY NOT NULL,
 	"competition_id" text NOT NULL,
 	"team_name" text NOT NULL,
+	"stage" "phase_enum" DEFAULT 'pre-eliminary' NOT NULL,
+	"verification_status" "team_verification_status_enum",
+	"preeliminary_status" "competition_team_preeliminary_status_enum" DEFAULT 'On Review' NOT NULL,
+	"final_status" "competition_team_final_status_enum" DEFAULT 'On Review' NOT NULL,
 	"team_code" text NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
@@ -115,6 +125,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"id_instagram" text,
 	"nisn" text,
 	"consent" boolean DEFAULT false NOT NULL,
+	"real_consent" boolean DEFAULT false NOT NULL,
 	"is_registration_complete" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
@@ -162,13 +173,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "competition_submission" ADD CONSTRAINT "competition_submission_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "competition_submission" ADD CONSTRAINT "competition_submission_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "competition_submission" ADD CONSTRAINT "competition_submission_type_id_competition_submission_requirement_type_id_fk" FOREIGN KEY ("type_id") REFERENCES "public"."competition_submission_requirement"("type_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "competition_submission" ADD CONSTRAINT "competition_submission_type_id_competition_submission_requirement_type_id_fk" FOREIGN KEY ("type_id") REFERENCES "public"."competition_submission_requirement"("type_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -222,19 +233,19 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_document" ADD CONSTRAINT "team_document_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "team_document" ADD CONSTRAINT "team_document_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_document" ADD CONSTRAINT "team_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "team_document" ADD CONSTRAINT "team_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_member_document" ADD CONSTRAINT "team_member_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "team_member_document" ADD CONSTRAINT "team_member_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -246,13 +257,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "user_document" ADD CONSTRAINT "user_document_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "user_document" ADD CONSTRAINT "user_document_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "user_document" ADD CONSTRAINT "user_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "user_document" ADD CONSTRAINT "user_document_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

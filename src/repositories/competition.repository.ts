@@ -380,7 +380,7 @@ export const updateSubmissionStatus = async (
   typeId: string,
   status: z.infer<typeof submissionStatusSchema>,
 ) => {
-  const result = await db
+  return await db
     .update(competitionSubmission)
     .set({ status })
     .where(
@@ -388,7 +388,6 @@ export const updateSubmissionStatus = async (
         eq(competitionSubmission.teamId, teamId),
         eq(competitionSubmission.typeId, typeId),
       ),
-    );
-
-  return result;
+    )
+    .returning();
 };
