@@ -5,3 +5,7 @@ export * from './team-member.schema';
 export * from './team.schema';
 export * from './user.schema';
 export * from './verification.schema';
+export * from './event.schema';
+export * from './event-team.schema';
+export * from './event-team-member.schema';
+export * from './event-verification.schema';
