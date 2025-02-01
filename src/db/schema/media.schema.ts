@@ -14,6 +14,13 @@ export const mediaBucketEnum = pgEnum('media_bucket_enum', [
   'submission-arkalogica',
   'submission-hackvidia',
   'submission-datavidia',
+  'twibbon-event',
+  'poster-event',
+  'submission-awal-event',
+  'submission-academya-softeng',
+  'submission-academya-datsci',
+  'submission-academya-uiux',
+  'submission-academya-pm',
 ]);
 
 export const media = pgTable('media', {
