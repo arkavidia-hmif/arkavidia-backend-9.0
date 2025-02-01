@@ -7,6 +7,8 @@ import {
   competitionProtectedRouter,
   competitionRouter,
 } from './competition.controller';
+import { eventTeamProtectedRouter } from './event-team.controller';
+import { eventProtectedRouter, eventRouter } from './event.controller';
 import { healthRouter } from './health.controller';
 import { mediaRouter } from './media.controller';
 import { teamMemberProtectedRouter } from './team-member.controller';
@@ -17,6 +19,7 @@ const unprotectedApiRouter = new OpenAPIHono();
 unprotectedApiRouter.route('/', healthRouter);
 unprotectedApiRouter.route('/', authRouter);
 unprotectedApiRouter.route('/', competitionRouter);
+unprotectedApiRouter.route('/', eventRouter);
 
 const protectedApiRouter = new OpenAPIHono();
 protectedApiRouter.route('/', authProtectedRouter);
@@ -28,6 +31,8 @@ protectedApiRouter.route('/', userProtectedRouter);
 protectedApiRouter.route('/', competitionProtectedRouter);
 protectedApiRouter.route('/', analyticsProtectedRouter);
 protectedApiRouter.route('/', adminCompetitionProtectedRouter);
+protectedApiRouter.route('/', eventProtectedRouter);
+protectedApiRouter.route('/', eventTeamProtectedRouter);
 
 export const apiRouter = new OpenAPIHono();
 apiRouter.route('/', unprotectedApiRouter);
