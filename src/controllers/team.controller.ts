@@ -270,6 +270,8 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
   }
 
   // Add user to  team
+  await updateTeam(db, team.id, { verificationStatus: 'INCOMPLETE' });
+
   const newTeamMember = await insertUserToTeam(db, team.id, userId);
 
   return c.json(newTeamMember, 200);
