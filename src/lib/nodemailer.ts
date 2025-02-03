@@ -25,6 +25,10 @@ export const generateEmailTemplate = async (
     title: string;
     message: string;
     link?: string;
+    errorList?: {
+      title: string;
+      error: string;
+    }[];
   },
   sourcePath: string = 'src/lib/email.html',
 ) => {
@@ -84,8 +88,8 @@ export const sendVerificationDenyEmail = async (
     html: await generateEmailTemplate(
       {
         title: `Tim ${teamName} gagal diverifikasi`,
-        message: turnErrorToList(errors),
-        link: `${env.FE_URL}/dashboard/${competitionSlug}`,
+        message: `Tim ${teamName} gagal diverifikasi karena alasan berikut:`,
+        errorList: turnErrorToList(errors),
       },
       'src/lib/generic-email.html',
     ),
