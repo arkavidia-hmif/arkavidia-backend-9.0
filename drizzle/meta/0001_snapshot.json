@@ -1,6 +1,6 @@
 {
-  "id": "3ecd8c4d-595e-4b39-8a63-62827e62d1a4",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "bff2f1f1-c224-4ff9-8a2a-ae3d886bf216",
+  "prevId": "3ecd8c4d-595e-4b39-8a63-62827e62d1a4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -98,6 +98,208 @@
       "uniqueConstraints": {
         "user_identity_email_unique": {
           "name": "user_identity_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_member": {
+      "name": "team_member",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "team_member_role_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "team_member_user_id_user_id_fk": {
+          "name": "team_member_user_id_user_id_fk",
+          "tableFrom": "team_member",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "team_member_team_id_team_id_fk": {
+          "name": "team_member_team_id_team_id_fk",
+          "tableFrom": "team_member",
+          "tableTo": "team",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "team_member_user_id_team_id_pk": {
+          "name": "team_member_user_id_team_id_pk",
+          "columns": [
+            "user_id",
+            "team_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "birth_date": {
+          "name": "birth_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "education": {
+          "name": "education",
+          "type": "user_education_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entry_source": {
+          "name": "entry_source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "instance": {
+          "name": "instance",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_line": {
+          "name": "id_line",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_discord": {
+          "name": "id_discord",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_instagram": {
+          "name": "id_instagram",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nisn": {
+          "name": "nisn",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consent": {
+          "name": "consent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_registration_complete": {
+          "name": "is_registration_complete",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_id_user_identity_id_fk": {
+          "name": "user_id_user_identity_id_fk",
+          "tableFrom": "user",
+          "tableTo": "user_identity",
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_email_unique": {
+          "name": "user_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
@@ -558,73 +760,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.team_member": {
-      "name": "team_member",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "team_id": {
-          "name": "team_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "team_member_role_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "team_member_user_id_user_id_fk": {
-          "name": "team_member_user_id_user_id_fk",
-          "tableFrom": "team_member",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "team_member_team_id_team_id_fk": {
-          "name": "team_member_team_id_team_id_fk",
-          "tableFrom": "team_member",
-          "tableTo": "team",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "team_member_user_id_team_id_pk": {
-          "name": "team_member_user_id_team_id_pk",
-          "columns": [
-            "user_id",
-            "team_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.team": {
       "name": "team",
       "schema": "",
@@ -697,141 +832,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.user": {
-      "name": "user",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "email": {
-          "name": "email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "full_name": {
-          "name": "full_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "birth_date": {
-          "name": "birth_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "education": {
-          "name": "education",
-          "type": "user_education_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "entry_source": {
-          "name": "entry_source",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "instance": {
-          "name": "instance",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phone_number": {
-          "name": "phone_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id_line": {
-          "name": "id_line",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id_discord": {
-          "name": "id_discord",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id_instagram": {
-          "name": "id_instagram",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "nisn": {
-          "name": "nisn",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "consent": {
-          "name": "consent",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "is_registration_complete": {
-          "name": "is_registration_complete",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_id_user_identity_id_fk": {
-          "name": "user_id_user_identity_id_fk",
-          "tableFrom": "user",
-          "tableTo": "user_identity",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_email_unique": {
-          "name": "user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.team_document": {
       "name": "team_document",
       "schema": "",
@@ -881,7 +881,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_document_media_id_media_id_fk": {
@@ -894,7 +894,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -967,7 +967,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_member_document_team_id_user_id_team_member_team_id_user_id_fk": {
@@ -1050,7 +1050,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "user_document_media_id_media_id_fk": {
@@ -1063,7 +1063,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1099,13 +1099,21 @@
         "user"
       ]
     },
-    "public.phase_enum": {
-      "name": "phase_enum",
+    "public.team_member_role_enum": {
+      "name": "team_member_role_enum",
       "schema": "public",
       "values": [
-        "pre-eliminary",
-        "final",
-        "verification"
+        "leader",
+        "member"
+      ]
+    },
+    "public.user_education_enum": {
+      "name": "user_education_enum",
+      "schema": "public",
+      "values": [
+        "s1",
+        "s2",
+        "sma"
       ]
     },
     "public.media_bucket_enum": {
@@ -1124,21 +1132,13 @@
         "submission-datavidia"
       ]
     },
-    "public.team_member_role_enum": {
-      "name": "team_member_role_enum",
+    "public.phase_enum": {
+      "name": "phase_enum",
       "schema": "public",
       "values": [
-        "leader",
-        "member"
-      ]
-    },
-    "public.user_education_enum": {
-      "name": "user_education_enum",
-      "schema": "public",
-      "values": [
-        "s1",
-        "s2",
-        "sma"
+        "pre-eliminary",
+        "final",
+        "verification"
       ]
     },
     "public.team_document_type_enum": {

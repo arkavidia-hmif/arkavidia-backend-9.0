@@ -3,7 +3,9 @@ import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
 import {
+  CompetitionTeamVerificationStatusEnum,
   TeamDocumentTypeEnum,
+  TeamMember,
   competitionSubmission,
   team,
   teamDocument,
@@ -23,7 +25,13 @@ import {
   type TeamMemberRelationOption,
   deleteAllTeamMemberDocument,
   getTeamMemberCount,
+  isTeamMemberDocumentsPresent,
+  isTeamMemberDocumentsVerified,
 } from './team-member.repository';
+import {
+  isUserDocumentsPresent,
+  isUserDocumentsVerified,
+} from './user.repository';
 
 interface CompetitionTeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
@@ -264,6 +272,11 @@ export const getTeamDocument = async (
   });
 };
 
+export const getAllTeamDocuments = async (db: Database, teamId: string) => {
+  const buktiPembayaran = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+  return { buktiPembayaran };
+};
+
 export const createTeamDocument = async (
   db: Database,
   values: z.infer<typeof CreateTeamDocumentSchema>,
@@ -296,6 +309,8 @@ export const updatePaymentProofTeam = async (
       teamId,
       mediaId: paymentProofMediaId,
       type: 'bukti-pembayaran',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -313,6 +328,85 @@ export const isTeamDocumentsVerified = async (
   );
 
   return !!buktiPembayaranDocument?.isVerified;
+};
+
+export const isTeamDocumentsPresent = async (db: Database, teamId: string) => {
+  const documents = await db.query.teamDocument.findMany({
+    where: eq(teamDocument.teamId, teamId),
+  });
+
+  const buktiPembayaranDocument = documents.find(
+    (d) => d.type === 'bukti-pembayaran',
+  );
+
+  return !!buktiPembayaranDocument;
+};
+
+export const isAllDocumentsPresent = async (
+  db: Database,
+  teamId: string,
+  teamMembers: TeamMember[],
+) => {
+  let verdict: boolean = true;
+  const team = await getTeamById(db, teamId, { teamMember: true });
+
+  if (!team) return false;
+
+  verdict =
+    verdict && !(await isTeamDocumentsPresent(db, teamId)) ? false : verdict;
+  for (const member of teamMembers) {
+    verdict =
+      verdict && !(await isUserDocumentsPresent(db, member.userId))
+        ? false
+        : verdict;
+    verdict =
+      verdict &&
+      !(await isTeamMemberDocumentsPresent(db, teamId, member.userId))
+        ? false
+        : verdict;
+    if (!verdict) break;
+  }
+
+  return verdict;
+};
+
+export const getVerdict = async (
+  db: Database,
+  teamId: string,
+  teamMembers: TeamMember[],
+) => {
+  let verdict: boolean = true;
+
+  verdict =
+    verdict && !(await isTeamDocumentsVerified(db, teamId)) ? false : verdict;
+  for (const member of teamMembers) {
+    verdict =
+      verdict && !(await isUserDocumentsVerified(db, member.userId))
+        ? false
+        : verdict;
+    verdict =
+      verdict &&
+      !(await isTeamMemberDocumentsVerified(db, teamId, member.userId))
+        ? false
+        : verdict;
+    if (!verdict) break;
+  }
+
+  return verdict;
+};
+
+export const inferVerificationStatus = async (
+  db: Database,
+  teamId: string,
+  admin: boolean = false,
+): Promise<CompetitionTeamVerificationStatusEnum> => {
+  const team = await getTeamById(db, teamId, { teamMember: true });
+  if (!team) return 'INCOMPLETE';
+  if (!(await isAllDocumentsPresent(db, teamId, team.teamMembers)))
+    return 'INCOMPLETE';
+  if (!admin) return 'WAITING';
+  if (await getVerdict(db, teamId, team.teamMembers)) return 'VERIFIED';
+  return 'DENIED';
 };
 
 /** Team Submissions */

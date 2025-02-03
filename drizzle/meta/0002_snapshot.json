@@ -1,6 +1,6 @@
 {
-  "id": "3ecd8c4d-595e-4b39-8a63-62827e62d1a4",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "40849c2b-31f4-4d98-be4e-9bc22af3278c",
+  "prevId": "bff2f1f1-c224-4ff9-8a2a-ae3d886bf216",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -294,7 +294,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "competition_submission_type_id_competition_submission_requirement_type_id_fk": {
@@ -307,7 +307,7 @@
           "columnsTo": [
             "type_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "competition_submission_media_id_media_id_fk": {
@@ -881,7 +881,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_document_media_id_media_id_fk": {
@@ -894,7 +894,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -967,7 +967,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_member_document_team_id_user_id_team_member_team_id_user_id_fk": {
@@ -1050,7 +1050,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "user_document_media_id_media_id_fk": {
@@ -1063,7 +1063,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

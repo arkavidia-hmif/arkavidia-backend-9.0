@@ -1,5 +1,4 @@
 import { db } from '~/db/drizzle';
-import { CompetitionTeamVerificationStatusEnum } from '~/db/schema';
 import {
   getCompetitionById,
   getCompetitionSubmissionRequirement,
@@ -18,6 +17,7 @@ import {
   getTeamByCode,
   getTeamById,
   getUserTeams,
+  inferVerificationStatus,
   insertUserToTeam,
   updatePaymentProofTeam,
   updateTeam,
@@ -72,6 +72,7 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
 
     const team = await createTeam(db, competitionId, name);
     await insertUserToTeam(db, team.id, userId);
+    await updateTeam(db, team.id, { verificationStatus: 'INCOMPLETE' });
     return c.json(team, 200);
   } catch (error) {
     if (error instanceof Error) {
@@ -162,12 +163,10 @@ teamProtectedRouter.openapi(putTeamDocumentRoute, async (c) => {
 
   await updatePaymentProofTeam(db, teamId, paymentProofMediaId);
 
-  const verificationStatus: CompetitionTeamVerificationStatusEnum =
-    team?.verificationStatus === 'DENIED' ||
-    team?.verificationStatus === 'CHANGED'
+  const verificationStatus =
+    team?.verificationStatus === 'DENIED'
       ? 'CHANGED'
-      : 'WAITING';
-
+      : await inferVerificationStatus(db, teamId);
   await updateTeam(db, teamId, { verificationStatus });
 
   const updatedTeam = await getTeamById(db, teamId, {

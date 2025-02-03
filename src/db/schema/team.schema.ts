@@ -12,7 +12,7 @@ import { teamDocument } from './verification.schema';
 
 export const teamVerificationStatusEnum = pgEnum(
   'team_verification_status_enum',
-  ['VERIFIED', 'DENIED', 'WAITING', 'CHANGED'],
+  ['INCOMPLETE', 'VERIFIED', 'DENIED', 'WAITING', 'CHANGED'],
 );
 
 export const competitionTeamPreeliminaryStatusEnum = pgEnum(
@@ -31,7 +31,9 @@ export const team = pgTable('team', {
     .references(() => competition.id, { onDelete: 'cascade' }),
   name: text('team_name').notNull(),
   stage: stageEnum('stage').notNull().default('pre-eliminary'),
-  verificationStatus: teamVerificationStatusEnum('verification_status'),
+  verificationStatus: teamVerificationStatusEnum('verification_status').default(
+    'INCOMPLETE',
+  ),
   preeliminaryStatus: competitionTeamPreeliminaryStatusEnum(
     'preeliminary_status',
   )
