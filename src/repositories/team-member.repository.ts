@@ -48,6 +48,12 @@ export const getTeamMember = async (
   });
 };
 
+export const getUserTeamMember = async (db: Database, userId: string) => {
+  return await db.query.teamMember.findMany({
+    where: eq(teamMember.userId, userId),
+  });
+};
+
 export const getAllTeamMembers = async (
   db: Database,
   teamId: string,

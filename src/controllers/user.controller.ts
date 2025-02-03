@@ -1,5 +1,11 @@
 import { db } from '~/db/drizzle';
 import { findUserIdentityById } from '~/repositories/auth.repository';
+import { getUserTeamMember } from '~/repositories/team-member.repository';
+import {
+  getTeamById,
+  inferVerificationStatus,
+  updateTeam,
+} from '~/repositories/team.repository';
 import {
   getUser,
   updateKartuUser,
@@ -52,5 +58,19 @@ userProtectedRouter.openapi(updateUserDocumentRoute, async (c) => {
   if (kartuMediaId) await updateKartuUser(db, userId, kartuMediaId);
 
   const updatedUser = await getUser(db, userId, { document: true });
+  const userTeams = await getUserTeamMember(db, userId);
+
+  await Promise.all(
+    userTeams.map(async (t) => {
+      const team = await getTeamById(db, t.teamId);
+      if (!team) return;
+      const verificationStatus =
+        team?.verificationStatus === 'DENIED'
+          ? 'CHANGED'
+          : await inferVerificationStatus(db, team.id);
+      await updateTeam(db, team.id, { verificationStatus });
+    }),
+  );
+
   return c.json(updatedUser, 200);
 });
