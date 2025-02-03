@@ -54,10 +54,9 @@ app.get(
   }),
 );
 
-setupCron()
+setupCron();
 
 console.log(`Server is running on port ${env.PORT}`);
-
 
 serve({
   fetch: app.fetch,

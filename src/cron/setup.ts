@@ -1,4 +1,4 @@
-import { competitionErrorEmailCron } from "./comp-error-email.cron";
+import { competitionErrorEmailCron } from './comp-error-email.cron';
 
 export function setupCron() {
   if (
