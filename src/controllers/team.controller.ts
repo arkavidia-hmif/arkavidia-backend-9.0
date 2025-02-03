@@ -72,6 +72,7 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
 
     const team = await createTeam(db, competitionId, name);
     await insertUserToTeam(db, team.id, userId);
+    await updateTeam(db, team.id, { verificationStatus: 'INCOMPLETE' });
     return c.json(team, 200);
   } catch (error) {
     if (error instanceof Error) {
