@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
 import {
+  CompetitionTeamVerificationStatusEnum,
   TeamDocumentTypeEnum,
   TeamMember,
   competitionSubmission,
@@ -334,7 +335,11 @@ export const isTeamDocumentsPresent = async (db: Database, teamId: string) => {
   return !!buktiPembayaranDocument;
 };
 
-export const isAllDocumentsPresent = async (db: Database, teamId: string) => {
+export const isAllDocumentsPresent = async (
+  db: Database,
+  teamId: string,
+  teamMembers: TeamMember[],
+) => {
   let verdict: boolean = true;
   const team = await getTeamById(db, teamId, { teamMember: true });
 
@@ -342,7 +347,7 @@ export const isAllDocumentsPresent = async (db: Database, teamId: string) => {
 
   verdict =
     verdict && !(await isTeamDocumentsPresent(db, teamId)) ? false : verdict;
-  for (const member of team.teamMembers) {
+  for (const member of teamMembers) {
     verdict =
       verdict && !(await isUserDocumentsPresent(db, member.userId))
         ? false
@@ -381,6 +386,20 @@ export const getVerdict = async (
   }
 
   return verdict;
+};
+
+export const inferVerificationStatus = async (
+  db: Database,
+  teamId: string,
+  admin: boolean = false,
+): Promise<CompetitionTeamVerificationStatusEnum> => {
+  const team = await getTeamById(db, teamId, { teamMember: true });
+  if (!team) return 'INCOMPLETE';
+  if (!(await isAllDocumentsPresent(db, teamId, team.teamMembers)))
+    return 'INCOMPLETE';
+  if (!admin) return 'WAITING';
+  if (await getVerdict(db, teamId, team.teamMembers)) return 'VERIFIED';
+  return 'DENIED';
 };
 
 /** Team Submissions */
