@@ -250,6 +250,8 @@ export const updatePosterTeamMember = async (
       teamId,
       mediaId: posterMediaId,
       type: 'poster',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -271,6 +273,8 @@ export const updateTwibbonTeamMember = async (
       teamId,
       mediaId: twibbonMediaId,
       type: 'twibbon',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };

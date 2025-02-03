@@ -304,6 +304,8 @@ export const updatePaymentProofTeam = async (
       teamId,
       mediaId: paymentProofMediaId,
       type: 'bukti-pembayaran',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };

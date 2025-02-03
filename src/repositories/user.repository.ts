@@ -73,6 +73,8 @@ export const updateKartuUser = async (
     await createUserDocument(db, userId, {
       mediaId: kartuMediaId,
       type: 'kartu-identitas',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -89,6 +91,8 @@ export const updateNisnUser = async (
     await createUserDocument(db, userId, {
       mediaId: nisnMediaId,
       type: 'nisn',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
