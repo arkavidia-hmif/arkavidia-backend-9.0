@@ -16,16 +16,32 @@ export interface CompVerifErrorInterface {
 }
 
 export const turnErrorToList = (errors: CompVerifErrorInterface) => {
-  let errorList = 'Tim gagal diverifikasi karena alasan berikut:';
-
-  if (errors.buktiPembayaran)
-    errorList += `\n- Bukti pembayaran: ${errors.buktiPembayaran}`;
-
+  const errorList = [];
+  if (errors.buktiPembayaran) {
+    errorList.push({
+      title: 'Bukti Pembayaran',
+      error: errors.buktiPembayaran,
+    });
+  }
   errors.teamMember.forEach((tm) => {
-    if (tm.poster) errorList += `\n- ${tm.userName} poster: ${tm.poster}`;
-    if (tm.twibbon) errorList += `\n- ${tm.userName} twibbon: ${tm.twibbon}`;
-    if (tm.kartuIdentitas)
-      errorList += `\n- ${tm.userName} kartuIdentitas: ${tm.kartuIdentitas}`;
+    if (tm.twibbon) {
+      errorList.push({
+        title: `Twibbon - ${tm.userName}`,
+        error: tm.twibbon,
+      });
+    }
+    if (tm.poster) {
+      errorList.push({
+        title: `Poster - ${tm.userName}`,
+        error: tm.poster,
+      });
+    }
+    if (tm.kartuIdentitas) {
+      errorList.push({
+        title: `Kartu Identitas - ${tm.userName}`,
+        error: tm.kartuIdentitas,
+      });
+    }
   });
 
   return errorList;
