@@ -48,6 +48,12 @@ export const getTeamMember = async (
   });
 };
 
+export const getUserTeamMember = async (db: Database, userId: string) => {
+  return await db.query.teamMember.findMany({
+    where: eq(teamMember.userId, userId),
+  });
+};
+
 export const getAllTeamMembers = async (
   db: Database,
   teamId: string,
@@ -185,6 +191,16 @@ export const getTeamMemberDocument = async (
   });
 };
 
+export const getAllTeamMemberDocuments = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+) => {
+  const twibbon = await getTeamMemberDocument(db, userId, teamId, 'twibbon');
+  const poster = await getTeamMemberDocument(db, userId, teamId, 'poster');
+  return { twibbon, poster };
+};
+
 export const createTeamMemberDocument = async (
   db: Database,
   values: z.infer<typeof InsertTeamMemberDocumentSchema>,
@@ -244,6 +260,8 @@ export const updatePosterTeamMember = async (
       teamId,
       mediaId: posterMediaId,
       type: 'poster',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -265,6 +283,8 @@ export const updateTwibbonTeamMember = async (
       teamId,
       mediaId: twibbonMediaId,
       type: 'twibbon',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -285,4 +305,22 @@ export const isTeamMemberDocumentsVerified = async (
   const posterDocument = documents.find((d) => d.type === 'poster');
 
   return !!twibbonDocument?.isVerified && !!posterDocument?.isVerified;
+};
+
+export const isTeamMemberDocumentsPresent = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  const documents = await db.query.teamMemberDocument.findMany({
+    where: and(
+      eq(teamMemberDocument.teamId, teamId),
+      eq(teamMemberDocument.userId, userId),
+    ),
+  });
+
+  const twibbonDocument = documents.find((d) => d.type === 'twibbon');
+  const posterDocument = documents.find((d) => d.type === 'poster');
+
+  return !!twibbonDocument && !!posterDocument;
 };

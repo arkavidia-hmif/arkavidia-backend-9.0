@@ -1,6 +1,6 @@
 {
-  "id": "3ecd8c4d-595e-4b39-8a63-62827e62d1a4",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "111e1a20-e12f-4a00-b941-c3f281155f1b",
+  "prevId": "40849c2b-31f4-4d98-be4e-9bc22af3278c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -294,7 +294,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "competition_submission_type_id_competition_submission_requirement_type_id_fk": {
@@ -307,7 +307,7 @@
           "columnsTo": [
             "type_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "competition_submission_media_id_media_id_fk": {
@@ -781,6 +781,13 @@
           "notNull": true,
           "default": false
         },
+        "real_consent": {
+          "name": "real_consent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "is_registration_complete": {
           "name": "is_registration_complete",
           "type": "boolean",
@@ -881,7 +888,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_document_media_id_media_id_fk": {
@@ -894,7 +901,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -967,7 +974,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_member_document_team_id_user_id_team_member_team_id_user_id_fk": {
@@ -1050,7 +1057,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "user_document_media_id_media_id_fk": {
@@ -1063,7 +1070,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

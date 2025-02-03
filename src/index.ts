@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 
 import { env } from './configs/env.config';
 import { apiRouter } from './controllers/api.controller';
+import { setupCron } from './cron/setup';
 
 const app = new OpenAPIHono({
   defaultHook: (result, c) => {
@@ -52,6 +53,8 @@ app.get(
     },
   }),
 );
+
+setupCron();
 
 console.log(`Server is running on port ${env.PORT}`);
 

@@ -2,6 +2,11 @@ import fs from 'fs';
 import handlebars from 'handlebars';
 import nodemailer from 'nodemailer';
 import { env } from '~/configs/env.config';
+import {
+  CompVerifErrorInterface,
+  turnErrorToList,
+} from '~/cron/comp-error-email.cron';
+import { expandCompetitionTitle } from '~/utils/competition-utils';
 
 const MAIL_FROM = `Arkavidia <${env.SMTP_USER}>`;
 
@@ -15,12 +20,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const generateEmailTemplate = async (data: {
-  title: string;
-  message: string;
-  link: string;
-}) => {
-  const source = fs.readFileSync('src/lib/email.html', 'utf8');
+export const generateEmailTemplate = async (
+  data: {
+    title: string;
+    message: string;
+    link?: string;
+  },
+  sourcePath: string = 'src/lib/email.html',
+) => {
+  const source = fs.readFileSync(sourcePath, 'utf8');
   const template = handlebars.compile(source);
   return template({ ...data, fe_url: env.FE_URL });
 };
@@ -61,4 +69,47 @@ export const sendResetPasswordEmail = async (
   });
 
   console.log('Message sent: %s', info.messageId);
+};
+
+export const sendVerificationDenyEmail = async (
+  targetEmail: string,
+  teamName: string,
+  competitionSlug: string,
+  errors: CompVerifErrorInterface,
+) => {
+  await transporter.sendMail({
+    from: MAIL_FROM,
+    to: targetEmail,
+    subject: 'Arkavidia - Fix your team!',
+    html: await generateEmailTemplate(
+      {
+        title: `Tim ${teamName} gagal diverifikasi`,
+        message: turnErrorToList(errors),
+        link: `${env.FE_URL}/dashboard/${competitionSlug}`,
+      },
+      'src/lib/generic-email.html',
+    ),
+  });
+
+  console.log('Sent deny email');
+};
+
+export const sendVerificationAcceptEmail = async (
+  targetEmail: string,
+  teamName: string,
+  competitionSlug: string,
+) => {
+  await transporter.sendMail({
+    from: MAIL_FROM,
+    to: targetEmail,
+    subject: 'Arkavidia - Your team has been verified!',
+    html: await generateEmailTemplate(
+      {
+        title: `Tim ${teamName} berhasil diverifikasi`,
+        message: `Selamat! Tim ${teamName} untuk lomba ${expandCompetitionTitle(competitionSlug)} telah berhasil diverifikasi. Untuk kembali ke dashboard anda dapat menekan tombol di bawah ini.`,
+        link: `${env.FE_URL}/dashboard/${competitionSlug}`,
+      },
+      'src/lib/generic-email.html',
+    ),
+  });
 };

@@ -73,6 +73,8 @@ export const updateKartuUser = async (
     await createUserDocument(db, userId, {
       mediaId: kartuMediaId,
       type: 'kartu-identitas',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -89,6 +91,8 @@ export const updateNisnUser = async (
     await createUserDocument(db, userId, {
       mediaId: nisnMediaId,
       type: 'nisn',
+      isVerified: false,
+      verificationError: null,
     });
   }
 };
@@ -103,6 +107,11 @@ export const getUserDocument = async (
   return db.query.userDocument.findFirst({
     where: and(eq(userDocument.userId, userId), eq(userDocument.type, type)),
   });
+};
+
+export const getAllUserDocuments = async (db: Database, userId: string) => {
+  const kartuIdentitas = await getUserDocument(db, userId, 'kartu-identitas');
+  return { kartuIdentitas };
 };
 
 export const createUserDocument = async (
@@ -141,4 +150,16 @@ export const isUserDocumentsVerified = async (
   );
 
   return !!kartuIdentitasDocument?.isVerified;
+};
+
+export const isUserDocumentsPresent = async (db: Database, userId: string) => {
+  const documents = await db.query.userDocument.findMany({
+    where: eq(userDocument.userId, userId),
+  });
+
+  const kartuIdentitasDocument = documents.find(
+    (d) => d.type === 'kartu-identitas',
+  );
+
+  return !!kartuIdentitasDocument;
 };
