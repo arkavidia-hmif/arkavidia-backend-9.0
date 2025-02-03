@@ -286,3 +286,21 @@ export const isTeamMemberDocumentsVerified = async (
 
   return !!twibbonDocument?.isVerified && !!posterDocument?.isVerified;
 };
+
+export const isTeamMemberDocumentsPresent = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  const documents = await db.query.teamMemberDocument.findMany({
+    where: and(
+      eq(teamMemberDocument.teamId, teamId),
+      eq(teamMemberDocument.userId, userId),
+    ),
+  });
+
+  const twibbonDocument = documents.find((d) => d.type === 'twibbon');
+  const posterDocument = documents.find((d) => d.type === 'poster');
+
+  return !!twibbonDocument && !!posterDocument;
+};

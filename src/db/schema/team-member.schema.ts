@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgEnum, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
 
 import { team } from './team.schema';
@@ -37,3 +37,5 @@ export const teamMemberRelations = relations(teamMember, ({ one, many }) => ({
   }),
   document: many(teamMemberDocument),
 }));
+
+export type TeamMember = InferSelectModel<typeof teamMember>;

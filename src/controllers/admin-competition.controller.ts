@@ -8,22 +8,15 @@ import {
   getCompetitionSubmissionRequirement,
   updateSubmissionFeedback,
 } from '~/repositories/competition.repository';
-import {
-  isTeamMemberDocumentsVerified,
-  updateTeamMemberDocument,
-} from '~/repositories/team-member.repository';
+import { updateTeamMemberDocument } from '~/repositories/team-member.repository';
 import {
   getAllTeamsPaginated,
   getTeamById,
-  isTeamDocumentsVerified,
+  getVerdict,
   updateTeam,
   updateTeamDocument,
 } from '~/repositories/team.repository';
-import {
-  getUser,
-  isUserDocumentsVerified,
-  updateUserDocument,
-} from '~/repositories/user.repository';
+import { getUser, updateUserDocument } from '~/repositories/user.repository';
 import {
   getAdminAllCompetitionTeamsRoute,
   getAdminCompetitionTeamInformationRoute,
@@ -133,6 +126,9 @@ adminCompetitionProtectedRouter.openapi(
     if (!team || team.competition.id !== competitionId)
       return c.json({ error: "Team doesn't exist!" }, 400);
 
+    if (team.verificationStatus === 'INCOMPLETE')
+      return c.json({ error: "You can't verify an incomplete team yet!" });
+
     if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
 
     if (teamMember) {
@@ -163,23 +159,7 @@ adminCompetitionProtectedRouter.openapi(
       }
     }
 
-    let verdict: boolean = true;
-
-    verdict =
-      verdict && !(await isTeamDocumentsVerified(db, teamId)) ? false : verdict;
-    for (const member of team.teamMembers) {
-      verdict =
-        verdict && !(await isUserDocumentsVerified(db, member.userId))
-          ? false
-          : verdict;
-      verdict =
-        verdict &&
-        !(await isTeamMemberDocumentsVerified(db, teamId, member.userId))
-          ? false
-          : verdict;
-      if (!verdict) break;
-    }
-
+    const verdict = await getVerdict(db, teamId, team.teamMembers);
     const verificationStatus: CompetitionTeamVerificationStatusEnum = verdict
       ? 'VERIFIED'
       : 'DENIED';

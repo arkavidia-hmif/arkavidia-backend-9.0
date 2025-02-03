@@ -2,7 +2,7 @@ import fs from 'fs';
 import handlebars from 'handlebars';
 import nodemailer from 'nodemailer';
 import { env } from '~/configs/env.config';
-import { expandCompetitionTitle } from '~/utils/competition-title';
+import { expandCompetitionTitle } from '~/utils/competition-utils';
 
 const MAIL_FROM = `Arkavidia <${env.SMTP_USER}>`;
 

@@ -142,3 +142,15 @@ export const isUserDocumentsVerified = async (
 
   return !!kartuIdentitasDocument?.isVerified;
 };
+
+export const isUserDocumentsPresent = async (db: Database, userId: string) => {
+  const documents = await db.query.userDocument.findMany({
+    where: eq(userDocument.userId, userId),
+  });
+
+  const kartuIdentitasDocument = documents.find(
+    (d) => d.type === 'kartu-identitas',
+  );
+
+  return !!kartuIdentitasDocument;
+};
