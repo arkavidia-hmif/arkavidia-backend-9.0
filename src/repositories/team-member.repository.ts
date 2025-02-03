@@ -191,6 +191,16 @@ export const getTeamMemberDocument = async (
   });
 };
 
+export const getAllTeamMemberDocuments = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+) => {
+  const twibbon = await getTeamMemberDocument(db, userId, teamId, 'twibbon');
+  const poster = await getTeamMemberDocument(db, userId, teamId, 'poster');
+  return { twibbon, poster };
+};
+
 export const createTeamMemberDocument = async (
   db: Database,
   values: z.infer<typeof InsertTeamMemberDocumentSchema>,

@@ -2,6 +2,7 @@ import fs from 'fs';
 import handlebars from 'handlebars';
 import nodemailer from 'nodemailer';
 import { env } from '~/configs/env.config';
+import { CompVerifErrorInterface, turnErrorToList } from '~/cron/comp-error-email.cron';
 import { expandCompetitionTitle } from '~/utils/competition-utils';
 
 const MAIL_FROM = `Arkavidia <${env.SMTP_USER}>`;
@@ -67,7 +68,28 @@ export const sendResetPasswordEmail = async (
   console.log('Message sent: %s', info.messageId);
 };
 
-// export const sendVerificationDenyEmail = async (targetEmail: string) => {};
+export const sendVerificationDenyEmail = async (
+  targetEmail: string,
+  teamName: string,
+  competitionSlug: string,
+  errors: CompVerifErrorInterface,
+) => {
+  await transporter.sendMail({
+    from: MAIL_FROM,
+    to: targetEmail,
+    subject: 'Arkavidia - Fix your team!',
+    html: await generateEmailTemplate(
+      {
+        title: `Tim ${teamName} gagal diverifikasi`,
+        message: turnErrorToList(errors),
+        link: `${env.FE_URL}/dashboard/${competitionSlug}`,
+      },
+      'src/lib/generic-email.html',
+    ),
+  });
+
+  console.log('Sent deny email');
+};
 
 export const sendVerificationAcceptEmail = async (
   targetEmail: string,

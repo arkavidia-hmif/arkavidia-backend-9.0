@@ -109,6 +109,11 @@ export const getUserDocument = async (
   });
 };
 
+export const getAllUserDocuments = async (db: Database, userId: string) => {
+  const kartuIdentitas = await getUserDocument(db, userId, 'kartu-identitas');
+  return { kartuIdentitas };
+};
+
 export const createUserDocument = async (
   db: Database,
   userId: string,

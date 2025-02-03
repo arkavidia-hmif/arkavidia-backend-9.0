@@ -21,6 +21,7 @@
     "@trivago/prettier-plugin-sort-imports": "^5.2.0",
     "@types/nodemailer": "^6.4.17",
     "argon2": "^0.41.1",
+    "cron": "^3.5.0",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.0",
     "drizzle-zod": "^0.5.1",

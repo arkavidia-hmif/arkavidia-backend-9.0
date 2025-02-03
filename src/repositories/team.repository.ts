@@ -272,6 +272,11 @@ export const getTeamDocument = async (
   });
 };
 
+export const getAllTeamDocuments = async (db: Database, teamId: string) => {
+  const buktiPembayaran = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+  return { buktiPembayaran };
+};
+
 export const createTeamDocument = async (
   db: Database,
   values: z.infer<typeof CreateTeamDocumentSchema>,
