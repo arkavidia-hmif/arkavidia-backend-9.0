@@ -58,8 +58,8 @@ const sendErrorEmail = async () => {
         }),
       };
 
-      console.log(errors);
-      console.log(turnErrorToList(errors));
+      //   console.log(errors);
+      //   console.log(turnErrorToList(errors));
 
       await Promise.all(
         d.teamMembers.map(async (tm) => {
@@ -78,4 +78,7 @@ const sendErrorEmail = async () => {
 export const competitionErrorEmailCron = new CronJob(
   '* * * * *',
   sendErrorEmail,
+  null,
+  true,
+  'Asia/Jakarta',
 );
