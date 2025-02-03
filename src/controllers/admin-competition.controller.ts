@@ -1,5 +1,6 @@
 import { db } from '~/db/drizzle';
 import { CompetitionTeamVerificationStatusEnum } from '~/db/schema';
+import { sendVerificationAcceptEmail } from '~/lib/nodemailer';
 import { transformRoleToName } from '~/middlewares/role-access.middleware';
 import {
   getAllCompetitions,
@@ -19,6 +20,7 @@ import {
   updateTeamDocument,
 } from '~/repositories/team.repository';
 import {
+  getUser,
   isUserDocumentsVerified,
   updateUserDocument,
 } from '~/repositories/user.repository';
@@ -183,7 +185,20 @@ adminCompetitionProtectedRouter.openapi(
       : 'DENIED';
     const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
 
-    // TODO: Send email to team if not verified / verified
+    if (verificationStatus === 'VERIFIED') {
+      await Promise.all(
+        teamMember.map(async (tm) => {
+          const user = await getUser(db, tm?.userId as string);
+          if (!user) return;
+
+          await sendVerificationAcceptEmail(
+            user.email,
+            team.name,
+            team.competition.title,
+          );
+        }),
+      );
+    }
 
     return c.json(updatedTeam, 200);
   },
