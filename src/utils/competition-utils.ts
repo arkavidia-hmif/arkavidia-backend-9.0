@@ -19,6 +19,8 @@ export const getCompetitionGroupChat = (title: string) => {
       return 'https://s.hmif.dev/DiscordCTFArkavidia';
     case 'Datavidia':
       return 'https://s.hmif.dev/GrupDatavidia9';
+    case 'Hackvidia':
+      return 'https://chat.whatsapp.com/FsDOMt0os9808Ih6qVJnfk';
     default:
       return undefined;
   }
