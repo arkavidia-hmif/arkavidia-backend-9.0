@@ -127,7 +127,7 @@ adminCompetitionProtectedRouter.openapi(
       return c.json({ error: "Team doesn't exist!" }, 400);
 
     if (team.verificationStatus === 'INCOMPLETE')
-      return c.json({ error: "You can't verify an incomplete team yet!" });
+      return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
 
     if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
     if (teamMember) {
