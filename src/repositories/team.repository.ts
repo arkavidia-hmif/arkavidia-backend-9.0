@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
@@ -51,6 +51,7 @@ export const getAllTeamsPaginated = async (
     },
     limit,
     offset,
+    orderBy: [desc(team.createdAt)],
   });
 
   const totalItems = (
