@@ -12,7 +12,7 @@ import { teamDocument } from './verification.schema';
 
 export const teamVerificationStatusEnum = pgEnum(
   'team_verification_status_enum',
-  ['INCOMPLETE', 'VERIFIED', 'DENIED', 'WAITING', 'CHANGED'],
+  ['INCOMPLETE', 'VERIFIED', 'DENIED', 'WAITING', 'CHANGED', 'ON REVIEW'],
 );
 
 export const competitionTeamPreeliminaryStatusEnum = pgEnum(
