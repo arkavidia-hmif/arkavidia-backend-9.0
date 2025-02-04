@@ -92,7 +92,7 @@ const sendErrorEmail = async () => {
 };
 
 export const competitionErrorEmailCron = new CronJob(
-  '* * * * *',
+  '0 8 * * *',
   sendErrorEmail,
   null,
   true,

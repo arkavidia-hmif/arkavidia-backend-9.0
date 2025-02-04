@@ -383,7 +383,7 @@ export const getVerdict = async (
     verdict = verdict && !ud.kartuIdentitas ? false : verdict;
     errorCount += Number(!!ud.kartuIdentitas?.verificationError);
 
-    const tdm = await getAllTeamMemberDocuments(db, teamId, member.userId);
+    const tdm = await getAllTeamMemberDocuments(db, member.userId, teamId);
     verdict = verdict && (!tdm.poster || !tdm.twibbon) ? false : verdict;
     errorCount +=
       Number(!!tdm.poster?.verificationError) +
