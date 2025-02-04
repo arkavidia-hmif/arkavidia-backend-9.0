@@ -201,6 +201,15 @@ export const getAllTeamMemberDocuments = async (
   return { twibbon, poster };
 };
 
+export const countAllTeamMemberDocuments = async (
+  db: Database,
+  userId: string,
+  teamId: string,
+) => {
+  const docs = await getAllTeamMemberDocuments(db, userId, teamId);
+  return Number(!!docs.twibbon) + Number(!!docs.poster);
+};
+
 export const createTeamMemberDocument = async (
   db: Database,
   values: z.infer<typeof InsertTeamMemberDocumentSchema>,

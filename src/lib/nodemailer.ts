@@ -6,7 +6,10 @@ import {
   CompVerifErrorInterface,
   turnErrorToList,
 } from '~/cron/comp-error-email.cron';
-import { expandCompetitionTitle } from '~/utils/competition-utils';
+import {
+  expandCompetitionTitle,
+  getCompetitionGroupChat,
+} from '~/utils/competition-utils';
 
 const MAIL_FROM = `Arkavidia <${env.SMTP_USER}>`;
 
@@ -103,6 +106,14 @@ export const sendVerificationAcceptEmail = async (
   teamName: string,
   competitionSlug: string,
 ) => {
+  const message =
+    `Selamat! Tim ${teamName} untuk lomba ${expandCompetitionTitle(competitionSlug)} telah berhasil diverifikasi.` +
+      competitionSlug !==
+      'Datavidia' || competitionSlug != 'UXvidia'
+      ? `Silahkan bergabung ke grup komunitas di bawah ini untuk mendapatkan informasi lanjutan.`
+      : '';
+  const link = getCompetitionGroupChat(competitionSlug);
+
   await transporter.sendMail({
     from: MAIL_FROM,
     to: targetEmail,
@@ -110,8 +121,8 @@ export const sendVerificationAcceptEmail = async (
     html: await generateEmailTemplate(
       {
         title: `Tim ${teamName} berhasil diverifikasi`,
-        message: `Selamat! Tim ${teamName} untuk lomba ${expandCompetitionTitle(competitionSlug)} telah berhasil diverifikasi. Untuk kembali ke dashboard anda dapat menekan tombol di bawah ini.`,
-        link: `${env.FE_URL}/dashboard/${competitionSlug}`,
+        message,
+        link,
       },
       'src/lib/generic-email.html',
     ),
