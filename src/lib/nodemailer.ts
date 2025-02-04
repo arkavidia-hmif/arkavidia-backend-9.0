@@ -108,8 +108,8 @@ export const sendVerificationAcceptEmail = async (
 ) => {
   const message =
     `Selamat! Tim ${teamName} untuk lomba ${expandCompetitionTitle(competitionSlug)} telah berhasil diverifikasi.` +
-      competitionSlug !==
-      'Datavidia' || competitionSlug != 'UXvidia'
+      competitionSlug !=
+    'UXvidia'
       ? `Silahkan bergabung ke grup komunitas di bawah ini untuk mendapatkan informasi lanjutan.`
       : '';
   const link = getCompetitionGroupChat(competitionSlug);
