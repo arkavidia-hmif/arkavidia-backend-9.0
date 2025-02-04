@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
@@ -15,7 +15,6 @@ import type {
   CreateTeamDocumentSchema,
   InsertTeamSubmissionSchema,
   PutChangeTeamNameBodySchema,
-  // PostTeamVerificationBodySchema,
   UpdateTeamDocumentSchema,
   UpdateTeamSchema,
 } from '~/types/team.type';
@@ -24,14 +23,11 @@ import { getCompetitionById } from './competition.repository';
 import {
   type TeamMemberRelationOption,
   deleteAllTeamMemberDocument,
+  getAllTeamMemberDocuments,
   getTeamMemberCount,
   isTeamMemberDocumentsPresent,
-  isTeamMemberDocumentsVerified,
 } from './team-member.repository';
-import {
-  isUserDocumentsPresent,
-  isUserDocumentsVerified,
-} from './user.repository';
+import { getAllUserDocuments, isUserDocumentsPresent } from './user.repository';
 
 interface CompetitionTeamRelationOption {
   teamMember?: TeamMemberRelationOption | boolean;
@@ -55,6 +51,7 @@ export const getAllTeamsPaginated = async (
     },
     limit,
     offset,
+    orderBy: [desc(team.createdAt)],
   });
 
   const totalItems = (
@@ -347,27 +344,27 @@ export const isAllDocumentsPresent = async (
   teamId: string,
   teamMembers: TeamMember[],
 ) => {
-  let verdict: boolean = true;
+  let present: boolean = true;
   const team = await getTeamById(db, teamId, { teamMember: true });
 
   if (!team) return false;
 
-  verdict =
-    verdict && !(await isTeamDocumentsPresent(db, teamId)) ? false : verdict;
+  present =
+    present && !(await isTeamDocumentsPresent(db, teamId)) ? false : present;
   for (const member of teamMembers) {
-    verdict =
-      verdict && !(await isUserDocumentsPresent(db, member.userId))
+    present =
+      present && !(await isUserDocumentsPresent(db, member.userId))
         ? false
-        : verdict;
-    verdict =
-      verdict &&
+        : present;
+    present =
+      present &&
       !(await isTeamMemberDocumentsPresent(db, teamId, member.userId))
         ? false
-        : verdict;
-    if (!verdict) break;
+        : present;
+    if (!present) break;
   }
 
-  return verdict;
+  return present;
 };
 
 export const getVerdict = async (
@@ -375,24 +372,27 @@ export const getVerdict = async (
   teamId: string,
   teamMembers: TeamMember[],
 ) => {
-  let verdict: boolean = true;
+  let verdict = true;
+  let errorCount = 0;
 
-  verdict =
-    verdict && !(await isTeamDocumentsVerified(db, teamId)) ? false : verdict;
+  const td = await getAllTeamDocuments(db, teamId);
+  verdict = verdict && !td.buktiPembayaran ? false : verdict;
+  errorCount += Number(!!td.buktiPembayaran?.verificationError);
   for (const member of teamMembers) {
-    verdict =
-      verdict && !(await isUserDocumentsVerified(db, member.userId))
-        ? false
-        : verdict;
-    verdict =
-      verdict &&
-      !(await isTeamMemberDocumentsVerified(db, teamId, member.userId))
-        ? false
-        : verdict;
+    const ud = await getAllUserDocuments(db, member.userId);
+    verdict = verdict && !ud.kartuIdentitas ? false : verdict;
+    errorCount += Number(!!ud.kartuIdentitas?.verificationError);
+
+    const tdm = await getAllTeamMemberDocuments(db, teamId, member.userId);
+    verdict = verdict && (!tdm.poster || !tdm.twibbon) ? false : verdict;
+    errorCount +=
+      Number(!!tdm.poster?.verificationError) +
+      Number(!!tdm.twibbon?.verificationError);
+
     if (!verdict) break;
   }
 
-  return verdict;
+  return { verdict, errorCount };
 };
 
 export const inferVerificationStatus = async (

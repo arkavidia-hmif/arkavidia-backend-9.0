@@ -127,10 +127,9 @@ adminCompetitionProtectedRouter.openapi(
       return c.json({ error: "Team doesn't exist!" }, 400);
 
     if (team.verificationStatus === 'INCOMPLETE')
-      return c.json({ error: "You can't verify an incomplete team yet!" });
+      return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
 
     if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
-
     if (teamMember) {
       for (const member of teamMember) {
         if (member && member.poster)
@@ -159,10 +158,16 @@ adminCompetitionProtectedRouter.openapi(
       }
     }
 
-    const verdict = await getVerdict(db, teamId, team.teamMembers);
+    const { verdict, errorCount } = await getVerdict(
+      db,
+      teamId,
+      team.teamMembers,
+    );
     const verificationStatus: CompetitionTeamVerificationStatusEnum = verdict
       ? 'VERIFIED'
-      : 'DENIED';
+      : errorCount > 0
+        ? 'DENIED'
+        : 'ON REVIEW';
     const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
 
     if (verificationStatus === 'VERIFIED') {
