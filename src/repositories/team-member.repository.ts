@@ -182,7 +182,7 @@ export const getTeamMemberDocument = async (
   teamId: string,
   type: TeamMemberDocumentTypeEnum,
 ) => {
-  return db.query.teamMemberDocument.findFirst({
+  return await db.query.teamMemberDocument.findFirst({
     where: and(
       eq(teamMemberDocument.userId, userId),
       eq(teamMemberDocument.teamId, teamId),
