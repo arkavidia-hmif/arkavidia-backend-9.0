@@ -376,15 +376,19 @@ export const getVerdict = async (
   let errorCount = 0;
 
   const td = await getAllTeamDocuments(db, teamId);
-  verdict = verdict && !td.buktiPembayaran ? false : verdict;
+
+  verdict = verdict && !td.buktiPembayaran?.isVerified ? false : verdict;
   errorCount += Number(!!td.buktiPembayaran?.verificationError);
   for (const member of teamMembers) {
     const ud = await getAllUserDocuments(db, member.userId);
-    verdict = verdict && !ud.kartuIdentitas ? false : verdict;
+    verdict = verdict && !ud.kartuIdentitas?.isVerified ? false : verdict;
     errorCount += Number(!!ud.kartuIdentitas?.verificationError);
 
     const tdm = await getAllTeamMemberDocuments(db, member.userId, teamId);
-    verdict = verdict && (!tdm.poster || !tdm.twibbon) ? false : verdict;
+    verdict =
+      verdict && (!tdm.poster?.isVerified || !tdm.twibbon?.isVerified)
+        ? false
+        : verdict;
     errorCount +=
       Number(!!tdm.poster?.verificationError) +
       Number(!!tdm.twibbon?.verificationError);
