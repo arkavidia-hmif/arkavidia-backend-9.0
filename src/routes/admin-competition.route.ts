@@ -1,10 +1,10 @@
 import { createRoute } from '@hono/zod-openapi';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
+  AdminAllTeamQuerySchema,
   CompetitionAndTeamIdAndSubmissionIdParam,
   CompetitionAndTeamIdParam,
   GroupedTeamSubmissionSchmea as GroupedTeamSubmissionSchema,
-  PaginationQuerySchema,
   PutCompetitionTeamStatusSchema,
   PutTeamSubmissionVerdictSchema,
   PutTeamVerificationBodySchema,
@@ -56,7 +56,7 @@ export const getAdminAllCompetitionTeamsRoute = createRoute({
   path: '/admin/competition/{competitionId}/team',
   request: {
     params: CompetitionIdParam,
-    query: PaginationQuerySchema,
+    query: AdminAllTeamQuerySchema,
   },
   responses: {
     200: {

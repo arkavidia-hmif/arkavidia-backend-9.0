@@ -2,6 +2,8 @@ import { z } from 'zod';
 import {
   competitionTeamFinalStatusEnum,
   competitionTeamPreeliminaryStatusEnum,
+  stageEnum,
+  teamVerificationStatusEnum,
 } from '~/db/schema';
 
 import { ListSubmissionRequirementSchema, TeamSchema } from './team.type';
@@ -33,7 +35,52 @@ export const CompetitionAndTeamIdAndSubmissionIdParam =
     }),
   );
 
-export const PaginationQuerySchema = z.object({
+export const AdminAllTeamQuerySchema = z.object({
+  search: z
+    .string()
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+  verifStatus: z
+    .enum(teamVerificationStatusEnum.enumValues)
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+  prelimStatus: z
+    .enum(competitionTeamPreeliminaryStatusEnum.enumValues)
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+  finalStatus: z
+    .enum(competitionTeamFinalStatusEnum.enumValues)
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
+  stage: z
+    .enum(stageEnum.enumValues)
+    .optional()
+    .openapi({
+      param: {
+        in: 'query',
+        required: false,
+      },
+    }),
   page: z
     .string()
     .default('1')
