@@ -48,7 +48,10 @@ export const getAllTeamsPaginated = async (
   const offset = (page - 1) * limit;
 
   const searchQuery = query.search
-    ? or(ilike(team.name, query.search), ilike(team.id, query.search))
+    ? or(
+        ilike(team.name, `%${query.search}%`),
+        ilike(team.id, `%${query.search}%`),
+      )
     : undefined;
   const stageQuery = query.stage ? eq(team.stage, query.stage) : undefined;
   const verifStatusQuery = query.verifStatus
