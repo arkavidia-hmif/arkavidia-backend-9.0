@@ -45,13 +45,13 @@ adminCompetitionProtectedRouter.openapi(
 adminCompetitionProtectedRouter.openapi(
   getAdminAllCompetitionTeamsRoute,
   async (c) => {
-    const { page, limit } = c.req.valid('query');
+    // const { page, limit } = c.req.valid('query');
     const { competitionId } = c.req.valid('param');
 
     const competitionParticipant = await getAllTeamsPaginated(
       db,
       competitionId,
-      { page: Number(page), limit: Number(limit) },
+      c.req.valid('query'),
     );
     return c.json(competitionParticipant, 200);
   },

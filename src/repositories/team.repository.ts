@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, or } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
@@ -11,6 +11,7 @@ import {
   teamDocument,
   teamMember,
 } from '~/db/schema';
+import { AdminAllTeamQuerySchema } from '~/types/admin-competition.type';
 import type {
   CreateTeamDocumentSchema,
   InsertTeamSubmissionSchema,
@@ -39,13 +40,37 @@ interface CompetitionTeamRelationOption {
 export const getAllTeamsPaginated = async (
   db: Database,
   competitionId: string,
-  pagination: { page: number; limit: number },
+  query: z.infer<typeof AdminAllTeamQuerySchema>,
 ) => {
-  const { page, limit } = pagination;
+  const page = Number(query.page);
+  const limit = Number(query.limit);
+
   const offset = (page - 1) * limit;
 
+  const searchQuery = query.search
+    ? or(ilike(team.name, query.search), ilike(team.id, query.search))
+    : undefined;
+  const stageQuery = query.stage ? eq(team.stage, query.stage) : undefined;
+  const verifStatusQuery = query.verifStatus
+    ? eq(team.verificationStatus, query.verifStatus)
+    : undefined;
+  const finalStatuQuery = query.finalStatus
+    ? eq(team.finalStatus, query.finalStatus)
+    : undefined;
+  const prelimStatusQuery = query.prelimStatus
+    ? eq(team.preeliminaryStatus, query.prelimStatus)
+    : undefined;
+
+  const where = and(
+    searchQuery,
+    stageQuery,
+    verifStatusQuery,
+    finalStatuQuery,
+    prelimStatusQuery,
+  );
+
   const result = await db.query.team.findMany({
-    where: eq(team.competitionId, competitionId),
+    where: and(eq(team.competitionId, competitionId), where),
     with: {
       document: true,
     },
@@ -56,13 +81,29 @@ export const getAllTeamsPaginated = async (
 
   const totalItems = (
     await db.query.team.findMany({
-      where: eq(team.competitionId, competitionId),
+      where: and(eq(team.competitionId, competitionId), where),
     })
   ).length;
 
   const totalPages = Math.ceil(totalItems / limit);
-  const next = page < totalPages ? `?page=${page + 1}&limit=${limit}` : null;
-  const prev = page > 1 ? `?page=${page - 1}&limit=${limit}` : null;
+  const next =
+    page < totalPages
+      ? `?page=${page + 1}&limit=${limit}` +
+        (query.search ? `&search=${query.search}` : '') +
+        (query.stage ? `&stage=${query.stage}` : '') +
+        (query.verifStatus ? `&verifStatus=${query.verifStatus}` : '') +
+        (query.prelimStatus ? `&prelimStatus=${query.prelimStatus}` : '') +
+        (query.finalStatus ? `&finalStatus=${query.finalStatus}` : '')
+      : null;
+  const prev =
+    page > 1
+      ? `?page=${page - 1}&limit=${limit}` +
+        (query.search ? `&search=${query.search}` : '') +
+        (query.stage ? `&stage=${query.stage}` : '') +
+        (query.verifStatus ? `&verifStatus=${query.verifStatus}` : '') +
+        (query.prelimStatus ? `&prelimStatus=${query.prelimStatus}` : '') +
+        (query.finalStatus ? `&finalStatus=${query.finalStatus}` : '')
+      : null;
 
   return {
     pagination: {
