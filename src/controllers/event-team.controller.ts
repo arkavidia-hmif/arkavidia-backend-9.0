@@ -13,16 +13,23 @@ import {
   getUserEventTeams,
   updateEventTeam,
 } from '~/repositories/event-team.repository';
-import { getEventById } from '~/repositories/event.repository';
+import {
+  createEventTeamSubmission,
+  getEventById,
+  getEventSubmissionRequirement,
+  getEventSubmissionRequirementById,
+} from '~/repositories/event.repository';
 import {
   deleteEventTeamMemberRoute,
   getEventTeamByTeamIdRoute,
   getEventTeamRoute,
+  getEventTeamSubmissionRoute,
   joinEventTeamByCodeRoute,
   postCreateEventTeamRoute,
   postCreateEventTeamSoloRoute,
   postQuitEventTeamRoute,
   putChangeEventTeamNameRoute,
+  putEventTeamSubmissionRoute,
 } from '~/routes/event-team.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
@@ -125,14 +132,14 @@ eventTeamProtectedRouter.openapi(joinEventTeamByCodeRoute, async (c) => {
     return c.json({ error: "Team doesn't exist!" }, 400);
   }
 
-  // Get all competition IDs
+  // Get all event IDs
   const eventId = team.eventId;
 
-  // Check if user is in any other team across all competitions
+  // Check if user is in any other team across all events
   const isInOtherTeam = await isUserInOtherEventTeam(db, userId, eventId);
   if (isInOtherTeam) {
     return c.json(
-      { error: 'User is already in another team for a competition!' },
+      { error: 'User is already in another team for a event!' },
       400,
     );
   }
@@ -196,4 +203,66 @@ eventTeamProtectedRouter.openapi(postQuitEventTeamRoute, async (c) => {
 
   const res = await deleteEventTeamMember(db, teamId, userId);
   return c.json(res, 200);
+});
+
+eventTeamProtectedRouter.openapi(getEventTeamSubmissionRoute, async (c) => {
+  const { teamId } = c.req.valid('param');
+
+  const team = await getEventTeamById(db, teamId, {
+    submission: true,
+    teamMember: true,
+  });
+
+  const requirements = await getEventSubmissionRequirement(
+    db,
+    team?.eventId as string,
+  );
+
+  const result = requirements.map((r) => {
+    const submission = team?.submission.find((s) => s.typeId === r.typeId);
+    return {
+      requirement: r,
+      submission,
+    };
+  });
+
+  // Kalo masih preeliminary, keluarin preeliminary aja. Kalo final ya return aja semua
+  // const filteredResult =
+  //   team?.stage === 'pre-eliminary'
+  //     ? result.filter((r) => r.requirement.stage === 'pre-eliminary')
+  //     : result;
+
+  return c.json(result, 200);
+});
+
+eventTeamProtectedRouter.openapi(putEventTeamSubmissionRoute, async (c) => {
+  const { teamId } = c.req.valid('param');
+  const { typeId, mediaId } = c.req.valid('json');
+
+  if (!mediaId || !typeId)
+    return c.json({ error: 'Type ID and Media ID must be supplied!' }, 400);
+
+  const team = await getEventTeamById(db, teamId, {
+    teamMember: true,
+    event: true,
+  });
+  const requirement = await getEventSubmissionRequirementById(db, typeId);
+
+  if (requirement?.eventId !== team?.event.id)
+    return c.json(
+      { error: "Requirement type ID isn't for your team event!" },
+      403,
+    );
+  // if (requirement?.stage !== team?.stage)
+  //   return c.json(
+  //     { error: `Your team isn't in ${requirement?.stage} stage!` },
+  //     403,
+  //   );
+  const teamSubmission = await createEventTeamSubmission(
+    db,
+    teamId,
+    c.req.valid('json'),
+  );
+
+  return c.json(teamSubmission, 200);
 });

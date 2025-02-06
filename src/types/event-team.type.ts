@@ -1,6 +1,11 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { eventTeam, eventTeamDocument } from '~/db/schema';
+import {
+  eventSubmission,
+  eventSubmissionRequirement,
+  eventTeam,
+  eventTeamDocument,
+} from '~/db/schema';
 
 import { EventTeamMemberSchema } from './event-team-member.type';
 import { EventSchema } from './event.type';
@@ -98,3 +103,29 @@ export const EventTeamAndUserIdParam = z.object({
     },
   }),
 });
+
+export const EventTeamSubmissionSchema = createSelectSchema(
+  eventSubmission,
+).extend({
+  media: MediaSchema,
+});
+export const InsertEventTeamSubmissionSchema = createInsertSchema(
+  eventSubmission,
+).omit({
+  createdAt: true,
+  updatedAt: true,
+  teamId: true,
+  judgeResponse: true,
+});
+export const ListEventTeamSubmissionSchema = z.array(EventTeamSubmissionSchema);
+
+export const EventSubmissionRequirementSchema = createSelectSchema(
+  eventSubmissionRequirement,
+);
+
+export const ListEventSubmissionRequirementSchema = z.array(
+  z.object({
+    requirement: EventSubmissionRequirementSchema,
+    submission: EventTeamSubmissionSchema.optional(),
+  }),
+);

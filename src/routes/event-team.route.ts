@@ -7,6 +7,9 @@ import {
   EventTeamIdParam,
   EventTeamMemberIdSchema,
   EventTeamSchema,
+  EventTeamSubmissionSchema,
+  InsertEventTeamSubmissionSchema,
+  ListEventSubmissionRequirementSchema,
   ListEventTeamSchema,
   PutChangeEventTeamNameBodySchema,
   PutEventTeamDocumentBodySchema,
@@ -249,6 +252,60 @@ export const putEventTeamDocumentRoute = createRoute({
         },
       },
       description: 'Succesfully updated team document upload',
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getEventTeamSubmissionRoute = createRoute({
+  operationId: 'getEventTeamSubmission',
+  tags: ['event-team'],
+  method: 'get',
+  middleware: [isInEventTeamMiddleware()] as const,
+  path: '/event-team/{teamId}/submission',
+  request: {
+    params: EventTeamIdParam,
+  },
+  responses: {
+    200: {
+      description:
+        'Successfully fetched team submitted and unsubmitted submission',
+      content: {
+        'application/json': {
+          schema: ListEventSubmissionRequirementSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const putEventTeamSubmissionRoute = createRoute({
+  operationId: 'putEventTeamSubmission',
+  tags: ['event-team'],
+  method: 'put',
+  middleware: [isInEventTeamMiddleware()] as const,
+  path: '/event-team/{teamId}/submission',
+  request: {
+    params: EventTeamIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: InsertEventTeamSubmissionSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Successfully uploaded submission',
+      content: {
+        'application/json': {
+          schema: EventTeamSubmissionSchema,
+        },
+      },
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
