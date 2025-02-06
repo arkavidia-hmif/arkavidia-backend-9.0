@@ -31,8 +31,8 @@ protectedApiRouter.route('/', userProtectedRouter);
 protectedApiRouter.route('/', competitionProtectedRouter);
 protectedApiRouter.route('/', analyticsProtectedRouter);
 protectedApiRouter.route('/', adminCompetitionProtectedRouter);
-protectedApiRouter.route('/', eventProtectedRouter);
 protectedApiRouter.route('/', eventTeamProtectedRouter);
+protectedApiRouter.route('/', eventProtectedRouter);
 
 export const apiRouter = new OpenAPIHono();
 apiRouter.route('/', unprotectedApiRouter);

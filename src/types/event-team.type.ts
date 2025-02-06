@@ -10,11 +10,25 @@ export const EventTeamSchema = createSelectSchema(eventTeam)
 export const ListEventTeamSchema = z.array(EventTeamSchema);
 
 /* BODY SCHEMA */
-export const EventTeamNameBodySchema = z.object({
-  name: z.string(),
+export const CreateEventTeamBodySchema = z.object({
+  eventId: z.string(),
 });
 
-// TODO: Implement PutEventTeamBodySchema
+export const CreateEventTeamWithNameBodySchema =
+  CreateEventTeamBodySchema.extend({
+    name: z.string(),
+  });
+
+export const PutChangeEventTeamNameBodySchema = z.object({
+  name: z.string().min(1),
+});
+
+export const PutEventTeamDocumentBodySchema = z.object({
+  paymentProofMediaId: z.string(),
+});
+
+export const EventTeamMemberIdSchema = z.object({ userId: z.string() });
+
 
 /* PARAM SCHEMA */
 export const TeamIdParamSchema = z.object({
