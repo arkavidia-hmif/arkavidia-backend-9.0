@@ -28,7 +28,6 @@ export const isInCompTeamMiddleware = () => {
   });
 };
 
-
 // TODO: Fix this
 export const isInEventTeamMiddleware = () => {
   return factory.createMiddleware(async (c, next) => {

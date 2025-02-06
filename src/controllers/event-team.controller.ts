@@ -1,8 +1,8 @@
 import { db } from '~/db/drizzle';
 import {
   createEventTeam,
-  getEventTeam,
   getEventTeamById,
+  getUserEventTeams,
 } from '~/repositories/event-team.repository';
 import {
   getEventTeamByTeamIdRoute,
@@ -73,7 +73,7 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamRoute, async (c) => {
 
 eventTeamProtectedRouter.openapi(getEventTeamRoute, async (c) => {
   try {
-    const res = await getEventTeam(db, c.var.user.id);
+    const res = await getUserEventTeams(db, c.var.user.id);
     return c.json(res, 200);
   } catch (error) {
     if (error instanceof Error) {

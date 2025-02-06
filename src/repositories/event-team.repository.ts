@@ -1,7 +1,78 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
+import { z } from 'zod';
 import { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
+import { first, firstSure } from '~/db/helper';
 import { eventTeam, eventTeamMember, user } from '~/db/schema';
+import { UpdateEventTeamSchema } from '~/types/event-team.type';
+
+import { EventTeamMemberRelationOption } from './event-team-member.repository';
+
+interface EventTeamRelationOption {
+  teamMember?: EventTeamMemberRelationOption | boolean;
+  event?: boolean;
+  document?: boolean;
+  submission?: boolean;
+}
+
+export const getUserEventTeams = async (db: Database, userId: string) => {
+  const userTeams = (
+    await db.query.eventTeamMember.findMany({
+      where: eq(eventTeamMember.userId, userId),
+      columns: {
+        teamId: true,
+      },
+    })
+  ).map((t) => t.teamId);
+
+  return await db.query.eventTeam.findMany({
+    where: inArray(eventTeam.id, userTeams),
+    with: {
+      event: true,
+    },
+  });
+};
+
+export const getEventTeamById = async (
+  db: Database,
+  teamId: string,
+  options?: EventTeamRelationOption,
+) => {
+  return await db.query.eventTeam.findFirst({
+    where: eq(eventTeam.id, teamId),
+    with: {
+      teamMembers:
+        typeof options?.teamMember === 'boolean'
+          ? options?.teamMember
+            ? true
+            : undefined
+          : {
+              with: {
+                user:
+                  typeof options?.teamMember?.user === 'boolean'
+                    ? options?.teamMember?.user
+                      ? true
+                      : undefined
+                    : {
+                        with: {
+                          document: options?.teamMember?.user?.document
+                            ? { with: { media: true } }
+                            : undefined,
+                          userIdentity: options?.teamMember?.user?.userIdentity
+                            ? true
+                            : undefined,
+                        },
+                      },
+                document: options?.teamMember?.document
+                  ? { with: { media: true } }
+                  : undefined,
+              },
+            },
+      event: options?.event ? true : undefined,
+      document: options?.document ? { with: { media: true } } : undefined,
+      submission: options?.submission ? { with: { media: true } } : undefined,
+    },
+  });
+};
 
 export const createEventTeam = async (
   db: Database,
@@ -71,21 +142,17 @@ export const createEventTeam = async (
   }
 };
 
-export const getEventTeam = async (db: Database, userId: string) => {
+export const updateEventTeam = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateEventTeamSchema>,
+) => {
   return await db
-    .select()
-    .from(eventTeam)
-    .innerJoin(eventTeamMember, eq(eventTeam.id, eventTeamMember.teamId))
-    .where(eq(eventTeamMember.userId, userId));
-};
-
-export const getEventTeamById = async (db: Database, teamId: string) => {
-  return await db
-    .select()
-    .from(eventTeam)
-    .innerJoin(eventTeamMember, eq(eventTeam.id, eventTeamMember.teamId))
+    .update(eventTeam)
+    .set(values)
     .where(eq(eventTeam.id, teamId))
-    .then(first);
+    .returning()
+    .then(firstSure);
 };
 
 // TODO: Implement putEventTeam
