@@ -193,8 +193,8 @@ export const postQuitEventTeamRoute = createRoute({
   },
 });
 
-export const putTeamDocumentRoute = createRoute({
-  operationId: 'postTeamDocument',
+export const putEventTeamDocumentRoute = createRoute({
+  operationId: 'postEventTeamDocument',
   tags: ['team'],
   method: 'put',
   path: '/team/{teamId}/document',

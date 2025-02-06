@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { Database } from '~/db/drizzle';
-import { first } from '~/db/helper';
+import { firstSure } from '~/db/helper';
 import {
   EventTeamMemberDocumentTypeEnum,
   eventTeam,
@@ -112,7 +112,11 @@ export const deleteEventTeamMember = async (
     eq(eventTeamMember.teamId, teamId),
     eq(eventTeamMember.userId, userId),
   );
-  return await db.delete(eventTeamMember).where(where).returning().then(first);
+  return await db
+    .delete(eventTeamMember)
+    .where(where)
+    .returning()
+    .then(firstSure);
 };
 
 /** Event Team Member Verification Document */
