@@ -5,7 +5,10 @@ import { first, firstSure } from '~/db/helper';
 import { eventTeam, eventTeamMember, user } from '~/db/schema';
 import { UpdateEventTeamSchema } from '~/types/event-team.type';
 
-import { EventTeamMemberRelationOption } from './event-team-member.repository';
+import {
+  EventTeamMemberRelationOption,
+  deleteAllEventTeamMemberDocument,
+} from './event-team-member.repository';
 
 interface EventTeamRelationOption {
   teamMember?: EventTeamMemberRelationOption | boolean;
@@ -155,4 +158,16 @@ export const updateEventTeam = async (
     .then(firstSure);
 };
 
-// TODO: Implement putEventTeam
+export const deleteEventTeam = async (db: Database, teamId: string) => {
+  const foundTeam = await getEventTeamById(db, teamId, { teamMember: true });
+  if (!foundTeam) return;
+
+  for (const tm of foundTeam.teamMembers) {
+    await deleteAllEventTeamMemberDocument(db, tm.userId, teamId);
+  }
+  return await db
+    .delete(eventTeam)
+    .where(eq(eventTeam.id, teamId))
+    .returning()
+    .then(first);
+};
