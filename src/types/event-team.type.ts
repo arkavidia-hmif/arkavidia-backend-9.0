@@ -1,16 +1,37 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { eventTeam } from '~/db/schema';
+import { eventTeam, eventTeamDocument } from '~/db/schema';
 
 import { EventTeamMemberSchema } from './event-team-member.type';
 import { EventSchema } from './event.type';
+import { MediaSchema } from './media.type';
 
-/* MAIN SCHEMA */
+/* EVENT TEAM DOCUMENT SCHEMA */
+export const EventTeamDocumentSchema = createSelectSchema(eventTeamDocument)
+  .merge(
+    z.object({
+      media: MediaSchema,
+    }),
+  )
+  .openapi('EventTeamDocument');
+export const UpdateEventTeamDocumentSchema = createInsertSchema(
+  eventTeamDocument,
+)
+  .partial()
+  .omit({ teamId: true, type: true });
+export const CreateEventTeamDocumentSchema =
+  createInsertSchema(eventTeamDocument);
+
+export const PutEventTeamDocumentBodySchema = z.object({
+  paymentProofMediaId: z.string(),
+});
+
+/* EVENT TEAM SCHEMA */
 export const EventTeamSchema = createSelectSchema(eventTeam)
   .extend({
     event: EventSchema.optional(),
     teamMembers: z.array(EventTeamMemberSchema).optional(),
-    // document: z.array(TeamDocumentSchema).optional(),
+    document: z.array(EventTeamDocumentSchema).optional(),
     // submission: z.array(TeamSubmissionSchema).optional(),
   })
   .openapi('EventTeam');
@@ -38,7 +59,6 @@ export const UpdateEventTeamSchema = createInsertSchema(eventTeam)
   })
   .partial();
 
-/* BODY SCHEMA */
 export const CreateEventTeamBodySchema = z.object({
   eventId: z.string(),
 });
@@ -50,10 +70,6 @@ export const CreateEventTeamWithNameBodySchema =
 
 export const PutChangeEventTeamNameBodySchema = z.object({
   name: z.string().min(1),
-});
-
-export const PutEventTeamDocumentBodySchema = z.object({
-  paymentProofMediaId: z.string(),
 });
 
 export const EventTeamMemberIdSchema = z.object({ userId: z.string() });
