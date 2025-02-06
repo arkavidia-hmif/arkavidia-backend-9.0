@@ -17,22 +17,19 @@ import {
 } from '~/routes/event-team-member.route';
 import { createAuthRouter } from '~/utils/router-factory';
 
-export const eventTeamControllerProtectedRouter = createAuthRouter();
+export const eventTeamMemberProtectedRouter = createAuthRouter();
 
-eventTeamControllerProtectedRouter.openapi(
-  getEventTeamMembersRoute,
-  async (c) => {
-    const teamId = c.req.valid('param').teamId;
-    const teamMembers = await getAllEventTeamMembers(db, teamId, {
-      document: true,
-      user: { document: true },
-    });
-    if (teamMembers.length === 0) return c.json({ error: 'Team not found!' });
-    return c.json(teamMembers, 200);
-  },
-);
+eventTeamMemberProtectedRouter.openapi(getEventTeamMembersRoute, async (c) => {
+  const teamId = c.req.valid('param').teamId;
+  const teamMembers = await getAllEventTeamMembers(db, teamId, {
+    document: true,
+    user: { document: true },
+  });
+  if (teamMembers.length === 0) return c.json({ error: 'Team not found!' });
+  return c.json(teamMembers, 200);
+});
 
-eventTeamControllerProtectedRouter.openapi(
+eventTeamMemberProtectedRouter.openapi(
   getEventTeamMemberByIdRoute,
   async (c) => {
     const { teamId, userId } = c.req.valid('param');
@@ -45,7 +42,7 @@ eventTeamControllerProtectedRouter.openapi(
   },
 );
 
-eventTeamControllerProtectedRouter.openapi(
+eventTeamMemberProtectedRouter.openapi(
   updateEventTeamMemberDocumentRoute,
   async (c) => {
     const { teamId, userId } = c.req.valid('param');

@@ -263,9 +263,9 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   // Ensure team is not full
   const { teamMemberCount } = await getTeamMemberCount(db, team.id);
-  const maxParticipants = (await getCompetitionById(db, team.competitionId))
-    ?.maxParticipants;
-  if (teamMemberCount >= (maxParticipants ?? 0)) {
+  const maxTeamMember = (await getCompetitionById(db, team.competitionId))
+    ?.maxTeamMember;
+  if (teamMemberCount >= (maxTeamMember ?? 0)) {
     return c.json({ error: 'Team is already full!' }, 400);
   }
 

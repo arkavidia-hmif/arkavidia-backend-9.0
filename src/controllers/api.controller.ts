@@ -7,6 +7,7 @@ import {
   competitionProtectedRouter,
   competitionRouter,
 } from './competition.controller';
+import { eventTeamMemberProtectedRouter } from './event-team-member.controller';
 import { eventTeamProtectedRouter } from './event-team.controller';
 import { eventProtectedRouter, eventRouter } from './event.controller';
 import { healthRouter } from './health.controller';
@@ -32,6 +33,7 @@ protectedApiRouter.route('/', competitionProtectedRouter);
 protectedApiRouter.route('/', analyticsProtectedRouter);
 protectedApiRouter.route('/', adminCompetitionProtectedRouter);
 protectedApiRouter.route('/', eventTeamProtectedRouter);
+protectedApiRouter.route('/', eventTeamMemberProtectedRouter);
 protectedApiRouter.route('/', eventProtectedRouter);
 
 export const apiRouter = new OpenAPIHono();

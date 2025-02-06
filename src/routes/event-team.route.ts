@@ -11,7 +11,7 @@ import {
   PutChangeEventTeamNameBodySchema,
   PutEventTeamDocumentBodySchema,
 } from '~/types/event-team.type';
-import { EventIdParam } from '~/types/event.type';
+import { TeamCodeBody } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getEventTeamRoute = createRoute({
@@ -62,7 +62,6 @@ export const postCreateEventTeamSoloRoute = createRoute({
   method: 'post',
   path: '/event-team/solo',
   request: {
-    params: EventIdParam,
     body: {
       content: {
         'application/json': {
@@ -91,7 +90,6 @@ export const postCreateEventTeamRoute = createRoute({
   method: 'post',
   path: '/event-team/team',
   request: {
-    params: EventIdParam,
     body: {
       content: {
         'application/json': {
@@ -111,6 +109,35 @@ export const postCreateEventTeamRoute = createRoute({
     },
     400: createErrorResponse('UNION', 'Bad request error'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const joinEventTeamByCodeRoute = createRoute({
+  operationId: 'joinEventTeamByCode',
+  tags: ['event-team'],
+  method: 'post',
+  path: '/event-team/join',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: TeamCodeBody,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: EventTeamSchema,
+        },
+      },
+      description: 'Successfully joined a team',
+    },
+    400: createErrorResponse('UNION', 'Bad Request Error'),
+    500: createErrorResponse('GENERIC', 'Internal Server Error'),
   },
 });
 

@@ -1,16 +1,24 @@
 import { db } from '~/db/drizzle';
-import { deleteEventTeamMember } from '~/repositories/event-team-member.repository';
+import {
+  deleteEventTeamMember,
+  getEventTeamMemberCount,
+  insertUserToEventTeam,
+  isUserInOtherEventTeam,
+} from '~/repositories/event-team-member.repository';
 import {
   createEventTeam,
   deleteEventTeam,
+  getEventTeamByCode,
   getEventTeamById,
   getUserEventTeams,
   updateEventTeam,
 } from '~/repositories/event-team.repository';
+import { getEventById } from '~/repositories/event.repository';
 import {
   deleteEventTeamMemberRoute,
   getEventTeamByTeamIdRoute,
   getEventTeamRoute,
+  joinEventTeamByCodeRoute,
   postCreateEventTeamRoute,
   postCreateEventTeamSoloRoute,
   postQuitEventTeamRoute,
@@ -42,9 +50,16 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamSoloRoute, async (c) => {
       db,
       'solo',
       c.var.user.id,
-      c.req.valid('param').eventId,
+      c.req.valid('json').eventId,
     );
-    return c.json(res, 201);
+
+    const team = await getEventTeamById(db, res.event_team.id, {
+      document: true,
+      teamMember: { document: true, user: { document: true } },
+      event: true,
+    });
+
+    return c.json(team, 201);
   } catch (error) {
     if (error instanceof Error) {
       return c.json(
@@ -70,10 +85,17 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamRoute, async (c) => {
       db,
       'team',
       c.var.user.id,
-      c.req.valid('param').eventId,
+      c.req.valid('json').eventId,
       c.req.valid('json').name,
     );
-    return c.json(res, 201);
+
+    const team = await getEventTeamById(db, res.event_team.id, {
+      document: true,
+      teamMember: { document: true, user: { document: true } },
+      event: true,
+    });
+
+    return c.json(team, 201);
   } catch (error) {
     if (error instanceof Error) {
       return c.json(
@@ -91,6 +113,43 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamRoute, async (c) => {
       500,
     );
   }
+});
+
+eventTeamProtectedRouter.openapi(joinEventTeamByCodeRoute, async (c) => {
+  const { teamCode } = c.req.valid('json');
+  const userId = c.var.user.id;
+
+  // Check if the team exists
+  const team = await getEventTeamByCode(db, teamCode);
+  if (!team) {
+    return c.json({ error: "Team doesn't exist!" }, 400);
+  }
+
+  // Get all competition IDs
+  const eventId = team.eventId;
+
+  // Check if user is in any other team across all competitions
+  const isInOtherTeam = await isUserInOtherEventTeam(db, userId, eventId);
+  if (isInOtherTeam) {
+    return c.json(
+      { error: 'User is already in another team for a competition!' },
+      400,
+    );
+  }
+
+  // Ensure team is not full
+  const { teamMemberCount } = await getEventTeamMemberCount(db, team.id);
+  const maxTeamMember = (await getEventById(db, team.eventId))?.maxTeamMember;
+  if (teamMemberCount >= (maxTeamMember ?? 0)) {
+    return c.json({ error: 'Team is already full!' }, 400);
+  }
+
+  // Add user to  team
+
+  const newTeamMember = await insertUserToEventTeam(db, team.id, userId);
+  await updateEventTeam(db, team.id, { verificationStatus: 'INCOMPLETE' });
+
+  return c.json(newTeamMember, 200);
 });
 
 eventTeamProtectedRouter.openapi(putChangeEventTeamNameRoute, async (c) => {

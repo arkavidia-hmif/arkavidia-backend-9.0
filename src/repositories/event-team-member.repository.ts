@@ -13,6 +13,8 @@ import {
   UpdateEventTeamMemberDocumentSchema,
 } from '~/types/event-team-member.type';
 
+import { getEventTeamById } from './event-team.repository';
+import { getEventById } from './event.repository';
 import { UserRelationOption } from './user.repository';
 
 export interface EventTeamMemberRelationOption {
@@ -107,7 +109,7 @@ export const isUserInEventTeam = async (
   return true;
 };
 
-export const isUserInOtherTeam = async (
+export const isUserInOtherEventTeam = async (
   db: Database,
   userId: string,
   eventId: string,
@@ -124,6 +126,41 @@ export const isUserInOtherTeam = async (
     .where(where);
 
   return !!existingTeamMember.length;
+};
+
+export const insertUserToEventTeam = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+) => {
+  return await db.transaction(async (tx) => {
+    const team = await getEventTeamById(db, teamId);
+    if (!team) {
+      throw new Error("Such team doesn't exist");
+    }
+
+    const { teamMemberCount } = await getEventTeamMemberCount(db, teamId);
+    const maxParticipants = (await getEventById(db, team.eventId))
+      ?.maxParticipants;
+
+    if (!maxParticipants) {
+      throw new Error('There is no such competition');
+    }
+    if (maxParticipants <= teamMemberCount) {
+      throw new Error('The team is already full');
+    }
+
+    const [insertedMember] = await tx
+      .insert(eventTeamMember)
+      .values({
+        teamId,
+        userId,
+        role: 'member',
+      })
+      .returning();
+
+    return insertedMember;
+  });
 };
 
 export const deleteEventTeamMember = async (

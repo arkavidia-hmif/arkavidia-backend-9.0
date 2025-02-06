@@ -92,6 +92,48 @@ export const getEventTeamById = async (
   });
 };
 
+export const getEventTeamByCode = async (
+  db: Database,
+  joinCode: string,
+  options?: EventTeamRelationOption,
+) => {
+  return await db.query.eventTeam.findFirst({
+    where: eq(eventTeam.joinCode, joinCode),
+    with: {
+      teamMembers:
+        typeof options?.teamMember === 'boolean'
+          ? options?.teamMember
+            ? true
+            : undefined
+          : {
+              with: {
+                user:
+                  typeof options?.teamMember?.user === 'boolean'
+                    ? options?.teamMember?.user
+                      ? true
+                      : undefined
+                    : {
+                        with: {
+                          document: options?.teamMember?.user?.document
+                            ? { with: { media: true } }
+                            : undefined,
+                          userIdentity: options?.teamMember?.user?.userIdentity
+                            ? true
+                            : undefined,
+                        },
+                      },
+                document: options?.teamMember?.document
+                  ? { with: { media: true } }
+                  : undefined,
+              },
+            },
+      event: options?.event ? true : undefined,
+      document: options?.document ? { with: { media: true } } : undefined,
+      submission: options?.submission ? { with: { media: true } } : undefined,
+    },
+  });
+};
+
 export const createEventTeam = async (
   db: Database,
   mode: 'solo' | 'team',
