@@ -20,6 +20,31 @@ export interface EventTeamMemberRelationOption {
   document?: boolean;
 }
 
+export const getAllEventTeamMembers = async (
+  db: Database,
+  teamId: string,
+  options?: EventTeamMemberRelationOption,
+) => {
+  return await db.query.eventTeamMember.findMany({
+    where: and(eq(eventTeamMember.teamId, teamId)),
+    with: {
+      document: options?.document ? { with: { media: true } } : undefined,
+      user:
+        typeof options?.user === 'boolean'
+          ? options?.user
+            ? true
+            : undefined
+          : {
+              with: {
+                document: options?.user?.document
+                  ? { with: { media: true } }
+                  : undefined,
+              },
+            },
+    },
+  });
+};
+
 export const getEventTeamMember = async (
   db: Database,
   teamId: string,

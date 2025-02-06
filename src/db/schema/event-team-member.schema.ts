@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
 
 import { eventTeam } from './event-team.schema';
@@ -36,3 +36,5 @@ export const eventTeamMemberRelations = relations(
     document: many(eventTeamMemberDocument),
   }),
 );
+
+export type EventTeamMember = InferSelectModel<typeof eventTeamMember>;

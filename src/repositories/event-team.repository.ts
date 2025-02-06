@@ -1,14 +1,29 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
-import { eventTeam, eventTeamMember, user } from '~/db/schema';
-import { UpdateEventTeamSchema } from '~/types/event-team.type';
+import {
+  EventTeamDocumentTypeEnum,
+  EventTeamMember,
+  EventTeamVerificationStatusEnum,
+  eventTeam,
+  eventTeamDocument,
+  eventTeamMember,
+  user,
+} from '~/db/schema';
+import {
+  CreateEventTeamDocumentSchema,
+  UpdateEventTeamDocumentSchema,
+  UpdateEventTeamSchema,
+} from '~/types/event-team.type';
 
 import {
   EventTeamMemberRelationOption,
   deleteAllEventTeamMemberDocument,
+  getAllEventTeamMemberDocuments,
+  isEventTeamMemberDocumentsPresent,
 } from './event-team-member.repository';
+import { getAllUserDocuments, isUserDocumentsPresent } from './user.repository';
 
 interface EventTeamRelationOption {
   teamMember?: EventTeamMemberRelationOption | boolean;
@@ -170,4 +185,163 @@ export const deleteEventTeam = async (db: Database, teamId: string) => {
     .where(eq(eventTeam.id, teamId))
     .returning()
     .then(first);
+};
+
+/** Team Verification Documents */
+
+export const getTeamDocument = async (
+  db: Database,
+  teamId: string,
+  type: EventTeamDocumentTypeEnum,
+) => {
+  return db.query.teamDocument.findFirst({
+    where: and(
+      eq(eventTeamDocument.teamId, teamId),
+      eq(eventTeamDocument.type, type),
+    ),
+  });
+};
+
+// export const getAllTeamDocuments = async (db: Database, teamId: string) => {
+//   const buktiPembayaran = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+//   return { buktiPembayaran };
+// };
+
+export const createEventTeamDocument = async (
+  db: Database,
+  values: z.infer<typeof CreateEventTeamDocumentSchema>,
+) => {
+  return db.insert(eventTeamDocument).values(values).returning();
+};
+
+export const updateEventTeamDocument = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof UpdateEventTeamDocumentSchema>,
+) => {
+  return db
+    .update(eventTeamDocument)
+    .set(values)
+    .where(eq(eventTeamDocument.teamId, teamId))
+    .returning();
+};
+
+// export const updateEventPaymentProofTeam = async (
+//   db: Database,
+//   teamId: string,
+//   paymentProofMediaId: string,
+// ) => {
+//   const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
+//   if (kartu) {
+//     await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
+//   } else {
+//     await createTeamDocument(db, {
+//       teamId,
+//       mediaId: paymentProofMediaId,
+//       type: 'bukti-pembayaran',
+//       isVerified: false,
+//       verificationError: null,
+//     });
+//   }
+// };
+
+// export const isEventTeamDocumentsVerified = async (
+//   db: Database,
+//   teamId: string,
+// ): Promise<boolean> => {
+//   const documents = await db.query.teamDocument.findMany({
+//     where: eq(teamDocument.teamId, teamId),
+//   });
+
+//   const buktiPembayaranDocument = documents.find(
+//     (d) => d.type === 'bukti-pembayaran',
+//   );
+
+//   return !!buktiPembayaranDocument?.isVerified;
+// };
+
+// export const isEventTeamDocumentsPresent = async (db: Database, teamId: string) => {
+//   const documents = await db.query.teamDocument.findMany({
+//     where: eq(teamDocument.teamId, teamId),
+//   });
+
+//   const buktiPembayaranDocument = documents.find(
+//     (d) => d.type === 'bukti-pembayaran',
+//   );
+
+//   return !!buktiPembayaranDocument;
+// };
+
+export const isAllEventDocumentsPresent = async (
+  db: Database,
+  teamId: string,
+  teamMembers: EventTeamMember[],
+) => {
+  let present: boolean = true;
+  const team = await getEventTeamById(db, teamId, { teamMember: true });
+
+  if (!team) return false;
+
+  // present =
+  //   present && !(await isTeamDocumentsPresent(db, teamId)) ? false : present;
+  for (const member of teamMembers) {
+    present =
+      present && !(await isUserDocumentsPresent(db, member.userId))
+        ? false
+        : present;
+    present =
+      present &&
+      !(await isEventTeamMemberDocumentsPresent(db, teamId, member.userId))
+        ? false
+        : present;
+    if (!present) break;
+  }
+
+  return present;
+};
+
+export const getEventVerdict = async (
+  db: Database,
+  teamId: string,
+  teamMembers: EventTeamMember[],
+) => {
+  let verdict = true;
+  let errorCount = 0;
+
+  // const td = await getAllEventTeamDocuments(db, teamId);
+
+  // verdict = verdict && !td.buktiPembayaran?.isVerified ? false : verdict;
+  // errorCount += Number(!!td.buktiPembayaran?.verificationError);
+  for (const member of teamMembers) {
+    const ud = await getAllUserDocuments(db, member.userId);
+    verdict = verdict && !ud.kartuIdentitas?.isVerified ? false : verdict;
+    errorCount += Number(!!ud.kartuIdentitas?.verificationError);
+
+    const tdm = await getAllEventTeamMemberDocuments(db, member.userId, teamId);
+    verdict =
+      verdict && (!tdm.poster?.isVerified || !tdm.twibbon?.isVerified)
+        ? false
+        : verdict;
+    errorCount +=
+      Number(!!tdm.poster?.verificationError) +
+      Number(!!tdm.twibbon?.verificationError);
+
+    if (!verdict) break;
+  }
+
+  return { verdict, errorCount };
+};
+
+export const inferEventVerificationStatus = async (
+  db: Database,
+  teamId: string,
+  admin: boolean = false,
+): Promise<EventTeamVerificationStatusEnum> => {
+  const team = await getEventTeamById(db, teamId, { teamMember: true });
+  if (!team) return 'INCOMPLETE';
+  if (!(await isAllEventDocumentsPresent(db, teamId, team.teamMembers)))
+    return 'INCOMPLETE';
+  if (!admin) return 'WAITING';
+  if (await getEventVerdict(db, teamId, team.teamMembers)) return 'VERIFIED';
+  return 'DENIED';
 };
