@@ -1,4 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi';
+import { isInEventTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import {
   EventTeamMemberSchema,
   UpdateEventTeamMemberDocumentRouteSchema,
@@ -14,6 +15,7 @@ export const getEventTeamMembersRoute = createRoute({
   tags: ['event-team-member'],
   method: 'get',
   path: '/event-team/{teamId}/member',
+  middleware: [isInEventTeamMiddleware()] as const,
   request: {
     params: EventTeamIdParam,
   },
@@ -37,6 +39,8 @@ export const getEventTeamMemberByIdRoute = createRoute({
   tags: ['event-team-member'],
   method: 'get',
   path: '/event-team/{teamId}/member/{userId}',
+  middleware: [isInEventTeamMiddleware()] as const,
+
   request: {
     params: EventTeamAndUserIdParam,
   },
@@ -60,6 +64,8 @@ export const updateEventTeamMemberDocumentRoute = createRoute({
   tags: ['event-team-member'],
   method: 'put',
   path: '/event-team/{teamId}/member/{userId}/document',
+  middleware: [isInEventTeamMiddleware()] as const,
+
   request: {
     params: EventTeamAndUserIdParam,
     body: {

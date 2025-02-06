@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { isInEventTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 // import { isInEventTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import {
   CreateEventTeamBodySchema,
@@ -37,7 +38,7 @@ export const getEventTeamByTeamIdRoute = createRoute({
   tags: ['event-team'],
   method: 'get',
   path: '/event-team/{teamId}',
-  // middleware: [isInEventTeamMiddleware()],
+  middleware: [isInEventTeamMiddleware()] as const,
   request: {
     params: EventTeamIdParam,
   },
@@ -118,6 +119,7 @@ export const putChangeEventTeamNameRoute = createRoute({
   tags: ['event-team'],
   method: 'put',
   path: '/event-team/{teamId}',
+  middleware: [isInEventTeamMiddleware()] as const,
   request: {
     params: EventTeamIdParam,
     body: {
@@ -147,6 +149,7 @@ export const deleteEventTeamMemberRoute = createRoute({
   tags: ['event-team'],
   method: 'delete',
   path: '/event-team/{teamId}',
+  middleware: [isInEventTeamMiddleware()] as const,
   request: {
     params: EventTeamIdParam,
     body: {
@@ -173,9 +176,10 @@ export const deleteEventTeamMemberRoute = createRoute({
 
 export const postQuitEventTeamRoute = createRoute({
   operationId: 'postQuitEventTeam',
-  tags: ['team'],
+  tags: ['event-team'],
   method: 'post',
   path: '/event-team/{teamId}/quit',
+  middleware: [isInEventTeamMiddleware()] as const,
   request: {
     params: EventTeamIdParam,
   },
@@ -194,10 +198,11 @@ export const postQuitEventTeamRoute = createRoute({
 });
 
 export const putEventTeamDocumentRoute = createRoute({
-  operationId: 'postEventTeamDocument',
-  tags: ['team'],
+  operationId: 'putEventTeamDocument',
+  tags: ['event-team'],
   method: 'put',
   path: '/team/{teamId}/document',
+  middleware: [isInEventTeamMiddleware()] as const,
   request: {
     params: EventTeamIdParam,
     body: {

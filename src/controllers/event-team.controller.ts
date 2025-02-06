@@ -21,49 +21,19 @@ import { createAuthRouter } from '~/utils/router-factory';
 export const eventTeamProtectedRouter = createAuthRouter();
 
 eventTeamProtectedRouter.openapi(getEventTeamRoute, async (c) => {
-  try {
-    const res = await getUserEventTeams(db, c.var.user.id);
-    return c.json(res, 200);
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        {
-          error: error.message,
-        },
-        500,
-      );
-    }
-
-    return c.json(
-      {
-        error: 'Unexpected error occured',
-      },
-      500,
-    );
-  }
+  const user = c.var.user;
+  const teams = await getUserEventTeams(db, user.id);
+  return c.json(teams, 200);
 });
 
 eventTeamProtectedRouter.openapi(getEventTeamByTeamIdRoute, async (c) => {
-  try {
-    const res = await getEventTeamById(db, c.req.valid('param').teamId);
-    return c.json(res, 200);
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        {
-          error: error.message,
-        },
-        500,
-      );
-    }
-
-    return c.json(
-      {
-        error: 'Unexpected error occured',
-      },
-      500,
-    );
-  }
+  const { teamId } = c.req.valid('param');
+  const team = await getEventTeamById(db, teamId, {
+    document: true,
+    teamMember: { document: true, user: { document: true } },
+    event: true,
+  });
+  return c.json(team, 200);
 });
 
 eventTeamProtectedRouter.openapi(postCreateEventTeamSoloRoute, async (c) => {
