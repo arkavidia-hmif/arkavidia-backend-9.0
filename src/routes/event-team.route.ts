@@ -3,7 +3,7 @@ import { createRoute } from '@hono/zod-openapi';
 import {
   CreateEventTeamBodySchema,
   CreateEventTeamWithNameBodySchema,
-  TeamIdParamSchema as EventTeamIdParam,
+  EventTeamIdParam,
   EventTeamMemberIdSchema,
   EventTeamSchema,
   ListEventTeamSchema,

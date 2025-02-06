@@ -75,8 +75,23 @@ export const PutChangeEventTeamNameBodySchema = z.object({
 export const EventTeamMemberIdSchema = z.object({ userId: z.string() });
 
 /* PARAM SCHEMA */
-export const TeamIdParamSchema = z.object({
+export const EventTeamIdParam = z.object({
   teamId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+});
+
+export const EventTeamAndUserIdParam = z.object({
+  teamId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+  userId: z.string().openapi({
     param: {
       in: 'path',
       required: true,

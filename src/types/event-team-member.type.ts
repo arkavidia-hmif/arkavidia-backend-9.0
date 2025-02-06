@@ -24,6 +24,11 @@ export const UpdateEventTeamMemberDocumentSchema =
     type: true,
   });
 
+export const UpdateEventTeamMemberDocumentRouteSchema = z.object({
+  posterMediaId: z.string().optional(),
+  twibbonMediaId: z.string().optional(),
+});
+
 export const EventTeamMemberSchema = createSelectSchema(eventTeamMember)
   .extend({
     user: UserSchema.optional(),
