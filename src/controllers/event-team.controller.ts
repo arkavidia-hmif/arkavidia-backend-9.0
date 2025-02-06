@@ -14,6 +14,52 @@ import { createAuthRouter } from '~/utils/router-factory';
 
 export const eventTeamProtectedRouter = createAuthRouter();
 
+eventTeamProtectedRouter.openapi(getEventTeamRoute, async (c) => {
+  try {
+    const res = await getUserEventTeams(db, c.var.user.id);
+    return c.json(res, 200);
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          error: error.message,
+        },
+        500,
+      );
+    }
+
+    return c.json(
+      {
+        error: 'Unexpected error occured',
+      },
+      500,
+    );
+  }
+});
+
+eventTeamProtectedRouter.openapi(getEventTeamByTeamIdRoute, async (c) => {
+  try {
+    const res = await getEventTeamById(db, c.req.valid('param').teamId);
+    return c.json(res, 200);
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          error: error.message,
+        },
+        500,
+      );
+    }
+
+    return c.json(
+      {
+        error: 'Unexpected error occured',
+      },
+      500,
+    );
+  }
+});
+
 eventTeamProtectedRouter.openapi(postCreateEventTeamSoloRoute, async (c) => {
   try {
     const res = await createEventTeam(
@@ -71,33 +117,15 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamRoute, async (c) => {
   }
 });
 
-eventTeamProtectedRouter.openapi(getEventTeamRoute, async (c) => {
+eventTeamProtectedRouter.openapi(postCreateEventTeamSoloRoute, async (c) => {
   try {
-    const res = await getUserEventTeams(db, c.var.user.id);
-    return c.json(res, 200);
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        {
-          error: error.message,
-        },
-        500,
-      );
-    }
-
-    return c.json(
-      {
-        error: 'Unexpected error occured',
-      },
-      500,
+    const res = await createEventTeam(
+      db,
+      'solo',
+      c.var.user.id,
+      c.req.valid('param').eventId,
     );
-  }
-});
-
-eventTeamProtectedRouter.openapi(getEventTeamByTeamIdRoute, async (c) => {
-  try {
-    const res = await getEventTeamById(db, c.req.valid('param').teamId);
-    return c.json(res, 200);
+    return c.json(res, 201);
   } catch (error) {
     if (error instanceof Error) {
       return c.json(
