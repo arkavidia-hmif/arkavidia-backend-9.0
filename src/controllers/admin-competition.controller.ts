@@ -172,7 +172,7 @@ adminCompetitionProtectedRouter.openapi(
 
     if (verificationStatus === 'VERIFIED') {
       await Promise.all(
-        teamMember.map(async (tm) => {
+        team.teamMembers.map(async (tm) => {
           const user = await getUser(db, tm?.userId as string);
           if (!user) return;
 
