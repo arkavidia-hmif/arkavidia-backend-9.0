@@ -1,6 +1,10 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { event, eventTimeline } from '~/db/schema/event.schema';
+import {
+  event,
+  eventAnnouncement,
+  eventTimeline,
+} from '~/db/schema/event.schema';
 
 export const EventSchema = createSelectSchema(event).openapi('Event');
 
@@ -19,3 +23,7 @@ export const EventTimelineSchema =
   createSelectSchema(eventTimeline).openapi('EventTimeline');
 
 export const ListEventTimelineSchema = z.array(EventTimelineSchema);
+
+export const EventAnnouncementSchema = createSelectSchema(eventAnnouncement);
+
+export const ListEventAnnouncementSchema = z.array(EventAnnouncementSchema);

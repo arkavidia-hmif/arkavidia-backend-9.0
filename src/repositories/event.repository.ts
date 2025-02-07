@@ -4,6 +4,7 @@ import { Database } from '~/db/drizzle';
 import { firstSure } from '~/db/helper';
 import {
   event,
+  eventAnnouncement,
   eventSubmission,
   eventSubmissionRequirement,
   eventTimeline,
@@ -64,4 +65,10 @@ export const createEventTeamSubmission = async (
     .values({ teamId, ...values })
     .returning()
     .then(firstSure);
+};
+
+export const getEventAnnoucement = async (db: Database, eventId: string) => {
+  return await db.query.eventAnnouncement.findMany({
+    where: eq(eventAnnouncement.eventId, eventId),
+  });
 };

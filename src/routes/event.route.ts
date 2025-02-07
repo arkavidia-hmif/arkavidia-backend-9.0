@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import {
   EventIdParam,
   EventTimelineSchema,
+  ListEventAnnouncementSchema,
   ListEventSchema,
   ListEventTimelineSchema,
 } from '~/types/event.type';
@@ -81,6 +82,28 @@ export const getEventTimelineByIdRoute = createRoute({
       content: {
         'application/json': {
           schema: EventTimelineSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getEventAnnouncementByIdRoute = createRoute({
+  operationId: 'getEventAnnouncement',
+  tags: ['event'],
+  method: 'get',
+  path: '/event/announcement/{eventId}',
+  request: {
+    params: EventIdParam,
+  },
+  responses: {
+    200: {
+      description: 'Successfully fetched event announcement',
+      content: {
+        'application/json': {
+          schema: ListEventAnnouncementSchema,
         },
       },
     },
