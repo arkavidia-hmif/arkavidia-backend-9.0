@@ -8,15 +8,24 @@ import {
   getCompetitionSubmissionRequirement,
   updateSubmissionFeedback,
 } from '~/repositories/competition.repository';
-import { updateTeamMemberDocument } from '~/repositories/team-member.repository';
 import {
+  getAllTeamMemberDocuments,
+  updateTeamMemberDocument,
+} from '~/repositories/team-member.repository';
+import {
+  getAllTeamDocuments,
   getAllTeamsPaginated,
   getTeamById,
   getVerdict,
+  isAllDocumentsPresent,
   updateTeam,
   updateTeamDocument,
 } from '~/repositories/team.repository';
-import { getUser, updateUserDocument } from '~/repositories/user.repository';
+import {
+  getAllUserDocuments,
+  getUser,
+  updateUserDocument,
+} from '~/repositories/user.repository';
 import {
   getAdminAllCompetitionTeamsRoute,
   getAdminCompetitionTeamInformationRoute,
@@ -126,13 +135,26 @@ adminCompetitionProtectedRouter.openapi(
     if (!team || team.competition.id !== competitionId)
       return c.json({ error: "Team doesn't exist!" }, 400);
 
-    if (team.verificationStatus === 'INCOMPLETE')
-      return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
+    // if (team.verificationStatus === 'INCOMPLETE')
+    //   return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
 
-    if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
+    const currentTeamDocs = await getAllTeamDocuments(db, team.id);
+
+    if (buktiPembayaran && currentTeamDocs.buktiPembayaran)
+      await updateTeamDocument(db, teamId, buktiPembayaran);
     if (teamMember) {
       for (const member of teamMember) {
-        if (member && member.poster)
+        const currentTeamMemberDocs = await getAllTeamMemberDocuments(
+          db,
+          team.id,
+          member?.userId as string,
+        );
+        const currentUserDocs = await getAllUserDocuments(
+          db,
+          member?.userId as string,
+        );
+
+        if (member && member.poster && currentTeamMemberDocs.poster)
           await updateTeamMemberDocument(
             db,
             member.userId,
@@ -141,7 +163,7 @@ adminCompetitionProtectedRouter.openapi(
             member.poster,
           );
 
-        if (member && member.twibbon)
+        if (member && member.twibbon && currentTeamMemberDocs.twibbon)
           await updateTeamMemberDocument(
             db,
             member.userId,
@@ -150,7 +172,7 @@ adminCompetitionProtectedRouter.openapi(
             member.twibbon,
           );
 
-        if (member && member.kartuIdentitas)
+        if (member && member.kartuIdentitas && currentUserDocs.kartuIdentitas)
           await updateUserDocument(db, member.userId, {
             ...member.kartuIdentitas,
             type: 'kartu-identitas',
@@ -163,11 +185,14 @@ adminCompetitionProtectedRouter.openapi(
       teamId,
       team.teamMembers,
     );
-    const verificationStatus: CompetitionTeamVerificationStatusEnum = verdict
-      ? 'VERIFIED'
-      : errorCount > 0
-        ? 'DENIED'
-        : 'ON REVIEW';
+    const verificationStatus: CompetitionTeamVerificationStatusEnum =
+      !(await isAllDocumentsPresent(db, teamId, team.teamMembers))
+        ? 'INCOMPLETE'
+        : verdict
+          ? 'VERIFIED'
+          : errorCount > 0
+            ? 'DENIED'
+            : 'ON REVIEW';
     const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
 
     if (verificationStatus === 'VERIFIED') {
