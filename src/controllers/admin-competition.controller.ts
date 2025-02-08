@@ -8,12 +8,8 @@ import {
   getCompetitionSubmissionRequirement,
   updateSubmissionFeedback,
 } from '~/repositories/competition.repository';
+import { updateTeamMemberDocument } from '~/repositories/team-member.repository';
 import {
-  getAllTeamMemberDocuments,
-  updateTeamMemberDocument,
-} from '~/repositories/team-member.repository';
-import {
-  getAllTeamDocuments,
   getAllTeamsPaginated,
   getTeamById,
   getVerdict,
@@ -21,11 +17,7 @@ import {
   updateTeam,
   updateTeamDocument,
 } from '~/repositories/team.repository';
-import {
-  getAllUserDocuments,
-  getUser,
-  updateUserDocument,
-} from '~/repositories/user.repository';
+import { getUser, updateUserDocument } from '~/repositories/user.repository';
 import {
   getAdminAllCompetitionTeamsRoute,
   getAdminCompetitionTeamInformationRoute,
@@ -138,23 +130,10 @@ adminCompetitionProtectedRouter.openapi(
     // if (team.verificationStatus === 'INCOMPLETE')
     //   return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
 
-    const currentTeamDocs = await getAllTeamDocuments(db, team.id);
-
-    if (buktiPembayaran && currentTeamDocs.buktiPembayaran)
-      await updateTeamDocument(db, teamId, buktiPembayaran);
+    if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
     if (teamMember) {
       for (const member of teamMember) {
-        const currentTeamMemberDocs = await getAllTeamMemberDocuments(
-          db,
-          team.id,
-          member?.userId as string,
-        );
-        const currentUserDocs = await getAllUserDocuments(
-          db,
-          member?.userId as string,
-        );
-
-        if (member && member.poster && currentTeamMemberDocs.poster)
+        if (member && member.poster)
           await updateTeamMemberDocument(
             db,
             member.userId,
@@ -163,7 +142,7 @@ adminCompetitionProtectedRouter.openapi(
             member.poster,
           );
 
-        if (member && member.twibbon && currentTeamMemberDocs.twibbon)
+        if (member && member.twibbon)
           await updateTeamMemberDocument(
             db,
             member.userId,
@@ -172,7 +151,7 @@ adminCompetitionProtectedRouter.openapi(
             member.twibbon,
           );
 
-        if (member && member.kartuIdentitas && currentUserDocs.kartuIdentitas)
+        if (member && member.kartuIdentitas)
           await updateUserDocument(db, member.userId, {
             ...member.kartuIdentitas,
             type: 'kartu-identitas',
