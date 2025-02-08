@@ -1,7 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import {
   EventIdParam,
-  EventTimelineSchema,
   ListEventAnnouncementSchema,
   ListEventSchema,
   ListEventTimelineSchema,
@@ -81,7 +80,7 @@ export const getEventTimelineByIdRoute = createRoute({
       description: 'Successfully fetched event timeline by id',
       content: {
         'application/json': {
-          schema: EventTimelineSchema,
+          schema: ListEventTimelineSchema,
         },
       },
     },

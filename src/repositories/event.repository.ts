@@ -26,7 +26,7 @@ export const getEventTimeline = async (db: Database) => {
 };
 
 export const getEventTimelineById = async (db: Database, eventId: string) => {
-  return await db.query.eventTimeline.findFirst({
+  return await db.query.eventTimeline.findMany({
     where: eq(eventTimeline.eventId, eventId),
   });
 };
