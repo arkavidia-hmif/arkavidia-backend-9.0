@@ -141,17 +141,6 @@ export const createEventTeam = async (
   eventId: string,
   name?: string,
 ) => {
-  // Check if user is already in a team
-  const userTeam = await db
-    .select()
-    .from(eventTeamMember)
-    .where(eq(eventTeamMember.userId, userId))
-    .then(first);
-
-  if (userTeam) {
-    throw new Error('User is already registered!');
-  }
-
   if (mode === 'solo') {
     const userReq = await db
       .select()

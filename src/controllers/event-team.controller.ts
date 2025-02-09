@@ -52,6 +52,10 @@ eventTeamProtectedRouter.openapi(getEventTeamByTeamIdRoute, async (c) => {
 });
 
 eventTeamProtectedRouter.openapi(postCreateEventTeamSoloRoute, async (c) => {
+  const userTeams = await getUserEventTeams(db, c.var.user.id);
+  if (userTeams.length >= 1)
+    return c.json({ error: 'You can only join 1 Academya path.' }, 403);
+
   try {
     const res = await createEventTeam(
       db,
@@ -87,6 +91,10 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamSoloRoute, async (c) => {
 });
 
 eventTeamProtectedRouter.openapi(postCreateEventTeamRoute, async (c) => {
+  const userTeams = await getUserEventTeams(db, c.var.user.id);
+  if (userTeams.length >= 1)
+    return c.json({ error: 'You can only join 1 Academya path.' }, 403);
+
   try {
     const res = await createEventTeam(
       db,
@@ -125,6 +133,10 @@ eventTeamProtectedRouter.openapi(postCreateEventTeamRoute, async (c) => {
 eventTeamProtectedRouter.openapi(joinEventTeamByCodeRoute, async (c) => {
   const { teamCode } = c.req.valid('json');
   const userId = c.var.user.id;
+
+  const userTeams = await getUserEventTeams(db, userId);
+  if (userTeams.length >= 1)
+    return c.json({ error: 'You can only join 1 Academya path.' }, 403);
 
   // Check if the team exists
   const team = await getEventTeamByCode(db, teamCode);
