@@ -108,10 +108,9 @@ export const sendVerificationAcceptEmail = async (
 ) => {
   const message =
     `Selamat! Tim ${teamName} untuk lomba ${expandCompetitionTitle(competitionSlug)} telah berhasil diverifikasi.` +
-      competitionSlug !=
-    'UXvidia'
-      ? `Silahkan bergabung ke grup komunitas di bawah ini untuk mendapatkan informasi lanjutan.`
-      : '';
+    (competitionSlug.toLowerCase() !== 'uxvidia'
+      ? ` Silahkan bergabung ke grup komunitas di bawah ini untuk mendapatkan informasi lanjutan.`
+      : ' Tunggu tugas selanjutnya di dashboard.');
   const link = getCompetitionGroupChat(competitionSlug);
 
   await transporter.sendMail({

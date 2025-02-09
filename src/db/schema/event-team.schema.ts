@@ -26,7 +26,9 @@ export const eventTeam = pgTable('event_team', {
     .references(() => event.id, { onDelete: 'cascade' }),
   name: text('team_name').notNull(),
   stage: eventStageEnum('stage').notNull().default('pre-eliminary'),
-  verificationStatus: teamVerificationStatusEnum('verification_status'),
+  verificationStatus: teamVerificationStatusEnum('verification_status').default(
+    'INCOMPLETE',
+  ),
   preeliminaryStatus: eventTeamPreeliminaryStatusEnum('preeliminary_status')
     .notNull()
     .default('On Review'),

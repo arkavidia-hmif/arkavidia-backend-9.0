@@ -41,7 +41,7 @@ export const eventTeamMemberDocument = pgTable(
 export const eventTeamMemberDocumentRelations = relations(
   eventTeamMemberDocument,
   ({ one }) => ({
-    eventTeamMember: one(eventTeamMember, {
+    teamMember: one(eventTeamMember, {
       fields: [eventTeamMemberDocument.teamId, eventTeamMemberDocument.userId],
       references: [eventTeamMember.teamId, eventTeamMember.userId],
     }),

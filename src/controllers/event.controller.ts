@@ -1,11 +1,13 @@
 import { db } from '~/db/drizzle';
 import {
   getEvent,
+  getEventAnnoucement,
   getEventById,
   getEventTimeline,
   getEventTimelineById,
 } from '~/repositories/event.repository';
 import {
+  getEventAnnouncementByIdRoute,
   getEventByIdRoute,
   getEventRoute,
   getEventTimelineByIdRoute,
@@ -36,4 +38,10 @@ eventRouter.openapi(getEventTimelineByIdRoute, async (c) => {
   const { eventId } = c.req.valid('param');
   const timelines = await getEventTimelineById(db, eventId);
   return c.json(timelines, 200);
+});
+
+eventRouter.openapi(getEventAnnouncementByIdRoute, async (c) => {
+  const { eventId } = c.req.valid('param');
+  const announcement = await getEventAnnoucement(db, eventId);
+  return c.json(announcement, 200);
 });

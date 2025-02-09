@@ -1,6 +1,15 @@
 import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 import { Database } from '~/db/drizzle';
-import { event, eventTimeline } from '~/db/schema';
+import { firstSure } from '~/db/helper';
+import {
+  event,
+  eventAnnouncement,
+  eventSubmission,
+  eventSubmissionRequirement,
+  eventTimeline,
+} from '~/db/schema';
+import { InsertEventTeamSubmissionSchema } from '~/types/event-team.type';
 
 export const getEvent = async (db: Database) => {
   return await db.query.event.findMany();
@@ -17,7 +26,49 @@ export const getEventTimeline = async (db: Database) => {
 };
 
 export const getEventTimelineById = async (db: Database, eventId: string) => {
-  return await db.query.eventTimeline.findFirst({
+  return await db.query.eventTimeline.findMany({
     where: eq(eventTimeline.eventId, eventId),
+  });
+};
+
+export const getEventSubmissionRequirement = async (
+  db: Database,
+  eventId: string,
+) => {
+  return await db.query.eventSubmissionRequirement.findMany({
+    where: eq(eventSubmissionRequirement.eventId, eventId),
+    orderBy: (eventSubmissionRequirement, { asc }) => [
+      asc(eventSubmissionRequirement.order),
+    ],
+    with: {
+      media: true,
+    },
+  });
+};
+
+export const getEventSubmissionRequirementById = async (
+  db: Database,
+  typeId: string,
+) => {
+  return await db.query.eventSubmissionRequirement.findFirst({
+    where: eq(eventSubmissionRequirement.typeId, typeId),
+  });
+};
+
+export const createEventTeamSubmission = async (
+  db: Database,
+  teamId: string,
+  values: z.infer<typeof InsertEventTeamSubmissionSchema>,
+) => {
+  return db
+    .insert(eventSubmission)
+    .values({ teamId, ...values })
+    .returning()
+    .then(firstSure);
+};
+
+export const getEventAnnoucement = async (db: Database, eventId: string) => {
+  return await db.query.eventAnnouncement.findMany({
+    where: eq(eventAnnouncement.eventId, eventId),
   });
 };

@@ -10,6 +10,8 @@ import {
   competition,
   competitionSubmissionRequirement,
   competitionTimeline,
+  event,
+  eventTimeline,
   media,
   user,
   userEducationEnum,
@@ -156,6 +158,7 @@ async function seedUsers() {
   }
 }
 
+// eslint-disable-next-line
 async function seedCompetitions() {
   try {
     // Ask if the user wants to delete the table
@@ -237,6 +240,170 @@ async function seedCompetitions() {
   } catch (err) {
     console.log(err);
     throw '❌ Error seeding competitions!';
+  }
+}
+
+async function seedEvents() {
+  try {
+    // Ask if the user wants to delete the table
+    const userInput = await new Promise<string>((resolve) => {
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+      process.stdout.write('Do you want to delete the event table? (yes/no) ');
+      process.stdin.on('data', (data) => {
+        resolve(data.toString().trim());
+      });
+    });
+
+    if (userInput.toLowerCase() === 'yes') {
+      // Ask user for confirmation
+      const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
+        process.stdin.resume();
+        process.stdin.setEncoding('utf8');
+        process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
+        process.stdin.on('data', onData);
+      });
+
+      if (confirmInput.toLowerCase() === 'yes') {
+        console.log('Deleting event table...');
+        await db.delete(event);
+        console.log('🗑️ Event table deleted!');
+      }
+    }
+
+    const file = fs.readFileSync('src/db/seed/Seed - Event.csv', 'utf8');
+    const lines = file.split('\n');
+    lines.shift();
+    const events = lines.map(async (line) => {
+      const [
+        title,
+        description,
+        max_participants,
+        max_team_member,
+        guide_book_url,
+      ] = line.replace('\r', '').split(',');
+
+      const existingEvent = await db
+        .select()
+        .from(event)
+        .where(eq(event.title, title))
+        .then(first);
+
+      if (existingEvent) {
+        console.log(`Event with title ${title} already exists`);
+        return existingEvent;
+      }
+
+      const res = await db
+        .insert(event)
+        .values({
+          title,
+          description,
+          maxParticipants: parseInt(max_participants),
+          maxTeamMember: parseInt(max_team_member),
+          guidebookUrl: guide_book_url,
+        })
+        .returning()
+        .then(first);
+      return res;
+    });
+
+    // eslint-disable-next-line
+    const res = await Promise.all(events);
+
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
+    // console.log(res);
+    console.log('✅ Event seeding success!');
+  } catch (err) {
+    console.log(err);
+    throw '❌ Error seeding event!';
+  }
+}
+
+async function seedEventTimelines() {
+  try {
+    // Ask if the user wants to delete the table
+    const userInput = await new Promise<string>((resolve) => {
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+      process.stdout.write(
+        'Do you want to delete the event timeline table? (yes/no) ',
+      );
+      process.stdin.on('data', (data) => {
+        resolve(data.toString().trim());
+      });
+    });
+
+    if (userInput.toLowerCase() === 'yes') {
+      // Ask user for confirmation
+      const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
+        process.stdin.resume();
+        process.stdin.setEncoding('utf8');
+        process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
+        process.stdin.on('data', onData);
+      });
+
+      if (confirmInput.toLowerCase() === 'yes') {
+        console.log('Deleting event timeline table...');
+        await db.delete(competitionTimeline);
+        console.log('🗑️ Event Timeline table deleted!');
+      }
+    }
+
+    const file = fs.readFileSync(
+      'src/db/seed/Seed - Event Timeline.csv',
+      'utf8',
+    );
+    const lines = file.split('\n');
+    lines.shift();
+    const timelines = lines.map(async (line) => {
+      const [event_name, title, start_date, end_date, hide] = line
+        .replace('\r', '')
+        .split(',');
+
+      const event_id = await db
+        .select()
+        .from(event)
+        .where(eq(event.title, event_name))
+        .then(first);
+
+      const startDate = start_date ? new Date(start_date) : new Date();
+      const endDate = end_date ? new Date(end_date) : null;
+
+      const res = await db
+        .insert(eventTimeline)
+        .values({
+          eventId: event_id?.id ?? '',
+          title,
+          startDate,
+          showOnLanding: hide === 'TRUE',
+          showTime: hide === 'TRUE',
+          endDate,
+        })
+        .returning()
+        .then(first);
+
+      return res;
+    });
+
+    // eslint-disable-next-line
+    const res = await Promise.all(timelines);
+
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
+    // console.log(res);
+    console.log('✅ Event Timeline seeding success!');
+  } catch (err) {
+    throw '❌ Error seeding timelines!';
   }
 }
 
@@ -426,7 +593,8 @@ async function seedMedias() {
 //   }
 // }
 
-async function seedTimelines() {
+// eslint-disable-next-line
+async function seedCompetitionTimelines() {
   try {
     // Ask if the user wants to delete the table
     const userInput = await new Promise<string>((resolve) => {
@@ -600,11 +768,13 @@ async function seedSubmissionRequirement() {
 
 async function main() {
   // await seedUsers();
-  await seedCompetitions();
+  // await seedCompetitions();
   // await seedMedias();
   // await seedTeams();
-  await seedTimelines();
+  // await seedCompetitionTimelines();
   // await seedSubmissionRequirement();
+  await seedEvents();
+  await seedEventTimelines();
 }
 
 if (require.main === module) {

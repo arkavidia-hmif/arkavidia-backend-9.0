@@ -60,6 +60,12 @@ teamProtectedRouter.openapi(postCreateTeamRoute, async (c) => {
     const { competitionId, name } = await c.req.json();
     const userId = c.var.user.id;
 
+    if (name.length > 50)
+      return c.json(
+        { error: 'Length of team name must be less than 50 characters!' },
+        400,
+      );
+
     const user = await getUser(db, userId);
     const competition = await getCompetitionById(db, competitionId);
     if (competition?.title === 'Arkalogica' && user?.education !== 'sma')
@@ -263,9 +269,9 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
 
   // Ensure team is not full
   const { teamMemberCount } = await getTeamMemberCount(db, team.id);
-  const maxParticipants = (await getCompetitionById(db, team.competitionId))
-    ?.maxParticipants;
-  if (teamMemberCount >= (maxParticipants ?? 0)) {
+  const maxTeamMember = (await getCompetitionById(db, team.competitionId))
+    ?.maxTeamMember;
+  if (teamMemberCount >= (maxTeamMember ?? 0)) {
     return c.json({ error: 'Team is already full!' }, 400);
   }
 

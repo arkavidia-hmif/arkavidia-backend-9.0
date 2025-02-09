@@ -1,7 +1,8 @@
-import { relations } from 'drizzle-orm';
+import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
 
 import { eventTeam } from './event-team.schema';
+import { eventTeamMemberDocument } from './event-verification.schema';
 import { teamMemberRoleEnum } from './team-member.schema';
 import { user } from './user.schema';
 
@@ -23,7 +24,7 @@ export const eventTeamMember = pgTable(
 
 export const eventTeamMemberRelations = relations(
   eventTeamMember,
-  ({ one }) => ({
+  ({ one, many }) => ({
     user: one(user, {
       fields: [eventTeamMember.userId],
       references: [user.id],
@@ -32,7 +33,8 @@ export const eventTeamMemberRelations = relations(
       fields: [eventTeamMember.teamId],
       references: [eventTeam.id],
     }),
-    // TODO: Change this to eventTeamMemberDocument
-    // document: many(eventTeamMemberDocument),
+    document: many(eventTeamMemberDocument),
   }),
 );
+
+export type EventTeamMember = InferSelectModel<typeof eventTeamMember>;

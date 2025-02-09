@@ -13,6 +13,7 @@ import {
   getAllTeamsPaginated,
   getTeamById,
   getVerdict,
+  isAllDocumentsPresent,
   updateTeam,
   updateTeamDocument,
 } from '~/repositories/team.repository';
@@ -126,8 +127,8 @@ adminCompetitionProtectedRouter.openapi(
     if (!team || team.competition.id !== competitionId)
       return c.json({ error: "Team doesn't exist!" }, 400);
 
-    if (team.verificationStatus === 'INCOMPLETE')
-      return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
+    // if (team.verificationStatus === 'INCOMPLETE')
+    //   return c.json({ error: "You can't verify an incomplete team yet!" }, 400);
 
     if (buktiPembayaran) await updateTeamDocument(db, teamId, buktiPembayaran);
     if (teamMember) {
@@ -163,16 +164,19 @@ adminCompetitionProtectedRouter.openapi(
       teamId,
       team.teamMembers,
     );
-    const verificationStatus: CompetitionTeamVerificationStatusEnum = verdict
-      ? 'VERIFIED'
-      : errorCount > 0
-        ? 'DENIED'
-        : 'ON REVIEW';
+    const verificationStatus: CompetitionTeamVerificationStatusEnum =
+      !(await isAllDocumentsPresent(db, teamId, team.teamMembers))
+        ? 'INCOMPLETE'
+        : verdict
+          ? 'VERIFIED'
+          : errorCount > 0
+            ? 'DENIED'
+            : 'ON REVIEW';
     const updatedTeam = await updateTeam(db, teamId, { verificationStatus });
 
     if (verificationStatus === 'VERIFIED') {
       await Promise.all(
-        teamMember.map(async (tm) => {
+        team.teamMembers.map(async (tm) => {
           const user = await getUser(db, tm?.userId as string);
           if (!user) return;
 
