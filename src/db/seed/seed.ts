@@ -7,10 +7,12 @@ import { createId } from '~/utils/drizzle-schema-util';
 import { db } from '../drizzle';
 import { first } from '../helper';
 import {
+  EventStageEnum,
   competition,
   competitionSubmissionRequirement,
   competitionTimeline,
   event,
+  eventSubmissionRequirement,
   eventTimeline,
   media,
   user,
@@ -243,6 +245,7 @@ async function seedCompetitions() {
   }
 }
 
+// eslint-disable-next-line
 async function seedEvents() {
   try {
     // Ask if the user wants to delete the table
@@ -325,6 +328,7 @@ async function seedEvents() {
   }
 }
 
+// eslint-disable-next-line
 async function seedEventTimelines() {
   try {
     // Ask if the user wants to delete the table
@@ -674,7 +678,7 @@ async function seedCompetitionTimelines() {
 }
 
 // eslint-disable-next-line
-async function seedSubmissionRequirement() {
+async function seedCompetitionSubmissionRequirement() {
   try {
     // Ask if the user wants to delete the table
     const userInput = await new Promise<string>((resolve) => {
@@ -766,6 +770,99 @@ async function seedSubmissionRequirement() {
   }
 }
 
+// eslint-disable-next-line
+async function seedEventSubmissionRequirement() {
+  try {
+    // Ask if the user wants to delete the table
+    const userInput = await new Promise<string>((resolve) => {
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+      process.stdout.write(
+        'Do you want to delete the event submission requirement table? (yes/no) ',
+      );
+      process.stdin.on('data', (data) => {
+        resolve(data.toString().trim());
+      });
+    });
+
+    if (userInput.toLowerCase() === 'yes') {
+      // Ask user for confirmation
+      const confirmInput = await new Promise<string>((resolve) => {
+        const onData = (data: string) => {
+          resolve(data.toString().trim());
+        };
+        process.stdin.resume();
+        process.stdin.setEncoding('utf8');
+        process.stdout.write('\x1b[31mAre you sure? (yes/no) \x1b[0m');
+        process.stdin.on('data', onData);
+      });
+
+      if (confirmInput.toLowerCase() === 'yes') {
+        console.log('Deleting event submission requirement table...');
+        await db.delete(eventSubmissionRequirement);
+        console.log('🗑️ Event submission requirement table deleted!');
+      }
+    }
+
+    const file = fs.readFileSync(
+      'src/db/seed/Seed - Event Submission Requirement.csv',
+      'utf8',
+    );
+    const lines = file.split('\n');
+    lines.shift();
+    const timelines = lines.map(async (line) => {
+      const [
+        event_name,
+        name,
+        description,
+        start_date,
+        deadline,
+        stage,
+        order,
+      ] = line.replace('\r', '').split(',');
+
+      const event_id = await db
+        .select()
+        .from(event)
+        .where(eq(event.title, event_name))
+        .then(first);
+
+      const startDate = start_date ? new Date(start_date) : new Date();
+      const endDate = deadline ? new Date(deadline) : new Date();
+      const stage_ = stage as EventStageEnum;
+      const order_ = Number(order);
+
+      const res = await db
+        .insert(eventSubmissionRequirement)
+        .values({
+          eventId: event_id?.id ?? '',
+          typeName: name,
+          startDate,
+          description,
+          deadline: endDate,
+          stage: stage_,
+          order: order_,
+        })
+        .returning()
+        .then(first);
+
+      return res;
+    });
+
+    // eslint-disable-next-line
+    const res = await Promise.all(timelines);
+
+    process.stdin.pause();
+    process.stdin.removeAllListeners('data');
+
+    // console.log(res);
+    console.log('✅ Event Submission Requirement seeding success!');
+  } catch (err) {
+    console.log(err);
+    throw '❌ Error seeding competition submission requirement!';
+  }
+}
+
 async function main() {
   // await seedUsers();
   // await seedCompetitions();
@@ -775,6 +872,7 @@ async function main() {
   // await seedSubmissionRequirement();
   await seedEvents();
   await seedEventTimelines();
+  // await seedEventSubmissionRequirement();
 }
 
 if (require.main === module) {
