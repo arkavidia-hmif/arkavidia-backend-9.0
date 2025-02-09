@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import type { Database } from '~/db/drizzle';
 import { media } from '~/db/schema';
 
@@ -8,6 +9,12 @@ const parseUrl = (url: string, creatorId: string) => ({
   type: url.split('/').at(-1) as string,
   url,
 });
+
+export const getMediaByUrl = async (db: Database, url: string) => {
+  return await db.query.media.findFirst({
+    where: eq(media.url, url),
+  });
+};
 
 export const insertMediaFromUrl = async (
   db: Database,

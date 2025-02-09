@@ -16,3 +16,11 @@ export const createPutObjectPresignedUrl = async (
 ) => {
   return await client.presignedPutObject(bucketName, key, expiresIn);
 };
+
+export const createGetObjectPresignedUrl = async (
+  key: string,
+  bucketName: string,
+  expiresIn: number,
+) => {
+  return await client.presignedGetObject(bucketName, key, expiresIn);
+};
