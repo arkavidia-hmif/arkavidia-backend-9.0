@@ -61,6 +61,7 @@ mediaRouter.openapi(getDownloadPresignedLink, async (c) => {
       mediaId: media.id,
       mediaUrl: url,
       expiresIn,
+      media,
     },
     200,
   );
