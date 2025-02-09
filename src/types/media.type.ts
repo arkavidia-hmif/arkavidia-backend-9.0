@@ -32,5 +32,6 @@ export const PresignedUrlSchema = z
     expiresIn: z.number().openapi({
       example: 3600,
     }),
+    media: MediaSchema,
   })
   .openapi('PresignedURL');

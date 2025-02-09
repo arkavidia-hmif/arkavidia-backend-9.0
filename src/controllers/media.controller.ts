@@ -33,6 +33,7 @@ mediaRouter.openapi(getUploadPresignedLink, async (c) => {
       mediaId: media.id,
       mediaUrl,
       expiresIn,
+      media,
     },
     200,
   );
@@ -44,8 +45,6 @@ mediaRouter.openapi(getDownloadPresignedLink, async (c) => {
   const { filename, bucket } = c.req.valid('query');
   const expiresIn = 3600;
   const mediaUrl = `${env.S3_ENDPOINT}/${bucket}/${filename}`;
-
-  console.log(mediaUrl);
 
   const media = await getMediaByUrl(db, mediaUrl);
 
@@ -62,6 +61,7 @@ mediaRouter.openapi(getDownloadPresignedLink, async (c) => {
       mediaId: media.id,
       mediaUrl: url,
       expiresIn,
+      media,
     },
     200,
   );
