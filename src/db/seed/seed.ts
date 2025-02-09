@@ -357,7 +357,7 @@ async function seedEventTimelines() {
 
       if (confirmInput.toLowerCase() === 'yes') {
         console.log('Deleting event timeline table...');
-        await db.delete(competitionTimeline);
+        await db.delete(eventTimeline);
         console.log('🗑️ Event Timeline table deleted!');
       }
     }
@@ -868,10 +868,10 @@ async function main() {
   // await seedCompetitions();
   // await seedMedias();
   // await seedTeams();
-  // await seedCompetitionTimelines();
+  await seedCompetitionTimelines();
   // await seedSubmissionRequirement();
-  await seedEvents();
-  await seedEventTimelines();
+  // await seedEvents();
+  // await seedEventTimelines();
   // await seedEventSubmissionRequirement();
 }
 
