@@ -6,6 +6,7 @@ import {
   createPutObjectPresignedUrl,
 } from '~/lib/s3';
 import {
+  findMediaInTables,
   getMediaByUrl,
   insertMediaFromUrl,
 } from '~/repositories/media.repository';
@@ -50,7 +51,34 @@ mediaRouter.openapi(getDownloadPresignedLink, async (c) => {
 
   if (!media || media.bucket !== bucket)
     return c.json({ error: 'Media not found' }, 404);
-  if (media.creatorId !== user.id && !user.role.includes('admin'))
+
+  const mediaIsIn = await findMediaInTables(db, media.id);
+
+  let hasAccess = false;
+  if (user.role.includes('admin')) hasAccess = true;
+  if (media.creatorId === user.id) hasAccess = true;
+  if (
+    bucket === 'bukti-pembayaran' &&
+    (mediaIsIn.competitionTeamDoc?.team.teamMembers.find(
+      (tm) => tm.userId === user.id,
+    ) ||
+      mediaIsIn.eventTeamDoc?.team.teamMembers.find(
+        (tm) => tm.userId === user.id,
+      ))
+  )
+    hasAccess = true;
+  if (
+    bucket.includes('submission') &&
+    (mediaIsIn.competitionTeamSubmission?.team.teamMembers.find(
+      (s) => s.userId === user.id,
+    ) ||
+      mediaIsIn.eventTeamSubmission?.team.teamMembers.find(
+        (s) => s.userId === user.id,
+      ))
+  )
+    hasAccess = true;
+
+  if (!hasAccess)
     return c.json({ error: 'You do not have access to this media' }, 403);
 
   const url = await createGetObjectPresignedUrl(filename, bucket, expiresIn);

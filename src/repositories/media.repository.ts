@@ -1,6 +1,12 @@
 import { eq } from 'drizzle-orm';
 import type { Database } from '~/db/drizzle';
-import { media } from '~/db/schema';
+import {
+  competitionSubmission,
+  eventSubmission,
+  eventTeamDocument,
+  media,
+  teamDocument,
+} from '~/db/schema';
 
 const parseUrl = (url: string, creatorId: string) => ({
   creatorId,
@@ -14,6 +20,58 @@ export const getMediaByUrl = async (db: Database, url: string) => {
   return await db.query.media.findFirst({
     where: eq(media.url, url),
   });
+};
+
+export const findMediaInTables = async (db: Database, id: string) => {
+  const competitionTeamDoc = await db.query.teamDocument.findFirst({
+    where: eq(teamDocument.mediaId, id),
+    with: {
+      team: {
+        with: {
+          teamMembers: true,
+        },
+      },
+    },
+  });
+  const eventTeamDoc = await db.query.eventTeamDocument.findFirst({
+    where: eq(eventTeamDocument.mediaId, id),
+    with: {
+      team: {
+        with: {
+          teamMembers: true,
+        },
+      },
+    },
+  });
+
+  const competitionTeamSubmission =
+    await db.query.competitionSubmission.findFirst({
+      where: eq(competitionSubmission.mediaId, id),
+      with: {
+        team: {
+          with: {
+            teamMembers: true,
+          },
+        },
+      },
+    });
+  const eventTeamSubmission = await db.query.eventSubmission.findFirst({
+    where: eq(eventSubmission.mediaId, id),
+    with: {
+      team: {
+        with: {
+          teamMembers: true,
+        },
+      },
+    },
+  });
+
+  return {
+    competitionTeamDoc,
+    eventTeamDoc,
+    competitionTeamSubmission,
+    eventTeamSubmission,
+  };
 };
 
 export const insertMediaFromUrl = async (
