@@ -211,43 +211,43 @@ export const getAcademyaStatistics = async (
           .then(firstSure)
       ).id
     : undefined;
+
   const where = eventId ? eq(eventTeam.eventId, eventId) : undefined;
 
   const totalCount = (
-    await db.select({ count: count() }).from(team).where(where).then(firstSure)
+    await db
+      .select({ count: count() })
+      .from(eventTeam)
+      .where(where)
+      .then(firstSure)
   ).count;
 
   const verificationStatus = {
     incomplete: (
-      await getCompetitionVerificationStatusStatistics(
-        db,
-        eventId,
-        'INCOMPLETE',
-      )
+      await getAcademyaVerificationStatusStatistics(db, eventId, 'INCOMPLETE')
     ).count,
     waiting: (
-      await getCompetitionVerificationStatusStatistics(db, eventId, 'WAITING')
+      await getAcademyaVerificationStatusStatistics(db, eventId, 'WAITING')
     ).count,
     onReview: (
-      await getCompetitionVerificationStatusStatistics(db, eventId, 'ON REVIEW')
+      await getAcademyaVerificationStatusStatistics(db, eventId, 'ON REVIEW')
     ).count,
     denied: (
-      await getCompetitionVerificationStatusStatistics(db, eventId, 'DENIED')
+      await getAcademyaVerificationStatusStatistics(db, eventId, 'DENIED')
     ).count,
     changed: (
-      await getCompetitionVerificationStatusStatistics(db, eventId, 'CHANGED')
+      await getAcademyaVerificationStatusStatistics(db, eventId, 'CHANGED')
     ).count,
     verified: (
-      await getCompetitionVerificationStatusStatistics(db, eventId, 'VERIFIED')
+      await getAcademyaVerificationStatusStatistics(db, eventId, 'VERIFIED')
     ).count,
   };
 
   const stage = {
     preeliminary: (
-      await getCompetitionStageStatistics(db, eventId, 'pre-eliminary')
+      await getAcademyaStageStatistics(db, eventId, 'pre-eliminary')
     ).count,
-    final: (await getCompetitionStageStatistics(db, eventId, 'final'))
-      .count,
+    final: (await getAcademyaStageStatistics(db, eventId, 'final')).count,
   };
 
   return { count: totalCount, verificationStatus, stage };
