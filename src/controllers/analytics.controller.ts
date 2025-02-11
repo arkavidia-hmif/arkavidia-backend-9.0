@@ -1,9 +1,11 @@
 import { db } from '~/db/drizzle';
 import {
+  getAcademyaStatistics,
   getCompetitionStatistics,
   getUserStatistics,
 } from '~/repositories/analytics.repository';
 import {
+  getAcademyaStatisticRoute,
   getCompetitionStatisticRoute,
   getUserStatisticRoute,
 } from '~/routes/analytics.route';
@@ -35,6 +37,24 @@ analyticsProtectedRouter.openapi(getCompetitionStatisticRoute, async (c) => {
       datavidia: await getCompetitionStatistics(db, 'Datavidia'),
       hackvidia: await getCompetitionStatistics(db, 'Hackvidia'),
       uxvidia: await getCompetitionStatistics(db, 'UXvidia'),
+    },
+  });
+});
+
+analyticsProtectedRouter.openapi(getAcademyaStatisticRoute, async (c) => {
+  return c.json({
+    ...(await getAcademyaStatistics(db)),
+    Academya: {
+      softwareEngineering: await getAcademyaStatistics(
+        db,
+        'Academya - Software Engineering',
+      ),
+      dataScience: await getAcademyaStatistics(db, 'Academya - Data Science'),
+      uiux: await getAcademyaStatistics(db, 'Academya - UI UX'),
+      productManagement: await getAcademyaStatistics(
+        db,
+        'Academya - Product Management',
+      ),
     },
   });
 });

@@ -17,14 +17,22 @@ export const UserStatisticSchema = z
   .merge(SingleUserStatisticSchema);
 
 const StageCompetitionStatisticSchema = z.object({
-  // verification: z.number(),
   preeliminary: z.number(),
   final: z.number(),
 });
 
+const VerificationStatusStatisticSchema = z.object({
+  incomplete: z.number(),
+  waiting: z.number(),
+  onReview: z.number(),
+  denied: z.number(),
+  changed: z.number(),
+  verified: z.number(),
+});
+
 const SingleCompetitionStatisticSchema = z.object({
   count: z.number(),
-  verifiedCount: z.number(),
+  verificationStatus: VerificationStatusStatisticSchema,
   stage: StageCompetitionStatisticSchema,
 });
 
@@ -40,3 +48,20 @@ export const CompetitionStatisticSchema = z
     }),
   })
   .merge(SingleCompetitionStatisticSchema);
+
+const SingleAcademyaStatisticSchema = z.object({
+  count: z.number(),
+  verificationStatus: VerificationStatusStatisticSchema,
+  stage: StageCompetitionStatisticSchema,
+});
+
+export const AcademyaStatisticSchema = z
+  .object({
+    academya: z.object({
+      softwareEngineering: SingleAcademyaStatisticSchema,
+      dataScinece: SingleAcademyaStatisticSchema,
+      uiux: SingleAcademyaStatisticSchema,
+      productManagement: SingleAcademyaStatisticSchema,
+    }),
+  })
+  .merge(SingleAcademyaStatisticSchema);

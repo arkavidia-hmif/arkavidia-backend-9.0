@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
+  AcademyaStatisticSchema,
   CompetitionStatisticSchema,
   UserStatisticSchema,
 } from '~/types/analytics.type';
@@ -41,6 +42,26 @@ export const getCompetitionStatisticRoute = createRoute({
         },
       },
       description: 'Get competition statistics',
+    },
+    403: createErrorResponse('UNION', 'Forbidden'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getAcademyaStatisticRoute = createRoute({
+  operationId: 'getAcademyaStatistic',
+  tags: ['analytics'],
+  method: 'get',
+  middleware: [roleMiddleware('admin')] as const,
+  path: '/analytics/academya',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: AcademyaStatisticSchema,
+        },
+      },
+      description: 'Get academya statistics',
     },
     403: createErrorResponse('UNION', 'Forbidden'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
