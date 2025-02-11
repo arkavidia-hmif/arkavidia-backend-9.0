@@ -1,44 +1,41 @@
 competition_name,title,start_date,end_date,hide
 Arkalogica,Registrasi Peserta,1/20/2025,2/7/2025,FALSE
-Arkalogica,Batch 2 Pendaftaran,2/7/2025,2/15/2025,FALSE
-Arkalogica,Technical Meeting,2/16/2025,,FALSE
-Arkalogica,Warm Up,2/16/2025,,FALSE
-Arkalogica,Penyisihan (Daring),2/22/2025,,FALSE
-Arkalogica,Pengumuman finalis,2/28/2025,,FALSE
-Arkalogica,Semifinal & Final (Luring),3/22/2025,,FALSE
-Arkalogica,Awarding Night (Luring),3/23/2025,,FALSE
+Arkalogica,Batch 2 Pendaftaran,2/7/2025,3/3/2025,FALSE
+Arkalogica,Technical Meeting,3/8/2025,,FALSE
+Arkalogica,Warm Up,3/8/2025,,FALSE
+Arkalogica,Penyisihan (Daring),3/15/2025,,FALSE
+Arkalogica,Pengumuman finalis,4/12/2025,,FALSE
+Arkalogica,Final & Awarding Night (Luring),5/3/2025,5/4/2025,FALSE
 CP,Registrasi Peserta,1/20/2025,2/7/2025,FALSE
-CP,Batch 2 Pendaftaran,2/7/2025,2/15/2025,FALSE
-CP,Technical Meeting,2/16/2025,,FALSE
-CP,Warm Up,2/16/2025,,FALSE
-CP,Penyisihan (Daring),2/23/2025,,FALSE
-CP,Pengumuman Finalis,2/28/2025,,FALSE
-CP,Final & Awarding Night (Luring),3/23/2025,,FALSE
+CP,Batch 2 Pendaftaran,2/7/2025,3/3/2025,FALSE
+CP,Technical Meeting,3/8/2025,,FALSE
+CP,Warm Up,3/8/2025,,FALSE
+CP,Penyisihan (Daring),3/15/2025,,FALSE
+CP,Pengumuman Finalis,4/12/2025,,FALSE
+CP,Final & Awarding Night (Luring),5/4/2025,,FALSE
 CTF,Registrasi Peserta,1/20/2025,2/7/2025,FALSE
-CTF,Batch 2 Pendaftaran,2/7/2025,2/15/2025,FALSE
-CTF,Technical Meeting,2/22/2025,,FALSE
-CTF,Warm Up,2/22/2025,,FALSE
-CTF,Penyisihan (Daring),2/23/2025,,FALSE
-CTF,Pengumuman Finalis,2/28/2025,,FALSE
-CTF,Final & Awarding Night (Luring),3/23/2025,,FALSE
+CTF,Batch 2 Pendaftaran,2/7/2025,3/3/2025,FALSE
+CTF,Technical Meeting,3/8/2025,,FALSE
+CTF,Warm Up,3/8/2025,,FALSE
+CTF,Penyisihan (Daring),3/15/2025,,FALSE
+CTF,Pengumuman Finalis,4/12/2025,,FALSE
+CTF,Final & Awarding Night (Luring),5/4/2025,,FALSE
 UXvidia,Registrasi Peserta,1/20/2025,2/7/2025,FALSE
-UXvidia,Batch 2 Pendaftaran,2/7/2025,2/15/2025,FALSE
-UXvidia,Deadline Submisi Penyisihan,2/18/2025,,FALSE
-UXvidia,Pengumuman Finalis,2/28/2025,,FALSE
-UXvidia,Deadline Submisi Final,3/17/2025,,FALSE
-UXvidia,Final & Awarding Night (Luring),3/23/2025,,FALSE
+UXvidia,Batch 2 Pendaftaran,2/7/2025,3/3/2025,FALSE
+UXvidia,Deadline Submisi Penyisihan,3/23/2025,,FALSE
+UXvidia,Pengumuman Finalis,4/12/2025,,FALSE
+UXvidia,Deadline Submisi Final,4/27/2025,,FALSE
+UXvidia,Final & Awarding Night (Luring),5/3/2025,5/4/2025,FALSE
 Datavidia,Registrasi Peserta,1/20/2025,2/7/2025,FALSE
-Datavidia,Batch 2 Pendaftaran,2/7/2025,2/15/2025,FALSE
-Datavidia,Technical Meeting,2/15/2025,,FALSE
-Datavidia,Penyisihan (Daring),2/17/2025,2/24/2025,FALSE
-Datavidia,Pengumuman Finalis,2/28/2025,,FALSE
-Datavidia,Final (Luring),3/22/2025,3/23/2025,FALSE
-Datavidia,Awarding Night,3/23/2025,,FALSE
-Hackvidia,Registrasi Peserta,1/25/2025,3/1/2025,FALSE
+Datavidia,Batch 2 Pendaftaran,2/7/2025,3/3/2025,FALSE
+Datavidia,Technical Meeting,3/4/2025,,FALSE
+Datavidia,Penyisihan (Daring),3/15/2025,3/15/2025,FALSE
+Datavidia,Pengumuman Finalis,4/12/2025,,FALSE
+Datavidia,Final & Awarding Night (Luring),5/3/2025,5/4/2025,FALSE
+Hackvidia,Registrasi Peserta,1/25/2025,3/3/2025,FALSE
 Hackvidia,Workshop,2/15/2025,,TRUE
-Hackvidia,Deadline Submisi Penyisihan,3/1/2025,,FALSE
-Hackvidia,Pengumuman Finalis,3/13/2025,,FALSE
-Hackvidia,Technical Meeting,3/14/2025,,FALSE
-Hackvidia,Coaching Session,3/14/2025,3/15/2025,TRUE
-Hackvidia,Final,3/21/2025,3/22/2025,FALSE
-Hackvidia,Awarding Night,3/23/2025,,FALSE
+Hackvidia,Deadline Submisi Penyisihan,3/23/2025,,FALSE
+Hackvidia,Pengumuman Finalis,4/12/2025,,FALSE
+Hackvidia,Technical Meeting,4/26/2025,,FALSE
+Hackvidia,Coaching Session,3/14/2025,3/15/2025,FALSE
+Hackvidia,Final & Awarding Night,5/2/2025,5/4/2025,FALSE
