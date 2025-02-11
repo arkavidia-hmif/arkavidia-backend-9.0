@@ -48,3 +48,20 @@ export const CompetitionStatisticSchema = z
     }),
   })
   .merge(SingleCompetitionStatisticSchema);
+
+const SingleAcademyaStatisticSchema = z.object({
+  count: z.number(),
+  verificationStatus: VerificationStatusStatisticSchema,
+  stage: StageCompetitionStatisticSchema,
+});
+
+export const AcademyaStatisticSchema = z
+  .object({
+    academya: z.object({
+      softwareEngineering: SingleAcademyaStatisticSchema,
+      dataScinece: SingleAcademyaStatisticSchema,
+      uiux: SingleAcademyaStatisticSchema,
+      productManagement: SingleAcademyaStatisticSchema,
+    }),
+  })
+  .merge(SingleAcademyaStatisticSchema);

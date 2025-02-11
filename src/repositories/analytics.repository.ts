@@ -4,8 +4,12 @@ import { firstSure } from '~/db/helper';
 import {
   CompetitionStageEnum,
   CompetitionTeamVerificationStatusEnum,
+  EventStageEnum,
+  EventTeamVerificationStatusEnum,
   UserEducationEnum,
   competition,
+  event,
+  eventTeam,
   team,
   user,
 } from '~/db/schema';
@@ -150,6 +154,99 @@ export const getCompetitionStatistics = async (
       await getCompetitionStageStatistics(db, competitionId, 'pre-eliminary')
     ).count,
     final: (await getCompetitionStageStatistics(db, competitionId, 'final'))
+      .count,
+  };
+
+  return { count: totalCount, verificationStatus, stage };
+};
+
+type AcademyaNameEnum =
+  | 'Academya - Software Engineering'
+  | 'Academya - Data Science'
+  | 'Academya - UI UX'
+  | 'Academya - Product Management';
+
+export const getAcademyaStageStatistics = async (
+  db: Database,
+  eventId?: string,
+  stage?: EventStageEnum,
+) => {
+  const where1 = eventId ? eq(eventTeam.eventId, eventId) : undefined;
+  const where2 = stage ? eq(eventTeam.stage, stage) : undefined;
+
+  return await db
+    .select({ count: count() })
+    .from(eventTeam)
+    .where(and(where1, where2))
+    .then(firstSure);
+};
+
+export const getAcademyaVerificationStatusStatistics = async (
+  db: Database,
+  eventId?: string,
+  verificationStatus?: EventTeamVerificationStatusEnum,
+) => {
+  const where1 = eventId ? eq(eventTeam.eventId, eventId) : undefined;
+  const where2 = verificationStatus
+    ? eq(eventTeam.verificationStatus, verificationStatus)
+    : undefined;
+
+  return await db
+    .select({ count: count() })
+    .from(eventTeam)
+    .where(and(where1, where2))
+    .then(firstSure);
+};
+
+export const getAcademyaStatistics = async (
+  db: Database,
+  eventName?: AcademyaNameEnum,
+) => {
+  const eventId = eventName
+    ? (
+        await db
+          .select({ id: event.id })
+          .from(event)
+          .where(eq(event.title, eventName as string))
+          .then(firstSure)
+      ).id
+    : undefined;
+  const where = eventId ? eq(eventTeam.eventId, eventId) : undefined;
+
+  const totalCount = (
+    await db.select({ count: count() }).from(team).where(where).then(firstSure)
+  ).count;
+
+  const verificationStatus = {
+    incomplete: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        eventId,
+        'INCOMPLETE',
+      )
+    ).count,
+    waiting: (
+      await getCompetitionVerificationStatusStatistics(db, eventId, 'WAITING')
+    ).count,
+    onReview: (
+      await getCompetitionVerificationStatusStatistics(db, eventId, 'ON REVIEW')
+    ).count,
+    denied: (
+      await getCompetitionVerificationStatusStatistics(db, eventId, 'DENIED')
+    ).count,
+    changed: (
+      await getCompetitionVerificationStatusStatistics(db, eventId, 'CHANGED')
+    ).count,
+    verified: (
+      await getCompetitionVerificationStatusStatistics(db, eventId, 'VERIFIED')
+    ).count,
+  };
+
+  const stage = {
+    preeliminary: (
+      await getCompetitionStageStatistics(db, eventId, 'pre-eliminary')
+    ).count,
+    final: (await getCompetitionStageStatistics(db, eventId, 'final'))
       .count,
   };
 
