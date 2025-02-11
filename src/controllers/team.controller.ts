@@ -246,39 +246,61 @@ teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
 });
 
 teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
-  const { teamCode } = c.req.valid('json');
-  const userId = c.var.user.id;
+  try {
+    const { teamCode } = c.req.valid('json');
+    const userId = c.var.user.id;
 
-  // Check if the team exists
-  const team = await getTeamByCode(db, teamCode);
-  if (!team) {
-    return c.json({ error: "Team doesn't exist!" }, 400);
-  }
+    // Check if the team exists
+    const team = await getTeamByCode(db, teamCode);
+    if (!team) {
+      return c.json({ error: "Team doesn't exist!" }, 400);
+    }
 
-  // Get all competition IDs
-  const competitionId = team.competitionId;
+    // Get all competition IDs
+    const competitionId = team.competitionId;
 
-  // Check if user is in any other team across all competitions
-  const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
-  if (isInOtherTeam) {
+    // Check if user is in any other team across all competitions
+    const isInOtherTeam = await isUserInOtherTeam(db, userId, competitionId);
+    if (isInOtherTeam) {
+      return c.json(
+        { error: 'User is already in another team for a competition!' },
+        400,
+      );
+    }
+
+    // Ensure team is not full
+    const { teamMemberCount } = await getTeamMemberCount(db, team.id);
+    const maxTeamMember = (await getCompetitionById(db, team.competitionId))
+      ?.maxTeamMember;
+    if (teamMemberCount >= (maxTeamMember ?? 0)) {
+      return c.json({ error: 'Team is already full!' }, 400);
+    }
+
+    // Add user to  team
+    await updateTeam(db, team.id, { verificationStatus: 'INCOMPLETE' });
+
+    const newTeamMember = await insertUserToTeam(db, team.id, userId);
+
+    if (!newTeamMember) {
+      return c.json({ error: 'Something went wrong!' });
+    }
+
+    return c.json(newTeamMember, 200);
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          error: error.message,
+        },
+        500,
+      );
+    }
+
     return c.json(
-      { error: 'User is already in another team for a competition!' },
-      400,
+      {
+        error: 'Unexpected error occured',
+      },
+      500,
     );
   }
-
-  // Ensure team is not full
-  const { teamMemberCount } = await getTeamMemberCount(db, team.id);
-  const maxTeamMember = (await getCompetitionById(db, team.competitionId))
-    ?.maxTeamMember;
-  if (teamMemberCount >= (maxTeamMember ?? 0)) {
-    return c.json({ error: 'Team is already full!' }, 400);
-  }
-
-  // Add user to  team
-  await updateTeam(db, team.id, { verificationStatus: 'INCOMPLETE' });
-
-  const newTeamMember = await insertUserToTeam(db, team.id, userId);
-
-  return c.json(newTeamMember, 200);
 });
