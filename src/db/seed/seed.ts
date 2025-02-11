@@ -635,9 +635,14 @@ async function seedCompetitionTimelines() {
     const lines = file.split('\n');
     lines.shift();
     const timelines = lines.map(async (line) => {
-      const [competition_name, title, start_date, end_date, hide] = line
-        .replace('\r', '')
-        .split(',');
+      const [
+        competition_name,
+        title,
+        start_date,
+        end_date,
+        show_on_landing,
+        show_tile,
+      ] = line.replace('\r', '').split(',');
 
       const competition_id = await db
         .select()
@@ -654,8 +659,8 @@ async function seedCompetitionTimelines() {
           competitionId: competition_id?.id ?? '',
           title,
           startDate,
-          showOnLanding: hide === 'TRUE',
-          showTime: hide === 'TRUE',
+          showOnLanding: show_on_landing === 'TRUE',
+          showTime: show_tile === 'TRUE',
           endDate,
         })
         .returning()
