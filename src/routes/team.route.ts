@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
-import { cutResponseMiddleware } from '~/middlewares/cut-response.middleware';
+// import { cutResponseMiddleware } from '~/middlewares/cut-response.middleware';
 import { isInCompTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
@@ -21,9 +21,9 @@ export const getTeamsRoute = createRoute({
   operationId: 'getTeams',
   tags: ['team'],
   method: 'get',
-  middleware: [
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
-  ] as const,
+  // middleware: [
+  //   cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  // ] as const,
   path: '/team',
   responses: {
     200: {
@@ -45,7 +45,7 @@ export const getTeamByIdRoute = createRoute({
   method: 'get',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}',
   request: {
@@ -69,9 +69,9 @@ export const postCreateTeamRoute = createRoute({
   operationId: 'postCreateTeam',
   tags: ['team'],
   method: 'post',
-  middleware: [
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
-  ] as const,
+  // middleware: [
+  //   cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  // ] as const,
   path: '/team',
   request: {
     body: {
@@ -102,9 +102,9 @@ export const joinTeamByCodeRoute = createRoute({
   operationId: 'joinTeamByCode',
   tags: ['team'],
   method: 'post',
-  middleware: [
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
-  ] as const,
+  // middleware: [
+  //   cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+  // ] as const,
   path: '/team/join',
   request: {
     body: {
@@ -136,7 +136,7 @@ export const putChangeTeamNameRoute = createRoute({
   method: 'put',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}',
   request: {
@@ -170,7 +170,7 @@ export const deleteTeamMemberRoute = createRoute({
   method: 'delete',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}',
   request: {
@@ -204,7 +204,7 @@ export const postQuitTeamRoute = createRoute({
   method: 'post',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}/quit',
   request: {
@@ -230,7 +230,7 @@ export const putTeamDocumentRoute = createRoute({
   method: 'put',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}/document',
   request: {
@@ -264,7 +264,7 @@ export const getTeamSubmissionRoute = createRoute({
   method: 'get',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}/submission',
   request: {
@@ -291,7 +291,7 @@ export const putTeamSubmissionRoute = createRoute({
   method: 'put',
   middleware: [
     isInCompTeamMiddleware(),
-    cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
+    // cutResponseMiddleware(['finalStatus', 'preeliminaryStatus']),
   ] as const,
   path: '/team/{teamId}/submission',
   request: {
