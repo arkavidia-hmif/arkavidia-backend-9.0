@@ -3,6 +3,7 @@ import type { Database } from '~/db/drizzle';
 import { firstSure } from '~/db/helper';
 import {
   CompetitionStageEnum,
+  CompetitionTeamVerificationStatusEnum,
   UserEducationEnum,
   competition,
   team,
@@ -59,6 +60,25 @@ export const getCompetitionStageStatistics = async (
     .then(firstSure);
 };
 
+export const getCompetitionVerificationStatusStatistics = async (
+  db: Database,
+  competitionId?: string,
+  verificationStatus?: CompetitionTeamVerificationStatusEnum,
+) => {
+  const where1 = competitionId
+    ? eq(team.competitionId, competitionId)
+    : undefined;
+  const where2 = verificationStatus
+    ? eq(team.verificationStatus, verificationStatus)
+    : undefined;
+
+  return await db
+    .select({ count: count() })
+    .from(team)
+    .where(and(where1, where2))
+    .then(firstSure);
+};
+
 export const getCompetitionStatistics = async (
   db: Database,
   competitionName?: CompetitionNameEnum,
@@ -80,24 +100,58 @@ export const getCompetitionStatistics = async (
     await db.select({ count: count() }).from(team).where(where).then(firstSure)
   ).count;
 
-  const verifiedCount = (
-    await db
-      .select({ count: count() })
-      .from(team)
-      .where(and(where, eq(team.verificationStatus, 'VERIFIED')))
-      .then(firstSure)
-  ).count;
+  const verificationStatus = {
+    incomplete: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        competitionId,
+        'INCOMPLETE',
+      )
+    ).count,
+    waiting: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        competitionId,
+        'WAITING',
+      )
+    ).count,
+    onReview: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        competitionId,
+        'ON REVIEW',
+      )
+    ).count,
+    denied: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        competitionId,
+        'DENIED',
+      )
+    ).count,
+    changed: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        competitionId,
+        'CHANGED',
+      )
+    ).count,
+    verified: (
+      await getCompetitionVerificationStatusStatistics(
+        db,
+        competitionId,
+        'VERIFIED',
+      )
+    ).count,
+  };
 
   const stage = {
     preeliminary: (
       await getCompetitionStageStatistics(db, competitionId, 'pre-eliminary')
     ).count,
-    // verification: (
-    //   await getCompetitionStageStatistics(db, competitionId, 'verification')
-    // ).count,
     final: (await getCompetitionStageStatistics(db, competitionId, 'final'))
       .count,
   };
 
-  return { count: totalCount, verifiedCount, stage };
+  return { count: totalCount, verificationStatus, stage };
 };
