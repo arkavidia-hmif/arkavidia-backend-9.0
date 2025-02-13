@@ -274,6 +274,7 @@ export const updatePosterEventTeamMember = async (
   if (poster) {
     await updateEventTeamMemberDocument(db, userId, teamId, 'poster', {
       mediaId: posterMediaId,
+      verificationError: null,
     });
   } else {
     await createEventTeamMemberDocument(db, {
@@ -302,6 +303,7 @@ export const updateTwibbonEventTeamMember = async (
   if (twibbon) {
     await updateEventTeamMemberDocument(db, userId, teamId, 'twibbon', {
       mediaId: twibbonMediaId,
+      verificationError: null,
     });
   } else {
     await createEventTeamMemberDocument(db, {
