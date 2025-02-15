@@ -1,4 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
+import { PutTeamSubmissionVerdictSchema } from '~/types/admin-competition.type';
+import { EventAndTeamIdAndSubmissionIdParam } from '~/types/admin-event.type';
+import { TeamEventSubmissionSchema } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getAdminEventsRoute = createRoute({
@@ -148,17 +151,26 @@ export const putAdminEventTeamSubmissionVerdictRoute = createRoute({
   tags: ['admin-event'],
   method: 'put',
   // middleware: [roleMiddleware('admin_competition')] as const, // TODO: fix middleware for event (just leave this for now)
-  path: '/admin/event',
-  request: {},
+  path: '/admin/event/{eventId}/team/{teamId}/submission/{typeId}',
+  request: {
+    params: EventAndTeamIdAndSubmissionIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: PutTeamSubmissionVerdictSchema,
+        },
+      },
+    },
+  },
   responses: {
-    // 200: {
-    //   description: "Succesfully updated team's submission verdict.",
-    //   content: {
-    //     'application/json': {
-    //       schema: TeamSubmissionSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: "Succesfully updated team's submission verdict.",
+      content: {
+        'application/json': {
+          schema: TeamEventSubmissionSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
