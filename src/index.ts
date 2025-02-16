@@ -35,6 +35,7 @@ app.doc('/openapi.json', {
   },
   tags: [
     { name: 'admin-competition', description: 'Admin Competition API' },
+    { name: 'admin-event', description: 'Admin Event API' },
     { name: 'auth', description: 'Authentication API' },
     { name: 'media', description: 'Media API' },
     { name: 'team', description: 'Team API' },
