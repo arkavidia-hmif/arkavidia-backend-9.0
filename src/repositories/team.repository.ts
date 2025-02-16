@@ -344,7 +344,10 @@ export const updatePaymentProofTeam = async (
 ) => {
   const kartu = await getTeamDocument(db, teamId, 'bukti-pembayaran');
   if (kartu) {
-    await updateTeamDocument(db, teamId, { mediaId: paymentProofMediaId });
+    await updateTeamDocument(db, teamId, {
+      mediaId: paymentProofMediaId,
+      verificationError: null,
+    });
   } else {
     await createTeamDocument(db, {
       teamId,
