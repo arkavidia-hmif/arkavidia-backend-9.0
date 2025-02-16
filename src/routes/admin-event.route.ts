@@ -12,7 +12,7 @@ export const getAdminEventsRoute = createRoute({
   path: '/admin/event',
   responses: {
     200: {
-      description: "Succesfully fetched admin's priveleged competitions.",
+      description: "Succesfully fetched admin's priveleged events.",
       content: {
         'application/json': {
           schema: ListEventSchema,
