@@ -26,8 +26,14 @@ export const transformRoleToName = (role: UserIdentityRolesEnum) => {
       return 'Hackvidia';
     case 'admin_competition_uxvidia':
       return 'UXvidia';
-
-    // TODO: Add event roles, too lazy now
+    case 'admin_event_academya_softeng':
+      return 'Academya - Software Engineering';
+    case 'admin_event_academya_datsci':
+      return 'Academya - Data Science';
+    case 'admin_event_academya_uiux':
+      return 'Academya - UI UX';
+    case 'admin_event_academya_pm':
+      return 'Academya - Product Management';
   }
 };
 
@@ -47,8 +53,14 @@ export const transformNameToRole = (
       return 'admin_competition_hackvidia';
     case 'UXvidia':
       return 'admin_competition_uxvidia';
-
-    // TODO: Add event roles, too lazy now
+    case 'Academya - Software Engineering':
+      return 'admin_event_academya_softeng';
+    case 'Academya - Data Science':
+      return 'admin_event_academya_datsci';
+    case 'Academya - UI UX':
+      return 'admin_event_academya_uiux';
+    case 'Academya - Product Management':
+      return 'admin_event_academya_pm';
   }
 };
 

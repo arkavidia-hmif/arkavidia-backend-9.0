@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { ListEventSchema } from '~/types/event.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getAdminEventsRoute = createRoute({
@@ -10,14 +11,14 @@ export const getAdminEventsRoute = createRoute({
   // middleware: [roleMiddleware('admin_event')] as const, // TODO: fix middleware for event (just leave this for now)
   path: '/admin/event',
   responses: {
-    // 200: {
-    //   description: "Succesfully fetched admin's priveleged competitions.",
-    //   content: {
-    //     'application/json': {
-    //       schema: ListCompetitionSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: "Succesfully fetched admin's priveleged competitions.",
+      content: {
+        'application/json': {
+          schema: ListEventSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

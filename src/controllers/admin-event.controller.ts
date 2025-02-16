@@ -1,3 +1,6 @@
+import { db } from '~/db/drizzle';
+import { transformRoleToName } from '~/middlewares/role-access.middleware';
+import { getEvent, getEventByTitle } from '~/repositories/event.repository';
 import {
   getAdminAllEventTeamsRoute,
   getAdminEventTeamInformationRoute,
@@ -12,7 +15,12 @@ import { createAuthRouter } from '~/utils/router-factory';
 export const adminEventProtectedRouter = createAuthRouter();
 
 adminEventProtectedRouter.openapi(getAdminEventsRoute, async (c) => {
-  return c.json({}, 200);
+  if (c.var.user.role === 'admin' || c.var.user.role === 'admin_event')
+    return c.json(await getEvent(db), 200);
+
+  const eventName = transformRoleToName(c.var.user.role);
+  const events = await getEventByTitle(db, eventName);
+  return c.json(events, 200);
 });
 
 adminEventProtectedRouter.openapi(getAdminAllEventTeamsRoute, async (c) => {
