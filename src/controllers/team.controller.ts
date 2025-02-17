@@ -243,6 +243,10 @@ teamProtectedRouter.openapi(putTeamSubmissionRoute, async (c) => {
     teamMember: true,
     competition: true,
   });
+
+  if (team?.verificationStatus !== 'VERIFIED')
+    return c.json({ error: 'Your team must be verified to submit!' }, 403);
+
   const requirement = await getCompetitionSubmissionRequirementById(db, typeId);
 
   if (requirement?.competitionId !== team?.competition.id)
