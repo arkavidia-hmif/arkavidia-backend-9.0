@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS "voucer" (
 	"id" text PRIMARY KEY NOT NULL,
 	"code" text NOT NULL,
-	"required_team_count" text NOT NULL
+	"required_team_count" integer NOT NULL,
+	"discount" integer
 );
 --> statement-breakpoint
 ALTER TABLE "team" ADD COLUMN "applied_voucer_id" text;--> statement-breakpoint

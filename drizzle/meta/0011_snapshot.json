@@ -1,5 +1,5 @@
 {
-  "id": "cb7078f7-dddb-4675-9799-477a3d4dd985",
+  "id": "116244d5-01de-4eb7-a952-d66f51739954",
   "prevId": "3acd8419-7303-45f2-8665-9cea0d5d018a",
   "version": "7",
   "dialect": "postgresql",
@@ -335,9 +335,15 @@
         },
         "required_team_count": {
           "name": "required_team_count",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "discount": {
+          "name": "discount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
