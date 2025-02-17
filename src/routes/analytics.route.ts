@@ -3,6 +3,7 @@ import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   AcademyaStatisticSchema,
   CompetitionStatisticSchema,
+  EventSubmissionStatistic,
   UserStatisticSchema,
 } from '~/types/analytics.type';
 
@@ -64,6 +65,28 @@ export const getAcademyaStatisticRoute = createRoute({
       description: 'Get academya statistics',
     },
     403: createErrorResponse('UNION', 'Forbidden'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const getEventSubmissionStatisticRoute = createRoute({
+  operationId: 'getEventSubmissionStatistic',
+  description: 'Gets event submission statistic.',
+  tags: ['analytics'],
+  method: 'get',
+  middleware: [roleMiddleware('admin')] as const,
+  path: '/analytics/event/submission',
+  responses: {
+    200: {
+      description: 'Succesfully fetch event submission statistic',
+      content: {
+        'application/json': {
+          schema: EventSubmissionStatistic,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
   },
 });

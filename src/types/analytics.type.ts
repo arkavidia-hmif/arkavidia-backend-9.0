@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { EventSchema } from './event.type';
+
 const SingleUserStatisticSchema = z.object({
   totalCount: z.number(),
   totalRegisteredCount: z.number(),
@@ -65,3 +67,10 @@ export const AcademyaStatisticSchema = z
     }),
   })
   .merge(SingleAcademyaStatisticSchema);
+
+export const EventSubmissionStatistic = z.array(
+  z.object({
+    event: EventSchema,
+    totalSubmission: z.number(),
+  }),
+);
