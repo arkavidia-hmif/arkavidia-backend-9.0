@@ -65,7 +65,7 @@ export const getAdminEventTeamInformationRoute = createRoute({
   tags: ['admin-event'],
   method: 'get',
   middleware: [roleMiddleware('admin_competition')] as const,
-  path: '/admin/event',
+  path: '/admin/event/{eventId}/team/{teamId}',
   request: {},
   responses: {
     // 200: {
@@ -115,7 +115,7 @@ export const putAdminEventTeamVerificationRoute = createRoute({
   tags: ['admin-event'],
   method: 'put',
   middleware: [roleMiddleware('admin_competition')] as const,
-  path: '/admin/event',
+  path: '/admin/event/{eventId}/team/{teamId}/submission',
   request: {},
   responses: {
     // 200: {
@@ -138,7 +138,7 @@ export const putAdminEventTeamStatusRoute = createRoute({
   tags: ['admin-event'],
   method: 'put',
   middleware: [roleMiddleware('admin_competition')] as const,
-  path: '/admin/event',
+  path: '/admin/event/{eventId}/team/{teamId}/status',
   request: {},
   responses: {
     // 200: {
