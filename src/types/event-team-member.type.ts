@@ -34,7 +34,7 @@ export const EventTeamMemberSchema = createSelectSchema(eventTeamMember)
     user: UserSchema.optional(),
     document: z.array(EventTeamMemberDocumentSchema).optional(),
   })
-  .openapi('EventTeam');
+  .openapi('EventTeamMember');
 
 export const ListEventTeamMemberSchema = z.array(EventTeamMemberSchema);
 

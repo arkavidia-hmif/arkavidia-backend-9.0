@@ -4,6 +4,7 @@ import { db } from '~/db/drizzle';
 import type { UserIdentityRolesEnum } from '~/db/schema';
 import { findUserIdentityById } from '~/repositories/auth.repository';
 import { getCompetition } from '~/repositories/competition.repository';
+import { getEventById } from '~/repositories/event.repository';
 import type { JWTPayloadSchema } from '~/types/auth.type';
 
 const factory = createFactory<{
@@ -83,7 +84,16 @@ export const roleMiddleware = (requestedRole: UserIdentityRolesEnum) => {
         authorized = role?.includes(requestedRole) as boolean;
       }
 
-      // TODO: Add event roles, too lazy now
+      if (param.eventId) {
+        const event = await getEventById(db, param.eventId);
+        if (
+          role !== 'admin_event' &&
+          role !== transformNameToRole(event?.title as string)
+        )
+          authorized = false;
+      } else {
+        authorized = role?.includes(requestedRole) as boolean;
+      }
 
       if (!authorized) {
         return c.json({ message: 'Unauthorized' }, 403);

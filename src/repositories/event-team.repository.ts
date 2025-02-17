@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
@@ -11,6 +11,7 @@ import {
   eventTeamMember,
   user,
 } from '~/db/schema';
+import { AdminAllEventTeamQuerySchema } from '~/types/admin-event.type';
 import {
   CreateEventTeamDocumentSchema,
   UpdateEventTeamDocumentSchema,
@@ -31,6 +32,89 @@ interface EventTeamRelationOption {
   document?: boolean;
   submission?: boolean;
 }
+
+export const getAllEventTeamsPaginated = async (
+  db: Database,
+  eventId: string,
+  query: z.infer<typeof AdminAllEventTeamQuerySchema>,
+) => {
+  const page = Number(query.page);
+  const limit = Number(query.limit);
+
+  const offset = (page - 1) * limit;
+
+  const searchQuery = query.search
+    ? or(
+        ilike(eventTeam.name, `%${query.search}%`),
+        ilike(eventTeam.id, `%${query.search}%`),
+      )
+    : undefined;
+  const stageQuery = query.stage ? eq(eventTeam.stage, query.stage) : undefined;
+  const verifStatusQuery = query.verifStatus
+    ? eq(eventTeam.verificationStatus, query.verifStatus)
+    : undefined;
+  const finalStatuQuery = query.finalStatus
+    ? eq(eventTeam.finalStatus, query.finalStatus)
+    : undefined;
+  const prelimStatusQuery = query.prelimStatus
+    ? eq(eventTeam.preeliminaryStatus, query.prelimStatus)
+    : undefined;
+
+  const where = and(
+    searchQuery,
+    stageQuery,
+    verifStatusQuery,
+    finalStatuQuery,
+    prelimStatusQuery,
+  );
+
+  const result = await db.query.eventTeam.findMany({
+    where: and(eq(eventTeam.eventId, eventId), where),
+    with: {
+      document: true,
+    },
+    limit,
+    offset,
+    orderBy: [desc(eventTeam.createdAt)],
+  });
+
+  const totalItems = (
+    await db.query.eventTeam.findMany({
+      where: and(eq(eventTeam.eventId, eventId), where),
+    })
+  ).length;
+
+  const totalPages = Math.ceil(totalItems / limit);
+  const next =
+    page < totalPages
+      ? `?page=${page + 1}&limit=${limit}` +
+        (query.search ? `&search=${query.search}` : '') +
+        (query.stage ? `&stage=${query.stage}` : '') +
+        (query.verifStatus ? `&verifStatus=${query.verifStatus}` : '') +
+        (query.prelimStatus ? `&prelimStatus=${query.prelimStatus}` : '') +
+        (query.finalStatus ? `&finalStatus=${query.finalStatus}` : '')
+      : null;
+  const prev =
+    page > 1
+      ? `?page=${page - 1}&limit=${limit}` +
+        (query.search ? `&search=${query.search}` : '') +
+        (query.stage ? `&stage=${query.stage}` : '') +
+        (query.verifStatus ? `&verifStatus=${query.verifStatus}` : '') +
+        (query.prelimStatus ? `&prelimStatus=${query.prelimStatus}` : '') +
+        (query.finalStatus ? `&finalStatus=${query.finalStatus}` : '')
+      : null;
+
+  return {
+    pagination: {
+      currentPage: page,
+      totalItems,
+      totalPages,
+      next,
+      prev,
+    },
+    result,
+  };
+};
 
 export const getUserEventTeams = async (db: Database, userId: string) => {
   const userTeams = (

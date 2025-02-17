@@ -1,6 +1,7 @@
 import { db } from '~/db/drizzle';
 import { transformRoleToName } from '~/middlewares/role-access.middleware';
 import { getEvent, getEventByTitle } from '~/repositories/event.repository';
+import { getAllEventTeamsPaginated } from '~/repositories/event-team.repository';
 import {
   getAdminAllEventTeamsRoute,
   getAdminEventTeamInformationRoute,
@@ -24,7 +25,14 @@ adminEventProtectedRouter.openapi(getAdminEventsRoute, async (c) => {
 });
 
 adminEventProtectedRouter.openapi(getAdminAllEventTeamsRoute, async (c) => {
-  return c.json({}, 200);
+  const { eventId } = c.req.valid('param');
+
+  const eventParticipant = await getAllEventTeamsPaginated(
+    db,
+    eventId,
+    c.req.valid('query'),
+  );
+  return c.json(eventParticipant, 200);
 });
 
 adminEventProtectedRouter.openapi(
