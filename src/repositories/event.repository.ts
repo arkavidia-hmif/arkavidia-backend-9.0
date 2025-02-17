@@ -72,3 +72,15 @@ export const getEventAnnoucement = async (db: Database, eventId: string) => {
     where: eq(eventAnnouncement.eventId, eventId),
   });
 };
+
+export const getEventByTitle = async (
+  db: Database,
+  title: string | undefined,
+) => {
+  const where = title ? eq(event.title, title) : undefined;
+
+  const result = await db.query.event.findMany({
+    where,
+  });
+  return result;
+};
