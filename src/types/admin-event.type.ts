@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { ListEventSubmissionRequirementSchema } from './event-team.type';
 import {
   eventStageEnum,
   eventTeamFinalStatusEnum,
@@ -7,6 +6,7 @@ import {
   teamVerificationStatusEnum,
 } from '~/db/schema';
 
+import { ListEventSubmissionRequirementSchema } from './event-team.type';
 import { EventTeamSchema } from './event-team.type';
 
 export const EventTeamsPaginatedSchema = z.object({
@@ -84,7 +84,7 @@ export const AdminAllEventTeamQuerySchema = z.object({
         required: false,
       },
     }),
-
+});
 
 export const EventAndTeamIdParam = z.object({
   eventId: z.string().openapi({
