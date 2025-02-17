@@ -1,10 +1,10 @@
 import { createRoute } from '@hono/zod-openapi';
-import { ListEventSchema } from '~/types/event.type';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
   AdminAllEventTeamQuerySchema,
   EventTeamsPaginatedSchema,
 } from '~/types/admin-event.type';
+import { ListEventSchema } from '~/types/event.type';
 import { EventIdParam } from '~/types/event.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 

@@ -1,7 +1,7 @@
 import { db } from '~/db/drizzle';
 import { transformRoleToName } from '~/middlewares/role-access.middleware';
-import { getEvent, getEventByTitle } from '~/repositories/event.repository';
 import { getAllEventTeamsPaginated } from '~/repositories/event-team.repository';
+import { getEvent, getEventByTitle } from '~/repositories/event.repository';
 import {
   getAdminAllEventTeamsRoute,
   getAdminEventTeamInformationRoute,
