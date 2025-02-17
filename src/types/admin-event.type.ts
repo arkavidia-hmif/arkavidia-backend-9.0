@@ -84,7 +84,7 @@ export const AdminAllEventTeamQuerySchema = z.object({
         required: false,
       },
     }),
-
+});
 
 export const EventAndTeamIdParam = z.object({
   eventId: z.string().openapi({
@@ -101,6 +101,16 @@ export const EventAndTeamIdParam = z.object({
   }),
 });
 
+export const EventAndTeamIdAndSubmissionIdParam = EventAndTeamIdParam.merge(
+  z.object({
+    typeId: z.string().openapi({
+      param: {
+        in: 'path',
+        required: true,
+      },
+    }),
+  }),
+);
 export const GroupedEventTeamSubmissionSchema = z.object({
   'pre-eliminary': ListEventSubmissionRequirementSchema.optional(),
   final: ListEventSubmissionRequirementSchema.optional(),

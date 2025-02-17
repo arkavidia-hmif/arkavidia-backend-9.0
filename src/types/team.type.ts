@@ -4,6 +4,7 @@ import {
   competition,
   competitionSubmission,
   competitionSubmissionRequirement,
+  eventSubmission,
   team,
   teamDocument,
 } from '~/db/schema';
@@ -32,6 +33,13 @@ export const TeamSubmissionSchema = createSelectSchema(
 ).extend({
   media: MediaSchema,
 });
+
+export const TeamEventSubmissionSchema = createSelectSchema(
+  eventSubmission,
+).extend({
+  media: MediaSchema,
+});
+
 export const InsertTeamSubmissionSchema = createInsertSchema(
   competitionSubmission,
 ).omit({
