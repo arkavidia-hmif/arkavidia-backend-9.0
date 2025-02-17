@@ -2,11 +2,13 @@ import { db } from '~/db/drizzle';
 import {
   getAcademyaStatistics,
   getCompetitionStatistics,
+  getEventSubmissionStatistic,
   getUserStatistics,
 } from '~/repositories/analytics.repository';
 import {
   getAcademyaStatisticRoute,
   getCompetitionStatisticRoute,
+  getEventSubmissionStatisticRoute,
   getUserStatisticRoute,
 } from '~/routes/analytics.route';
 import { createAuthRouter } from '~/utils/router-factory';
@@ -58,3 +60,11 @@ analyticsProtectedRouter.openapi(getAcademyaStatisticRoute, async (c) => {
     },
   });
 });
+
+analyticsProtectedRouter.openapi(
+  getEventSubmissionStatisticRoute,
+  async (c) => {
+    const res = await getEventSubmissionStatistic(db);
+    return c.json(res, 200);
+  },
+);

@@ -64,7 +64,7 @@ export const getAdminEventTeamInformationRoute = createRoute({
     'Gets team complete information, including: team documents, team member documents, team member (user) personal info.',
   tags: ['admin-event'],
   method: 'get',
-  middleware: [roleMiddleware('admin_competition')] as const,
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}',
   request: {},
   responses: {
@@ -87,7 +87,7 @@ export const getAdminEventTeamSubmissionsRoute = createRoute({
   description: "Gets team's submission grouped by stage.",
   tags: ['admin-event'],
   method: 'get',
-  middleware: [roleMiddleware('admin_competition')] as const,
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}/submission',
   request: {
     params: EventAndTeamIdParam,
@@ -114,7 +114,7 @@ export const putAdminEventTeamVerificationRoute = createRoute({
     "Updates team's verification status. Automatically handles team final status (DENIED/VERIFIED) and sends team verification email.",
   tags: ['admin-event'],
   method: 'put',
-  middleware: [roleMiddleware('admin_competition')] as const,
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}/submission',
   request: {},
   responses: {
@@ -137,7 +137,7 @@ export const putAdminEventTeamStatusRoute = createRoute({
   description: "Updates team's final/pre-eliminary status.",
   tags: ['admin-event'],
   method: 'put',
-  middleware: [roleMiddleware('admin_competition')] as const,
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}/status',
   request: {},
   responses: {
@@ -160,7 +160,7 @@ export const putAdminEventTeamSubmissionVerdictRoute = createRoute({
   description: "Updates team's submission verdict.",
   tags: ['admin-event'],
   method: 'put',
-  middleware: [roleMiddleware('admin_competition')] as const,
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}/submission/{typeId}',
   request: {
     params: EventAndTeamIdAndSubmissionIdParam,
