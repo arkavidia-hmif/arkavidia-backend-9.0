@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, inArray, or } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
@@ -230,8 +230,11 @@ export const createEventTeam = async (
 ) => {
   // Check register deadline
   const firstEventTimeline = await db.query.eventTimeline.findFirst({
-    where: eq(eventTimeline?.eventId, eventId),
-    orderBy: [asc(eventTimeline?.startDate)],
+    where: and(
+      ilike(eventTimeline.title, '%Registration'),
+      eq(eventTimeline?.eventId, eventId),
+    ),
+    orderBy: [desc(eventTimeline?.endDate)],
   });
 
   if (!firstEventTimeline || !firstEventTimeline.endDate) {

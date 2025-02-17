@@ -7,6 +7,7 @@ import {
   TeamDocumentTypeEnum,
   TeamMember,
   competitionSubmission,
+  competitionTimeline,
   team,
   teamDocument,
   teamMember,
@@ -197,6 +198,28 @@ export const createTeam = async (
   competitionId: string,
   name: string,
 ) => {
+  // Check register deadline
+  const competitionRegistrationTimeline =
+    await db.query.competitionTimeline.findFirst({
+      where: and(
+        ilike(competitionTimeline.title, '%Registration'),
+        eq(competitionTimeline?.competitionId, competitionId),
+      ),
+      orderBy: [desc(competitionTimeline?.endDate)],
+    });
+
+  if (
+    !competitionRegistrationTimeline ||
+    !competitionRegistrationTimeline.endDate
+  ) {
+    throw new Error('Event not found');
+  }
+
+  const now = new Date();
+
+  if (now > competitionRegistrationTimeline?.endDate) {
+    throw new Error('Registration deadline has passed');
+  }
   return await db.transaction(async (tx) => {
     const existingTeam = await db.query.team.findFirst({
       where: eq(team.name, name),
