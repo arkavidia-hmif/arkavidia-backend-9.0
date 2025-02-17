@@ -1,4 +1,10 @@
 import { createRoute } from '@hono/zod-openapi';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
+import {
+  AdminAllEventTeamQuerySchema,
+  EventTeamsPaginatedSchema,
+} from '~/types/admin-event.type';
+import { EventIdParam } from '~/types/event.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getAdminEventsRoute = createRoute({
@@ -29,18 +35,18 @@ export const getAdminAllEventTeamsRoute = createRoute({
   description: 'Gets all teams in a event; Only returns basic information.',
   tags: ['admin-event'],
   method: 'get',
-  // middleware: [roleMiddleware('admin_competition')] as const, // TODO: fix middleware for event (just leave this for now)
-  path: '',
-  request: {},
+  middleware: [roleMiddleware('admin_event')] as const,
+  path: '/admin/event/{eventId}/team',
+  request: { params: EventIdParam, query: AdminAllEventTeamQuerySchema },
   responses: {
-    // 200: {
-    //   description: 'Succesfully fetched all teams.',
-    //   content: {
-    //     'application/json': {
-    //       schema: TeamsPaginatedSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: 'Succesfully fetched all teams.',
+      content: {
+        'application/json': {
+          schema: EventTeamsPaginatedSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),

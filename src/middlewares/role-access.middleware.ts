@@ -4,6 +4,7 @@ import { db } from '~/db/drizzle';
 import type { UserIdentityRolesEnum } from '~/db/schema';
 import { findUserIdentityById } from '~/repositories/auth.repository';
 import { getCompetition } from '~/repositories/competition.repository';
+import { getEventById } from '~/repositories/event.repository';
 import type { JWTPayloadSchema } from '~/types/auth.type';
 
 const factory = createFactory<{
@@ -26,8 +27,14 @@ export const transformRoleToName = (role: UserIdentityRolesEnum) => {
       return 'Hackvidia';
     case 'admin_competition_uxvidia':
       return 'UXvidia';
-
-    // TODO: Add event roles, too lazy now
+    case 'admin_event_academya_uiux':
+      return 'Academya - UI UX';
+    case 'admin_event_academya_pm':
+      return 'Academya - Product Management';
+    case 'admin_event_academya_softeng':
+      return 'Academya - Software Engineering';
+    case 'admin_event_academya_datsci':
+      return 'Academya - Data Science';
   }
 };
 
@@ -47,8 +54,14 @@ export const transformNameToRole = (
       return 'admin_competition_hackvidia';
     case 'UXvidia':
       return 'admin_competition_uxvidia';
-
-    // TODO: Add event roles, too lazy now
+    case 'Academya - UI UX':
+      return 'admin_event_academya_uiux';
+    case 'Academya - Product Management':
+      return 'admin_event_academya_pm';
+    case 'Academya - Software Engineering':
+      return 'admin_event_academya_softeng';
+    case 'Academya - Data Science':
+      return 'admin_event_academya_datsci';
   }
 };
 
@@ -71,7 +84,16 @@ export const roleMiddleware = (requestedRole: UserIdentityRolesEnum) => {
         authorized = role?.includes(requestedRole) as boolean;
       }
 
-      // TODO: Add event roles, too lazy now
+      if (param.eventId) {
+        const event = await getEventById(db, param.eventId);
+        if (
+          role !== 'admin_event' &&
+          role !== transformNameToRole(event?.title as string)
+        )
+          authorized = false;
+      } else {
+        authorized = role?.includes(requestedRole) as boolean;
+      }
 
       if (!authorized) {
         return c.json({ message: 'Unauthorized' }, 403);
