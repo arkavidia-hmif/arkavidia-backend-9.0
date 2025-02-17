@@ -14,7 +14,7 @@ export const getAdminEventsRoute = createRoute({
     "Gets admin's privileged event by role. For example, 'admin_event_softeng' can only see Softeng's admin page or 'admin_event' can see all.",
   tags: ['admin-event'],
   method: 'get',
-  // middleware: [roleMiddleware('admin_event')] as const, // TODO: fix middleware for event (just leave this for now)
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event',
   responses: {
     200: {
