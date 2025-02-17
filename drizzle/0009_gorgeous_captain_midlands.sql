@@ -1,1 +1,0 @@
-ALTER TYPE "public"."team_verification_status_enum" ADD VALUE 'ON REVIEW';
