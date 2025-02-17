@@ -3,6 +3,7 @@ import { transformRoleToName } from '~/middlewares/role-access.middleware';
 import {
   getAllEventTeamsPaginated,
   getEventTeamById,
+  updateEventTeamStatus,
 } from '~/repositories/event-team.repository';
 import {
   getEvent,
@@ -93,7 +94,40 @@ adminEventProtectedRouter.openapi(
 );
 
 adminEventProtectedRouter.openapi(putAdminEventTeamStatusRoute, async (c) => {
-  return c.json({}, 200);
+  const { teamId, eventId } = c.req.valid('param');
+  const { preeliminaryStatus, finalStatus } = c.req.valid('json');
+  try {
+    await updateEventTeamStatus(
+      db,
+      teamId,
+      eventId,
+      preeliminaryStatus,
+      finalStatus,
+    );
+
+    return c.json(
+      {
+        message: 'Team event status updated successfully',
+      },
+      200,
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          message: error.message,
+        },
+        400,
+      );
+    }
+
+    return c.json(
+      {
+        message: 'error occured',
+      },
+      500,
+    );
+  }
 });
 
 adminEventProtectedRouter.openapi(
