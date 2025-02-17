@@ -51,13 +51,14 @@ export const TeamSchema = createSelectSchema(team, {
     teamMembers: z.array(TeamMemberSchema).optional(),
     document: z.array(TeamDocumentSchema).optional(),
     submission: z.array(TeamSubmissionSchema).optional(),
-    voucer: VoucerSchema.optional()
+    voucer: VoucerSchema.optional(),
+    eligibleForVoucer: z.boolean().optional(),
   })
   .openapi('Team');
 
 export const BarebonesTeamSchema = createSelectSchema(team, {
   createdAt: z.union([z.string(), z.date()]),
-})
+});
 
 export const UpdateTeamSchema = createInsertSchema(team)
   .omit({

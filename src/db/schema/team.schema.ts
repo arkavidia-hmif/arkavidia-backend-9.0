@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { createId, getNow } from '../../utils/drizzle-schema-util';
@@ -65,6 +65,7 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   }),
 }));
 
+export type Team = InferSelectModel<typeof team>;
 export type CompetitionTeamVerificationStatusEnum =
   (typeof teamVerificationStatusEnum.enumValues)[number];
 

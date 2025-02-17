@@ -323,11 +323,10 @@ export const postApplyVoucerRoute = createRoute({
   operationId: 'postApplyVoucerCTeam',
   tags: ['team'],
   method: 'post',
-  middleware: [
-    isInCompTeamMiddleware(),
-  ] as const,
+  middleware: [isInCompTeamMiddleware()] as const,
   path: '/team/{teamId}/voucer',
   request: {
+    params: TeamIdParam,
     body: {
       content: {
         'application/json': {

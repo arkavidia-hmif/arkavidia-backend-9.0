@@ -1,4 +1,5 @@
 import { db } from '~/db/drizzle';
+import { Voucer } from '~/db/schema';
 import {
   getCompetitionById,
   getCompetitionSubmissionRequirement,
@@ -23,12 +24,14 @@ import {
   updateTeam,
 } from '~/repositories/team.repository';
 import { getUser } from '~/repositories/user.repository';
+import { getVoucerByCode } from '~/repositories/voucer.repository';
 import {
   deleteTeamMemberRoute,
   getTeamByIdRoute,
   getTeamSubmissionRoute,
   getTeamsRoute,
   joinTeamByCodeRoute,
+  postApplyVoucerRoute,
   postCreateTeamRoute,
   postQuitTeamRoute,
   putChangeTeamNameRoute,
@@ -45,7 +48,23 @@ teamProtectedRouter.openapi(getTeamByIdRoute, async (c) => {
     document: true,
     teamMember: { document: true, user: { document: true } },
     competition: true,
+    voucer: true,
   });
+
+  if (!team) return c.json({ error: "Team doesn't exist" }, 404);
+  if (team.voucer) {
+    const voucer = (await getVoucerByCode(db, team.voucer.code, {
+      team: true,
+    })) as Voucer;
+    return c.json(
+      {
+        ...team,
+        eligibleForVoucer: voucer.team.length + 1 == voucer.requiredTeamCount,
+      },
+      200,
+    );
+  }
+
   return c.json(team, 200);
 });
 
@@ -296,6 +315,42 @@ teamProtectedRouter.openapi(joinTeamByCodeRoute, async (c) => {
       );
     }
 
+    return c.json(
+      {
+        error: 'Unexpected error occured',
+      },
+      500,
+    );
+  }
+});
+
+teamProtectedRouter.openapi(postApplyVoucerRoute, async (c) => {
+  const { code } = c.req.valid('json');
+  const { teamId } = c.req.valid('param');
+
+  const voucer = await getVoucerByCode(db, code, { team: true });
+  if (!voucer) return c.json({ error: 'Voucer not found!' }, 404);
+  if (voucer.team.length >= voucer.requiredTeamCount)
+    return c.json({ error: 'Voucer has already hit max limit!' });
+
+  try {
+    const team = await updateTeam(db, teamId, { appliedVoucerId: voucer.id });
+    return c.json(
+      {
+        ...team,
+        eligibleForVoucer: voucer.team.length + 1 == voucer.requiredTeamCount,
+      },
+      200,
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json(
+        {
+          error: error.message,
+        },
+        500,
+      );
+    }
     return c.json(
       {
         error: 'Unexpected error occured',
