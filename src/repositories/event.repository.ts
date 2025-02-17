@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { Database } from '~/db/drizzle';
 import { firstSure } from '~/db/helper';
@@ -71,4 +71,36 @@ export const getEventAnnoucement = async (db: Database, eventId: string) => {
   return await db.query.eventAnnouncement.findMany({
     where: eq(eventAnnouncement.eventId, eventId),
   });
+};
+
+export const updateEventSubmissionFeedback = async (
+  db: Database,
+  teamId: string,
+  typeId: string,
+  feedback: string,
+) => {
+  return await db
+    .update(eventSubmission)
+    .set({
+      judgeResponse: feedback,
+    })
+    .where(
+      and(
+        eq(eventSubmission.teamId, teamId),
+        eq(eventSubmission.typeId, typeId),
+      ),
+    )
+    .returning();
+};
+
+export const getEventByTitle = async (
+  db: Database,
+  title: string | undefined,
+) => {
+  const where = title ? eq(event.title, title) : undefined;
+
+  const result = await db.query.event.findMany({
+    where,
+  });
+  return result;
 };

@@ -35,6 +35,7 @@ interface CompetitionTeamRelationOption {
   competition?: boolean;
   document?: boolean;
   submission?: boolean;
+  voucer?: boolean;
 }
 
 export const getAllTeamsPaginated = async (
@@ -186,6 +187,7 @@ export const getTeamById = async (
       competition: options?.competition ? true : undefined,
       document: options?.document ? { with: { media: true } } : undefined,
       submission: options?.submission ? { with: { media: true } } : undefined,
+      voucer: options?.voucer ? true : undefined,
     },
   });
 };

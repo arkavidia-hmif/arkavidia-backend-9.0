@@ -3,6 +3,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { isInCompTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import { TeamMemberSchema } from '~/types/team-member.type';
 import {
+  ApplyVoucerBodyShcema,
   InsertTeamSubmissionSchema,
   ListSubmissionRequirementSchema,
   ListTeamSchema,
@@ -310,6 +311,36 @@ export const putTeamSubmissionRoute = createRoute({
       content: {
         'application/json': {
           schema: TeamSubmissionSchema,
+        },
+      },
+    },
+    400: createErrorResponse('UNION', 'Bad request error'),
+    500: createErrorResponse('GENERIC', 'Internal server error'),
+  },
+});
+
+export const postApplyVoucerRoute = createRoute({
+  operationId: 'postApplyVoucerCTeam',
+  tags: ['team'],
+  method: 'post',
+  middleware: [isInCompTeamMiddleware()] as const,
+  path: '/team/{teamId}/voucer',
+  request: {
+    params: TeamIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: ApplyVoucerBodyShcema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Successfully applied voucer',
+      content: {
+        'application/json': {
+          schema: TeamSchema,
         },
       },
     },
