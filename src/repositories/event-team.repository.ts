@@ -231,7 +231,7 @@ export const createEventTeam = async (
   // Check register deadline
   const firstEventTimeline = await db.query.eventTimeline.findFirst({
     where: and(
-      ilike(eventTimeline.title, '%Registration%'),
+      ilike(eventTimeline.title, '%Registrasi%'),
       eq(eventTimeline?.eventId, eventId),
     ),
     orderBy: [desc(eventTimeline?.endDate)],

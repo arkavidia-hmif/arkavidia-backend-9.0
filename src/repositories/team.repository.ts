@@ -202,7 +202,7 @@ export const createTeam = async (
   const competitionRegistrationTimeline =
     await db.query.competitionTimeline.findFirst({
       where: and(
-        ilike(competitionTimeline.title, '%Registration%'),
+        ilike(competitionTimeline.title, '%Pendaftaran%'),
         eq(competitionTimeline?.competitionId, competitionId),
       ),
       orderBy: [desc(competitionTimeline?.endDate)],
