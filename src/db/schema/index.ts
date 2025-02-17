@@ -9,3 +9,4 @@ export * from './event-team.schema';
 export * from './event.schema';
 export * from './event-team-member.schema';
 export * from './event-verification.schema';
+export * from './voucer.schema';

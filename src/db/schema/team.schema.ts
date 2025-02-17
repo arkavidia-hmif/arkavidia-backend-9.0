@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { createId, getNow } from '../../utils/drizzle-schema-util';
@@ -9,6 +9,7 @@ import {
 } from './competition.schema';
 import { teamMember } from './team-member.schema';
 import { teamDocument } from './verification.schema';
+import { voucer } from './voucer.schema';
 
 export const teamVerificationStatusEnum = pgEnum(
   'team_verification_status_enum',
@@ -31,6 +32,9 @@ export const team = pgTable('team', {
     .references(() => competition.id, { onDelete: 'cascade' }),
   name: text('team_name').notNull(),
   stage: stageEnum('stage').notNull().default('pre-eliminary'),
+  appliedVoucerId: text('applied_voucer_id').references(() => voucer.id, {
+    onDelete: 'set null',
+  }),
   verificationStatus: teamVerificationStatusEnum('verification_status').default(
     'INCOMPLETE',
   ),
@@ -55,8 +59,13 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   }),
   document: many(teamDocument),
   submission: many(competitionSubmission),
+  voucer: one(voucer, {
+    fields: [team.appliedVoucerId],
+    references: [voucer.id],
+  }),
 }));
 
+export type Team = InferSelectModel<typeof team>;
 export type CompetitionTeamVerificationStatusEnum =
   (typeof teamVerificationStatusEnum.enumValues)[number];
 

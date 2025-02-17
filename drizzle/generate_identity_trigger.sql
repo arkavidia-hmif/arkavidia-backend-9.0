@@ -12,3 +12,4 @@ $$;
 CREATE TRIGGER on_identity_created
  AFTER INSERT ON public.user_identity
  FOR EACH ROW EXECUTE PROCEDURE handle_new_identity();
+ 

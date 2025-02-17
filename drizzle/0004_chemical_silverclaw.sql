@@ -1,0 +1,2 @@
+CREATE TYPE "public"."team_verification_status_enum" AS ENUM('VERIFIED', 'DENIED', 'WAITING', 'CHANGED');--> statement-breakpoint
+ALTER TABLE "team" ADD COLUMN "verification_status" "team_verification_status_enum";

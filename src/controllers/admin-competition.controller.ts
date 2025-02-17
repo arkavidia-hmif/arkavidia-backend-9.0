@@ -1,5 +1,5 @@
 import { db } from '~/db/drizzle';
-import { CompetitionTeamVerificationStatusEnum } from '~/db/schema';
+import { CompetitionTeamVerificationStatusEnum, Voucer } from '~/db/schema';
 import { sendVerificationAcceptEmail } from '~/lib/nodemailer';
 import { transformRoleToName } from '~/middlewares/role-access.middleware';
 import {
@@ -18,6 +18,7 @@ import {
   updateTeamDocument,
 } from '~/repositories/team.repository';
 import { getUser, updateUserDocument } from '~/repositories/user.repository';
+import { getVoucerByCode } from '~/repositories/voucer.repository';
 import {
   getAdminAllCompetitionTeamsRoute,
   getAdminCompetitionTeamInformationRoute,
@@ -67,10 +68,25 @@ adminCompetitionProtectedRouter.openapi(
       document: true,
       teamMember: { document: true, user: { document: true } },
       competition: true,
+      voucer: true,
     });
 
     if (team?.competition.id !== competitionId)
       return c.json({ error: "Team isn't in competition!" }, 400);
+
+    if (!team) return c.json({ error: "Team doesn't exist" }, 404);
+    if (team.voucer) {
+      const voucer = (await getVoucerByCode(db, team.voucer.code, {
+        team: true,
+      })) as Voucer;
+      return c.json(
+        {
+          ...team,
+          eligibleForVoucer: voucer.team.length == voucer.requiredTeamCount,
+        },
+        200,
+      );
+    }
 
     return c.json(team, 200);
   },
