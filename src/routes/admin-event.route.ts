@@ -1,8 +1,17 @@
 import { createRoute } from '@hono/zod-openapi';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import { PutTeamSubmissionVerdictSchema } from '~/types/admin-competition.type';
-import { AdminAllEventTeamQuerySchema, EventAndTeamIdAndSubmissionIdParam, EventAndTeamIdParam, EventTeamsPaginatedSchema, GroupedEventTeamSubmissionSchema } from '~/types/admin-event.type';
-import { EventTeamAndEventIdParam, PutEventTeamStatusBodySchema } from '~/types/event-team.type';
+import {
+  AdminAllEventTeamQuerySchema,
+  EventAndTeamIdAndSubmissionIdParam,
+  EventAndTeamIdParam,
+  EventTeamsPaginatedSchema,
+  GroupedEventTeamSubmissionSchema,
+} from '~/types/admin-event.type';
+import {
+  EventTeamAndEventIdParam,
+  PutEventTeamStatusBodySchema,
+} from '~/types/event-team.type';
 import { EventIdParam, ListEventSchema } from '~/types/event.type';
 import { TeamEventSubmissionSchema } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
