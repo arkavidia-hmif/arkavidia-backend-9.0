@@ -14,7 +14,7 @@ import {
   updateEventTeam,
 } from '~/repositories/event-team.repository';
 import {
-  createEventTeamSubmission,
+  createOrUpdateEventTeamSubmission,
   getEventById,
   getEventSubmissionRequirement,
   getEventSubmissionRequirementById,
@@ -270,7 +270,7 @@ eventTeamProtectedRouter.openapi(putEventTeamSubmissionRoute, async (c) => {
   //     { error: `Your team isn't in ${requirement?.stage} stage!` },
   //     403,
   //   );
-  const teamSubmission = await createEventTeamSubmission(
+  const teamSubmission = await createOrUpdateEventTeamSubmission(
     db,
     teamId,
     c.req.valid('json'),

@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { isInEventTeamMiddleware } from '~/middlewares/is-in-team.middleware';
+import { EventTeamMemberSchema } from '~/types/event-team-member.type';
 // import { isInEventTeamMiddleware } from '~/middlewares/is-in-team.middleware';
 import {
   CreateEventTeamBodySchema,
@@ -134,7 +135,7 @@ export const joinEventTeamByCodeRoute = createRoute({
     200: {
       content: {
         'application/json': {
-          schema: EventTeamSchema,
+          schema: EventTeamMemberSchema,
         },
       },
       description: 'Successfully joined a team',
