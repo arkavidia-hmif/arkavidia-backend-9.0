@@ -9,6 +9,8 @@ import {
   UserEducationEnum,
   competition,
   event,
+  eventSubmission,
+  eventSubmissionRequirement,
   eventTeam,
   team,
   user,
@@ -251,4 +253,21 @@ export const getAcademyaStatistics = async (
   };
 
   return { count: totalCount, verificationStatus, stage };
+};
+
+export const getEventSubmissionStatistic = async (db: Database) => {
+  const statistic = await db
+    .select({
+      event: event,
+      totalSubmission: count(),
+    })
+    .from(eventSubmission)
+    .fullJoin(
+      eventSubmissionRequirement,
+      eq(eventSubmission.typeId, eventSubmissionRequirement.typeId),
+    )
+    .fullJoin(event, eq(eventSubmissionRequirement.eventId, event.id))
+    .groupBy(event.id)
+    .orderBy(event.title);
+  return statistic;
 };
