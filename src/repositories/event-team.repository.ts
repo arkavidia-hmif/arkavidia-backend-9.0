@@ -4,7 +4,9 @@ import { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
 import {
   EventTeamDocumentTypeEnum,
+  EventTeamFinalStatusEnum,
   EventTeamMember,
+  EventTeamPreeliminaryStatusEnum,
   EventTeamVerificationStatusEnum,
   eventTeam,
   eventTeamDocument,
@@ -470,4 +472,44 @@ export const inferEventVerificationStatus = async (
   if (!admin) return 'WAITING';
   if (await getEventVerdict(db, teamId, team.teamMembers)) return 'VERIFIED';
   return 'DENIED';
+};
+
+export const updateEventTeamStatus = async (
+  db: Database,
+  teamId: string,
+  eventId: string,
+  preeliminaryStatus?: EventTeamPreeliminaryStatusEnum,
+  finalStatus?: EventTeamFinalStatusEnum,
+) => {
+  // Get existing team
+  const team = await getEventTeamById(db, teamId);
+  if (!team) {
+    throw new Error('Team not found');
+  }
+
+  // Validate team belongs to event
+  if (team.eventId !== eventId) {
+    throw new Error('Team does not belong to this event');
+  }
+
+  const updateValues: {
+    preeliminaryStatus?: EventTeamPreeliminaryStatusEnum;
+    finalStatus?: EventTeamFinalStatusEnum;
+  } = {};
+
+  if (preeliminaryStatus) {
+    updateValues.preeliminaryStatus = preeliminaryStatus;
+  }
+
+  if (finalStatus) {
+    updateValues.finalStatus = finalStatus;
+  }
+
+  // Update team status
+  return await db
+    .update(eventTeam)
+    .set(updateValues)
+    .where(eq(eventTeam.id, teamId))
+    .returning()
+    .then(firstSure);
 };

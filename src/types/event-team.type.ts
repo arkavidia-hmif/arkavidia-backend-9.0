@@ -77,6 +77,19 @@ export const PutChangeEventTeamNameBodySchema = z.object({
   name: z.string().min(1),
 });
 
+export const PutEventTeamStatusBodySchema = z
+  .object({
+    preeliminaryStatus: z.enum(['On Review', 'Pass', 'Not Pass'] as const),
+    finalStatus: z.enum([
+      'On Review',
+      'Not Pass',
+      'Juara 1',
+      'Juara 2',
+      'Juara 3',
+    ] as const),
+  })
+  .partial();
+
 export const EventTeamMemberIdSchema = z.object({ userId: z.string() });
 
 /* PARAM SCHEMA */
@@ -97,6 +110,21 @@ export const EventTeamAndUserIdParam = z.object({
     },
   }),
   userId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+});
+
+export const EventTeamAndEventIdParam = z.object({
+  teamId: z.string().openapi({
+    param: {
+      in: 'path',
+      required: true,
+    },
+  }),
+  eventId: z.string().openapi({
     param: {
       in: 'path',
       required: true,
