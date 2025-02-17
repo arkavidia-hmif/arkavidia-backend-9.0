@@ -1,8 +1,13 @@
 import { createRoute } from '@hono/zod-openapi';
+import { roleMiddleware } from '~/middlewares/role-access.middleware';
 import {
+  AdminAllEventTeamQuerySchema,
+  EventTeamsPaginatedSchema,
   EventAndTeamIdParam,
-  GroupedEventTeamSubmissionSchema,
+  GroupedEventTeamSubmissionSchema
 } from '~/types/admin-event.type';
+import { ListEventSchema } from '~/types/event.type';
+import { EventIdParam } from '~/types/event.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
 
 export const getAdminEventsRoute = createRoute({
@@ -11,17 +16,17 @@ export const getAdminEventsRoute = createRoute({
     "Gets admin's privileged event by role. For example, 'admin_event_softeng' can only see Softeng's admin page or 'admin_event' can see all.",
   tags: ['admin-event'],
   method: 'get',
-  // middleware: [roleMiddleware('admin_event')] as const, // TODO: fix middleware for event (just leave this for now)
+  middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event',
   responses: {
-    // 200: {
-    //   description: "Succesfully fetched admin's priveleged competitions.",
-    //   content: {
-    //     'application/json': {
-    //       schema: ListCompetitionSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: "Succesfully fetched admin's priveleged events.",
+      content: {
+        'application/json': {
+          schema: ListEventSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
@@ -33,18 +38,18 @@ export const getAdminAllEventTeamsRoute = createRoute({
   description: 'Gets all teams in a event; Only returns basic information.',
   tags: ['admin-event'],
   method: 'get',
-  // middleware: [roleMiddleware('admin_competition')] as const, // TODO: fix middleware for event (just leave this for now)
-  path: '',
-  request: {},
+  middleware: [roleMiddleware('admin_event')] as const,
+  path: '/admin/event/{eventId}/team',
+  request: { params: EventIdParam, query: AdminAllEventTeamQuerySchema },
   responses: {
-    // 200: {
-    //   description: 'Succesfully fetched all teams.',
-    //   content: {
-    //     'application/json': {
-    //       schema: TeamsPaginatedSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: 'Succesfully fetched all teams.',
+      content: {
+        'application/json': {
+          schema: EventTeamsPaginatedSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
@@ -80,8 +85,7 @@ export const getAdminEventTeamSubmissionsRoute = createRoute({
   description: "Gets team's submission grouped by stage.",
   tags: ['admin-event'],
   method: 'get',
-  // middleware: [roleMiddleware('admin_competition')] as const, // TODO: fix middleware for event (just leave this for now)
-
+  middleware: [roleMiddleware('admin_competition')] as const, // TODO: fix middleware for event (just leave this for now)
   path: '/admin/event/{eventId}/team/{teamId}/submission',
   request: {
     params: EventAndTeamIdParam,

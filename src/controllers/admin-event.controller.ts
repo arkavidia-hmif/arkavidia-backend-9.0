@@ -1,6 +1,7 @@
 import { db } from '~/db/drizzle';
-import { getEventTeamById } from '~/repositories/event-team.repository';
-import { getEventSubmissionRequirement } from '~/repositories/event.repository';
+import { transformRoleToName } from '~/middlewares/role-access.middleware';
+import { getAllEventTeamsPaginated, getEventTeamById } from '~/repositories/event-team.repository';
+import { getEvent, getEventByTitle, getEventSubmissionRequirement } from '~/repositories/event.repository';
 import {
   getAdminAllEventTeamsRoute,
   getAdminEventTeamInformationRoute,
@@ -15,11 +16,23 @@ import { createAuthRouter } from '~/utils/router-factory';
 export const adminEventProtectedRouter = createAuthRouter();
 
 adminEventProtectedRouter.openapi(getAdminEventsRoute, async (c) => {
-  return c.json({}, 200);
+  if (c.var.user.role === 'admin' || c.var.user.role === 'admin_event')
+    return c.json(await getEvent(db), 200);
+
+  const eventName = transformRoleToName(c.var.user.role);
+  const events = await getEventByTitle(db, eventName);
+  return c.json(events, 200);
 });
 
 adminEventProtectedRouter.openapi(getAdminAllEventTeamsRoute, async (c) => {
-  return c.json({}, 200);
+  const { eventId } = c.req.valid('param');
+
+  const eventParticipant = await getAllEventTeamsPaginated(
+    db,
+    eventId,
+    c.req.valid('query'),
+  );
+  return c.json(eventParticipant, 200);
 });
 
 adminEventProtectedRouter.openapi(
