@@ -55,7 +55,7 @@ export const getEventSubmissionRequirementById = async (
   });
 };
 
-export const createEventTeamSubmission = async (
+export const createOrUpdateEventTeamSubmission = async (
   db: Database,
   teamId: string,
   values: z.infer<typeof InsertEventTeamSubmissionSchema>,
@@ -63,6 +63,10 @@ export const createEventTeamSubmission = async (
   return db
     .insert(eventSubmission)
     .values({ teamId, ...values })
+    .onConflictDoUpdate({
+      target: [eventSubmission.typeId, eventSubmission.teamId],
+      set: { mediaId: values.mediaId },
+    })
     .returning()
     .then(firstSure);
 };
