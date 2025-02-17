@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, or } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { Database } from '~/db/drizzle';
 import { first, firstSure } from '~/db/helper';
@@ -11,6 +11,7 @@ import {
   eventTeam,
   eventTeamDocument,
   eventTeamMember,
+  eventTimeline,
   user,
 } from '~/db/schema';
 import { AdminAllEventTeamQuerySchema } from '~/types/admin-event.type';
@@ -227,6 +228,22 @@ export const createEventTeam = async (
   eventId: string,
   name?: string,
 ) => {
+  // Check register deadline
+  const firstEventTimeline = await db.query.eventTimeline.findFirst({
+    where: eq(eventTimeline?.eventId, eventId),
+    orderBy: [asc(eventTimeline?.startDate)],
+  });
+
+  if (!firstEventTimeline || !firstEventTimeline.endDate) {
+    throw new Error('Event not found');
+  }
+
+  const now = new Date();
+
+  if (now > firstEventTimeline?.endDate) {
+    throw new Error('Registration deadline has passed');
+  }
+
   if (mode === 'solo') {
     const userReq = await db
       .select()
