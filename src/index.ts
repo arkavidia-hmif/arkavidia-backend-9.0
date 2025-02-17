@@ -34,7 +34,9 @@ app.doc('/openapi.json', {
     title: 'Arkavidia API',
   },
   tags: [
+    { name: 'admin-event', description: 'Admin Event API' },
     { name: 'admin-competition', description: 'Admin Competition API' },
+    { name: 'admin-event', description: 'Admin Event API' },
     { name: 'auth', description: 'Authentication API' },
     { name: 'media', description: 'Media API' },
     { name: 'team', description: 'Team API' },

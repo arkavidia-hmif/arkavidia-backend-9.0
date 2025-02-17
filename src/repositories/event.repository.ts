@@ -91,4 +91,14 @@ export const updateEventSubmissionFeedback = async (
       ),
     )
     .returning();
+export const getEventByTitle = async (
+  db: Database,
+  title: string | undefined,
+) => {
+  const where = title ? eq(event.title, title) : undefined;
+
+  const result = await db.query.event.findMany({
+    where,
+  });
+  return result;
 };
