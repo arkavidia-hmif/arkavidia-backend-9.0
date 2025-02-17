@@ -59,7 +59,7 @@ teamProtectedRouter.openapi(getTeamByIdRoute, async (c) => {
     return c.json(
       {
         ...team,
-        eligibleForVoucer: voucer.team.length + 1 == voucer.requiredTeamCount,
+        eligibleForVoucer: voucer.team.length == voucer.requiredTeamCount,
       },
       200,
     );
@@ -331,7 +331,11 @@ teamProtectedRouter.openapi(postApplyVoucerRoute, async (c) => {
   const voucer = await getVoucerByCode(db, code, { team: true });
   if (!voucer) return c.json({ error: 'Voucer not found!' }, 404);
   if (voucer.team.length >= voucer.requiredTeamCount)
-    return c.json({ error: 'Voucer has already hit max limit!' });
+    return c.json({ error: 'Voucer has already hit max limit!' }, 403);
+
+  const currTeam = await getTeamById(db, teamId, { competition: true });
+  if (currTeam?.competition?.title !== 'Arkalogica')
+    return c.json({ error: 'Voucer is only for Arkalogica!' }, 403);
 
   try {
     const team = await updateTeam(db, teamId, { appliedVoucerId: voucer.id });

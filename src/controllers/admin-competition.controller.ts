@@ -82,7 +82,7 @@ adminCompetitionProtectedRouter.openapi(
       return c.json(
         {
           ...team,
-          eligibleForVoucer: voucer.team.length + 1 == voucer.requiredTeamCount,
+          eligibleForVoucer: voucer.team.length == voucer.requiredTeamCount,
         },
         200,
       );
