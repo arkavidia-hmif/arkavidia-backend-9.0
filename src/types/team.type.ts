@@ -10,6 +10,7 @@ import {
 
 import { MediaSchema } from './media.type';
 import { TeamMemberSchema } from './team-member.type';
+import { VoucerSchema } from './voucer.type';
 
 export const TeamDocumentSchema = createSelectSchema(teamDocument)
   .merge(
@@ -50,8 +51,13 @@ export const TeamSchema = createSelectSchema(team, {
     teamMembers: z.array(TeamMemberSchema).optional(),
     document: z.array(TeamDocumentSchema).optional(),
     submission: z.array(TeamSubmissionSchema).optional(),
+    voucer: VoucerSchema.optional()
   })
   .openapi('Team');
+
+export const BarebonesTeamSchema = createSelectSchema(team, {
+  createdAt: z.union([z.string(), z.date()]),
+})
 
 export const UpdateTeamSchema = createInsertSchema(team)
   .omit({
@@ -118,3 +124,7 @@ export const TeamCompetitionDetailSchema = TeamSchema.extend({
 });
 
 export const ListTeamSchema = z.array(TeamSchema);
+
+export const ApplyVoucerBodyShcema = z.object({
+  code: z.string(),
+});
