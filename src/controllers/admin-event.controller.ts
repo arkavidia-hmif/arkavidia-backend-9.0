@@ -47,7 +47,19 @@ adminEventProtectedRouter.openapi(getAdminAllEventTeamsRoute, async (c) => {
 adminEventProtectedRouter.openapi(
   getAdminEventTeamInformationRoute,
   async (c) => {
-    return c.json({}, 200);
+    const { teamId, eventId } = c.req.valid('param');
+
+    const team = await getEventTeamById(db, teamId, {
+      document: true,
+      teamMember: { document: true, user: { document: true } },
+      event: true,
+    });
+
+    if (!team) return c.json({ error: "Team doesn't exist" }, 404);
+    if (team.event.id !== eventId)
+      return c.json({ error: "Team isn't in event!" }, 400);
+
+    return c.json(team, 200);
   },
 );
 
