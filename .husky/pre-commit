@@ -1,2 +1,12 @@
 bun i
 bun check:write
+
+# Format only staged files
+STAGED_FILES=$(git diff --name-only --cached --diff-filter=d)
+
+if [ -n "$STAGED_FILES" ]; then
+  echo "Reformat the following files:"
+  echo "$STAGED_FILES"
+
+  git add $STAGED_FILES
+fi

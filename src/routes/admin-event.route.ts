@@ -1,6 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
-import { PutTeamSubmissionVerdictSchema } from '~/types/admin-competition.type';
+import {
+  PutTeamSubmissionVerdictSchema,
+  PutTeamVerificationBodySchema,
+} from '~/types/admin-competition.type';
 import {
   AdminAllEventTeamQuerySchema,
   EventAndTeamIdAndSubmissionIdParam,
@@ -8,6 +11,11 @@ import {
   EventTeamsPaginatedSchema,
   GroupedEventTeamSubmissionSchema,
 } from '~/types/admin-event.type';
+import {
+  EventTeamAndEventIdParam,
+  EventTeamSchema,
+  PutEventTeamStatusBodySchema,
+} from '~/types/event-team.type';
 import { EventIdParam, ListEventSchema } from '~/types/event.type';
 import { TeamEventSubmissionSchema } from '~/types/team.type';
 import { createErrorResponse } from '~/utils/error-response-factory';
@@ -66,16 +74,16 @@ export const getAdminEventTeamInformationRoute = createRoute({
   method: 'get',
   middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}',
-  request: {},
+  request: { params: EventAndTeamIdParam },
   responses: {
-    // 200: {
-    //   description: "Succesfully fetched team's complete information.",
-    //   content: {
-    //     'application/json': {
-    //       schema: TeamSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: "Succesfully fetched team's complete information.",
+      content: {
+        'application/json': {
+          schema: EventTeamSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
@@ -116,16 +124,25 @@ export const putAdminEventTeamVerificationRoute = createRoute({
   method: 'put',
   middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}/submission',
-  request: {},
+  request: {
+    params: EventAndTeamIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: PutTeamVerificationBodySchema,
+        },
+      },
+    },
+  },
   responses: {
-    // 200: {
-    //   description: "Succesfully updated team's verification status.",
-    //   content: {
-    //     'application/json': {
-    //       schema: TeamSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: "Succesfully updated event team's verification status.",
+      content: {
+        'application/json': {
+          schema: EventTeamSchema,
+        },
+      },
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
@@ -139,16 +156,20 @@ export const putAdminEventTeamStatusRoute = createRoute({
   method: 'put',
   middleware: [roleMiddleware('admin_event')] as const,
   path: '/admin/event/{eventId}/team/{teamId}/status',
-  request: {},
+  request: {
+    params: EventTeamAndEventIdParam,
+    body: {
+      content: {
+        'application/json': {
+          schema: PutEventTeamStatusBodySchema,
+        },
+      },
+    },
+  },
   responses: {
-    // 200: {
-    //   description: "Succesfully updated team's verification status.",
-    //   content: {
-    //     'application/json': {
-    //       schema: TeamSchema,
-    //     },
-    //   },
-    // },
+    200: {
+      description: "Succesfully updated team's verification status.",
+    },
     400: createErrorResponse('UNION', 'Bad request error'),
     403: createErrorResponse('GENERIC', 'Not authorized for access'),
     500: createErrorResponse('GENERIC', 'Internal server error'),
