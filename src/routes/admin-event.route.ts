@@ -1,6 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
 import { roleMiddleware } from '~/middlewares/role-access.middleware';
-import { PutTeamSubmissionVerdictSchema, PutTeamVerificationBodySchema } from '~/types/admin-competition.type';
+import {
+  PutTeamSubmissionVerdictSchema,
+  PutTeamVerificationBodySchema,
+} from '~/types/admin-competition.type';
 import {
   AdminAllEventTeamQuerySchema,
   EventAndTeamIdAndSubmissionIdParam,

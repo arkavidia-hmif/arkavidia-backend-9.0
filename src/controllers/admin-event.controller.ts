@@ -120,7 +120,8 @@ adminEventProtectedRouter.openapi(
     if (!team || team.event.id !== eventId)
       return c.json({ error: "Team doesn't exist!" }, 400);
 
-    if (buktiPembayaran) await updateEventTeamDocument(db, teamId, buktiPembayaran);
+    if (buktiPembayaran)
+      await updateEventTeamDocument(db, teamId, buktiPembayaran);
     if (teamMember) {
       for (const member of teamMember) {
         if (member && member.poster)
@@ -164,8 +165,10 @@ adminEventProtectedRouter.openapi(
             ? 'DENIED'
             : 'ON REVIEW';
 
-    const updatedTeam = await updateEventTeam(db, teamId, { verificationStatus });        
-    
+    const updatedTeam = await updateEventTeam(db, teamId, {
+      verificationStatus,
+    });
+
     if (verificationStatus === 'VERIFIED') {
       await Promise.all(
         team.teamMembers.map(async (tm) => {
