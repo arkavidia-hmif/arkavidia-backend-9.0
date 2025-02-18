@@ -1,8 +1,15 @@
 import { db } from '~/db/drizzle';
+import { EventTeamVerificationStatusEnum } from '~/db/schema';
+import { sendVerificationAcceptEmail } from '~/lib/nodemailer';
 import { transformRoleToName } from '~/middlewares/role-access.middleware';
+import { updateEventTeamMemberDocument } from '~/repositories/event-team-member.repository';
 import {
   getAllEventTeamsPaginated,
   getEventTeamById,
+  getEventVerdict,
+  isAllEventDocumentsPresent,
+  updateEventTeam,
+  updateEventTeamDocument,
   updateEventTeamStatus,
 } from '~/repositories/event-team.repository';
 import {
@@ -11,6 +18,7 @@ import {
   getEventSubmissionRequirement,
   updateEventSubmissionFeedback,
 } from '~/repositories/event.repository';
+import { getUser, updateUserDocument } from '~/repositories/user.repository';
 import {
   getAdminAllEventTeamsRoute,
   getAdminEventTeamInformationRoute,
@@ -101,7 +109,79 @@ adminEventProtectedRouter.openapi(
 adminEventProtectedRouter.openapi(
   putAdminEventTeamVerificationRoute,
   async (c) => {
-    return c.json({}, 200);
+    const { eventId, teamId } = c.req.valid('param');
+    const { buktiPembayaran, teamMember } = c.req.valid('json');
+
+    const team = await getEventTeamById(db, teamId, {
+      event: true,
+      teamMember: true,
+    });
+
+    if (!team || team.event.id !== eventId)
+      return c.json({ error: "Team doesn't exist!" }, 400);
+
+    if (buktiPembayaran) await updateEventTeamDocument(db, teamId, buktiPembayaran);
+    if (teamMember) {
+      for (const member of teamMember) {
+        if (member && member.poster)
+          await updateEventTeamMemberDocument(
+            db,
+            member.userId,
+            teamId,
+            'poster',
+            member.poster,
+          );
+
+        if (member && member.twibbon)
+          await updateEventTeamMemberDocument(
+            db,
+            member.userId,
+            teamId,
+            'twibbon',
+            member.twibbon,
+          );
+
+        if (member && member.kartuIdentitas)
+          await updateUserDocument(db, member.userId, {
+            ...member.kartuIdentitas,
+            type: 'kartu-identitas',
+          });
+      }
+    }
+
+    const { verdict, errorCount } = await getEventVerdict(
+      db,
+      teamId,
+      team.teamMembers,
+    );
+
+    const verificationStatus: EventTeamVerificationStatusEnum =
+      !(await isAllEventDocumentsPresent(db, teamId, team.teamMembers))
+        ? 'INCOMPLETE'
+        : verdict
+          ? 'VERIFIED'
+          : errorCount > 0
+            ? 'DENIED'
+            : 'ON REVIEW';
+
+    const updatedTeam = await updateEventTeam(db, teamId, { verificationStatus });        
+    
+    if (verificationStatus === 'VERIFIED') {
+      await Promise.all(
+        team.teamMembers.map(async (tm) => {
+          const user = await getUser(db, tm?.userId as string);
+          if (!user) return;
+
+          await sendVerificationAcceptEmail(
+            user.email,
+            team.name,
+            team.event.title,
+          );
+        }),
+      );
+    }
+
+    return c.json(updatedTeam, 200);
   },
 );
 
