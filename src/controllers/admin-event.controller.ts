@@ -102,7 +102,7 @@ adminEventProtectedRouter.openapi(
       ({ requirement }) => requirement.stage,
     );
 
-    return c.json({ groupedResult }, 200);
+    return c.json(groupedResult, 200);
   },
 );
 
