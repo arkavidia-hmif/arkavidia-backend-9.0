@@ -40,6 +40,15 @@ export const generateEmailTemplate = async (
   return template({ ...data, fe_url: env.FE_URL });
 };
 
+export const generateGenericEmailTemplate = async (
+  data: object,
+  sourcePath: string = 'src/lib/email.html',
+) => {
+  const source = fs.readFileSync(sourcePath, 'utf8');
+  const template = handlebars.compile(source);
+  return template({ ...data });
+};
+
 export const sendVerificationEmail = async (
   targetEmail: string,
   verificationToken: string,
@@ -124,6 +133,34 @@ export const sendVerificationAcceptEmail = async (
         link,
       },
       'src/lib/generic-email.html',
+    ),
+  });
+};
+
+export const sendAcademyaPassEmail = async (
+  targetEmail: string,
+  academyaType: string,
+  academyaWawanLink: string,
+) => {
+  await transporter.sendMail({
+    from: MAIL_FROM,
+    to: targetEmail,
+    subject: 'Pengumuman Seleksi 1 Academya',
+    html: await generateGenericEmailTemplate(
+      { academyaType, academyaWawanLink },
+      'src/lib/acads-lolos-email.template.html',
+    ),
+  });
+};
+
+export const sendAcademyaFailEmail = async (targetEmail: string) => {
+  await transporter.sendMail({
+    from: MAIL_FROM,
+    to: targetEmail,
+    subject: 'Pengumuman Seleksi 1 Academya!',
+    html: await generateGenericEmailTemplate(
+      {},
+      'src/lib/acads-gagal-email.template.html',
     ),
   });
 };
