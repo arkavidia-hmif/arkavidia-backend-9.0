@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ilike } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '~/db/drizzle';
 import { first } from '~/db/helper';
@@ -27,6 +27,20 @@ export const findUserByEmail = async (
 ) => {
   return db.query.user.findFirst({
     where: eq(user.email, email),
+    with: {
+      document: options?.document ? { with: { media: true } } : undefined,
+      userIdentity: options?.userIdentity ? true : undefined,
+    },
+  });
+};
+
+export const findUserByName = async (
+  db: Database,
+  fullName: string,
+  options?: UserRelationOption,
+) => {
+  return db.query.user.findFirst({
+    where: ilike(user.fullName, `%${fullName}%`),
     with: {
       document: options?.document ? { with: { media: true } } : undefined,
       userIdentity: options?.userIdentity ? true : undefined,

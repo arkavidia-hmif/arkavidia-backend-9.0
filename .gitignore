@@ -1,5 +1,7 @@
 # deps
 node_modules/
 
+scripts/email-targets/
+
 .env
 test.ts

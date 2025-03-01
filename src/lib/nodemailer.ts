@@ -145,7 +145,7 @@ export const sendAcademyaPassEmail = async (
   await transporter.sendMail({
     from: MAIL_FROM,
     to: targetEmail,
-    subject: 'Pengumuman Seleksi 1 Academya',
+    subject: 'Revisi: Pengumuman Seleksi 1 Academya',
     html: await generateGenericEmailTemplate(
       { academyaType, academyaWawanLink },
       'src/lib/acads-lolos-email.template.html',
@@ -157,7 +157,7 @@ export const sendAcademyaFailEmail = async (targetEmail: string) => {
   await transporter.sendMail({
     from: MAIL_FROM,
     to: targetEmail,
-    subject: 'Pengumuman Seleksi 1 Academya!',
+    subject: 'Revisi: Pengumuman Seleksi 1 Academya!',
     html: await generateGenericEmailTemplate(
       {},
       'src/lib/acads-gagal-email.template.html',
