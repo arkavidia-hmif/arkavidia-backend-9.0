@@ -75,7 +75,7 @@ const findAllIncompleteTeams = async () => {
 
 async function main() {
   try {
-    await findAllIncompleteTeams();
+    // await findAllIncompleteTeams();
     // Read and parse email targets
     const emailFile = fs.readFileSync(
       'scripts/email-targets/incomplete-teams.csv',
@@ -84,7 +84,7 @@ async function main() {
     const emailLines = emailFile.split('\n');
     emailLines.shift(); // Remove CSV header
     const data: EmailData[] = emailLines.map((line) => {
-      const [teamName, compe, email] = line.replace('\r', '').split(',');
+      const [teamName, compe, email] = line.replace('\r', '').split(';');
       return { email, teamName, compe };
     });
 
@@ -100,7 +100,18 @@ async function main() {
     }
 
     // Filter out emails that have already been sent
-    const unsentEmails = data.filter((emailData) => !sentEmails.has(emailData));
+    const unsentEmails = data.filter((emailData) => {
+      for (const sentEmail of sentEmails) {
+        if (
+          sentEmail.email === emailData.email &&
+          sentEmail.compe === emailData.compe &&
+          sentEmail.teamName === emailData.teamName
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
     if (unsentEmails.length === 0) {
       console.log('✅ All emails have already been sent. Exiting.');
       return;
