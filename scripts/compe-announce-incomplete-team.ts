@@ -119,7 +119,6 @@ async function main() {
               {
                 title: 'Lengkapi Data Tim Arkavidia 9.0',
                 teamName: val.teamName,
-                message: `Terima kasih telah mendaftar di Arkavidia 9.0. Kami ingin mengingatkan bahwa data tim Anda belum lengkap. Silakan lengkapi data tim Anda melalui tombol dibawah ini. Terima kasih!`,
                 link: `${env.FE_URL}/dashboard/${val.compe}`,
                 fe_url: env.FE_URL,
               },
